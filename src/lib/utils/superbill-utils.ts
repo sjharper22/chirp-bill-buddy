@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { Visit, Superbill } from "@/types/superbill";
 
@@ -94,49 +93,70 @@ export const sortSuperbillsByDate = (superbills: Superbill[]): Superbill[] => {
 
 // Common ICD-10 codes for physical therapy, chiropractic, and related fields
 export const commonICD10Codes = [
-  // Musculoskeletal
+  // Spinal Codes (M99 series)
+  { value: "M99.01", label: "M99.01 - Segmental and somatic dysfunction of cervical region" },
+  { value: "M99.02", label: "M99.02 - Segmental and somatic dysfunction of thoracic region" },
+  { value: "M99.03", label: "M99.03 - Segmental and somatic dysfunction of lumbar region" },
+  { value: "M99.04", label: "M99.04 - Segmental and somatic dysfunction of sacral region" },
+  { value: "M99.05", label: "M99.05 - Segmental and somatic dysfunction of pelvic region" },
+  { value: "M99.06", label: "M99.06 - Segmental and somatic dysfunction of lower extremity" },
+  { value: "M99.07", label: "M99.07 - Segmental and somatic dysfunction of upper extremity" },
+
+  // Musculoskeletal Pain (M54 series)
   { value: "M54.5", label: "M54.5 - Low back pain" },
   { value: "M54.2", label: "M54.2 - Cervicalgia (Neck pain)" },
+  { value: "M54.6", label: "M54.6 - Pain in thoracic spine" },
+  { value: "M54.31", label: "M54.31 - Lumbago with sciatica, right side" },
+  { value: "M54.32", label: "M54.32 - Lumbago with sciatica, left side" },
+
+  // Pain in Joints (M25 series)
   { value: "M25.511", label: "M25.511 - Pain in right shoulder" },
   { value: "M25.512", label: "M25.512 - Pain in left shoulder" },
+  { value: "M25.521", label: "M25.521 - Pain in right elbow" },
+  { value: "M25.522", label: "M25.522 - Pain in left elbow" },
+  { value: "M25.531", label: "M25.531 - Pain in right wrist" },
+  { value: "M25.532", label: "M25.532 - Pain in left wrist" },
   { value: "M25.551", label: "M25.551 - Pain in right hip" },
   { value: "M25.552", label: "M25.552 - Pain in left hip" },
   { value: "M25.561", label: "M25.561 - Pain in right knee" },
   { value: "M25.562", label: "M25.562 - Pain in left knee" },
+  { value: "M25.571", label: "M25.571 - Pain in right ankle" },
+  { value: "M25.572", label: "M25.572 - Pain in left ankle" },
+  { value: "M79.671", label: "M79.671 - Pain in right foot" },
+  { value: "M79.672", label: "M79.672 - Pain in left foot" },
+
+  // Sprains and Strains (S series)
+  { value: "S13.4XXA", label: "S13.4XXA - Sprain of ligaments of cervical spine, initial encounter" },
+  { value: "S16.1XXA", label: "S16.1XXA - Strain of muscle, fascia and tendon at neck level, initial encounter" },
+  { value: "S23.3XXA", label: "S23.3XXA - Sprain of ligaments of thoracic spine, initial encounter" },
+  { value: "S33.5XXA", label: "S33.5XXA - Sprain of ligaments of lumbar spine, initial encounter" },
+  { value: "S33.6XXA", label: "S33.6XXA - Sprain of sacroiliac joint, initial encounter" },
+  { value: "S39.012A", label: "S39.012A - Strain of muscle, fascia and tendon of lower back, initial encounter" },
+
+  // Other conditions
+  { value: "G44.89", label: "G44.89 - Other headache syndrome" },
   { value: "M79.1", label: "M79.1 - Myalgia (Muscle pain)" },
   { value: "M79.7", label: "M79.7 - Fibromyalgia" },
   { value: "M54.16", label: "M54.16 - Radiculopathy, lumbar region" },
   { value: "M54.12", label: "M54.12 - Radiculopathy, cervical region" },
   { value: "M50.20", label: "M50.20 - Cervical disc disorder, unspecified" },
   { value: "M51.26", label: "M51.26 - Lumbar disc displacement" },
-
-  // Headaches and neurological
   { value: "G44.209", label: "G44.209 - Tension-type headache" },
   { value: "G43.909", label: "G43.909 - Migraine, unspecified" },
   { value: "G89.29", label: "G89.29 - Other chronic pain" },
   { value: "G56.00", label: "G56.00 - Carpal tunnel syndrome" },
   { value: "M54.81", label: "M54.81 - Occipital neuralgia" },
-
-  // Sprains, strains, and injuries
-  { value: "S13.4XXA", label: "S13.4XXA - Sprain of cervical spine, initial encounter" },
-  { value: "S33.5XXA", label: "S33.5XXA - Sprain of ligaments of lumbar spine, initial encounter" },
   { value: "S43.401A", label: "S43.401A - Sprain of right shoulder joint, initial encounter" },
   { value: "S43.402A", label: "S43.402A - Sprain of left shoulder joint, initial encounter" },
-
-  // Prenatal
   { value: "O26.9", label: "O26.9 - Pregnancy related condition, unspecified" },
   { value: "O26.891", label: "O26.891 - Other specified pregnancy related conditions" },
   { value: "Z34.00", label: "Z34.00 - Encounter for supervision of normal first pregnancy, unspecified" },
   { value: "Z34.80", label: "Z34.80 - Encounter for supervision of other normal pregnancy, unspecified" },
   { value: "M54.9", label: "M54.9 - Dorsalgia, unspecified (back pain)" },
-
-  // Posture and functional conditions
   { value: "M62.838", label: "M62.838 - Other muscle spasm" },
   { value: "R29.3", label: "R29.3 - Abnormal posture" },
   { value: "M40.00", label: "M40.00 - Postural kyphosis" },
   { value: "M41.9", label: "M41.9 - Scoliosis, unspecified" },
-
-  // Wellness and prevention
   { value: "Z00.00", label: "Z00.00 - General adult medical examination without abnormal findings" },
   { value: "Z71.89", label: "Z71.89 - Other specified counseling" },
 ];
