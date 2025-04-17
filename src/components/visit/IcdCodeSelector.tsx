@@ -1,19 +1,15 @@
 
 import { Visit } from "@/types/superbill";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { commonICD10Codes } from "@/lib/utils/superbill-utils";
+import { Command } from "cmdk";
 import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Plus } from "lucide-react";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { useState } from "react";
 
 interface IcdCodeSelectorProps {
@@ -22,14 +18,13 @@ interface IcdCodeSelectorProps {
 }
 
 export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) {
-  const [showCommandDialog, setShowCommandDialog] = useState(false);
-  const [customCode, setCustomCode] = useState("");
-  const [customDescription, setCustomDescription] = useState("");
-  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const addIcdCode = (code: string) => {
     if (!visit.icdCodes.includes(code)) {
       onVisitChange({ ...visit, icdCodes: [...visit.icdCodes, code] });
+      setInputValue("");
     }
   };
 
@@ -37,85 +32,82 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
     onVisitChange({ ...visit, icdCodes: visit.icdCodes.filter(c => c !== code) });
   };
 
-  const handleAddCustomCode = () => {
-    if (customCode) {
-      addIcdCode(customCode.toUpperCase());
-      setCustomCode("");
-      setCustomDescription("");
-      setShowCustomInput(false);
+  const filteredCodes = commonICD10Codes.filter(code => {
+    const search = inputValue.toLowerCase();
+    return (
+      code.value.toLowerCase().includes(search) ||
+      code.label.toLowerCase().includes(search)
+    );
+  });
+
+  const handleCustomCodeAdd = () => {
+    if (inputValue && !visit.icdCodes.includes(inputValue.toUpperCase())) {
+      addIcdCode(inputValue.toUpperCase());
+      setOpen(false);
     }
   };
 
   return (
     <div className="mt-3">
-      <div className="flex items-center">
+      <div className="flex items-center mb-2">
         <span className="text-sm font-medium mr-2">ICD-10 Codes:</span>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setShowCommandDialog(true)}
-          >
-            Search ICD-10
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowCustomInput(!showCustomInput)}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Add Custom
-          </Button>
-        </div>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="w-[300px] justify-start">
+              <Search className="mr-2 h-4 w-4" />
+              Search or add ICD-10 code
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[300px] p-0" align="start">
+            <Command>
+              <div className="flex items-center border-b px-3">
+                <Search className="h-4 w-4 shrink-0 opacity-50" />
+                <input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Type to search..."
+                  className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+              <div className="max-h-[300px] overflow-y-auto">
+                {filteredCodes.length > 0 ? (
+                  filteredCodes.map(code => (
+                    <div
+                      key={code.value}
+                      className="px-3 py-2 text-sm cursor-pointer hover:bg-accent"
+                      onClick={() => {
+                        addIcdCode(code.value);
+                        setOpen(false);
+                      }}
+                    >
+                      {code.label}
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-sm text-muted-foreground">
+                    {inputValue ? (
+                      <div className="space-y-2">
+                        <p>No existing codes found.</p>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={handleCustomCodeAdd}
+                        >
+                          Add "{inputValue.toUpperCase()}" as custom code
+                        </Button>
+                      </div>
+                    ) : (
+                      "Type to search for ICD-10 codes..."
+                    )}
+                  </div>
+                )}
+              </div>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
 
-      {showCustomInput && (
-        <div className="flex gap-2 mt-2">
-          <div className="flex-1">
-            <Input
-              placeholder="Enter ICD-10 code (e.g., M54.5)"
-              value={customCode}
-              onChange={e => setCustomCode(e.target.value)}
-              className="mb-2"
-            />
-            <Input
-              placeholder="Description (optional)"
-              value={customDescription}
-              onChange={e => setCustomDescription(e.target.value)}
-            />
-          </div>
-          <Button 
-            onClick={handleAddCustomCode}
-            className="h-20"
-          >
-            Add
-          </Button>
-        </div>
-      )}
-
-      <CommandDialog open={showCommandDialog} onOpenChange={setShowCommandDialog}>
-        <Command>
-          <CommandInput placeholder="Search ICD-10 codes..." />
-          <CommandList>
-            <CommandEmpty>No ICD-10 codes found.</CommandEmpty>
-            <CommandGroup>
-              {commonICD10Codes.map(code => (
-                <CommandItem
-                  key={code.value}
-                  onSelect={() => {
-                    addIcdCode(code.value);
-                    setShowCommandDialog(false);
-                  }}
-                >
-                  {code.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </CommandDialog>
-
-      <div className="flex flex-wrap gap-2 mt-1">
+      <div className="flex flex-wrap gap-2">
         {visit.icdCodes.map(code => (
           <Badge key={code} variant="secondary" className="cursor-pointer hover:bg-muted" onClick={() => removeIcdCode(code)}>
             {code} <span className="ml-1 text-muted-foreground">×</span>
