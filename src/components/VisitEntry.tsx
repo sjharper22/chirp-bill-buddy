@@ -2,28 +2,22 @@
 import { useState } from "react";
 import { Visit } from "@/types/superbill";
 import { duplicateVisit, formatCurrency, formatDate } from "@/lib/utils/superbill-utils";
-import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarIcon, Copy, Trash2 } from "lucide-react";
+import { CalendarIcon, Copy, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
 import { commonICD10Codes, commonCPTCodes } from "@/lib/utils/superbill-utils";
+import { MultiSelectComplaints } from "@/components/MultiSelectComplaints";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface VisitEntryProps {
@@ -42,9 +36,7 @@ export function VisitEntry({
   defaultMainComplaints = []
 }: VisitEntryProps) {
   const [showNotes, setShowNotes] = useState(false);
-  const [customComplaint, setCustomComplaint] = useState(
-    !defaultMainComplaints.includes(visit.mainComplaint || "") && visit.mainComplaint ? true : false
-  );
+  const [showComplaints, setShowComplaints] = useState(false);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -61,13 +53,8 @@ export function VisitEntry({
     onVisitChange({ ...visit, notes: e.target.value });
   };
 
-  const handleMainComplaintChange = (value: string) => {
-    onVisitChange({ ...visit, mainComplaint: value });
-    setCustomComplaint(false);
-  };
-
-  const handleCustomComplaintChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onVisitChange({ ...visit, mainComplaint: e.target.value });
+  const handleComplaintsChange = (complaints: string[]) => {
+    onVisitChange({ ...visit, mainComplaints: complaints });
   };
 
   const addIcdCode = (code: string) => {
@@ -89,6 +76,10 @@ export function VisitEntry({
   const removeCptCode = (code: string) => {
     onVisitChange({ ...visit, cptCodes: visit.cptCodes.filter(c => c !== code) });
   };
+
+  const mainComplaintsDisplay = visit.mainComplaints && visit.mainComplaints.length > 0 
+    ? visit.mainComplaints.join(", ")
+    : "No complaints selected";
 
   return (
     <Card className="mb-4">
@@ -115,58 +106,23 @@ export function VisitEntry({
             </Popover>
           </div>
 
-          {/* Main Complaint - Dropdown or custom input */}
+          {/* Main Complaints - Toggle display */}
           <div className="w-full sm:flex-1">
-            {customComplaint || defaultMainComplaints.length === 0 ? (
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Main Complaint/Reason for Visit"
-                  value={visit.mainComplaint || ""}
-                  onChange={handleCustomComplaintChange}
-                  className="w-full"
-                />
-                {defaultMainComplaints.length > 0 && (
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={() => setCustomComplaint(false)}
-                    title="Select from common complaints"
-                    className="shrink-0"
-                  >
-                    <span className="sr-only">Use pre-defined complaints</span>
-                    ⋮
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <Select
-                  value={visit.mainComplaint || ""}
-                  onValueChange={handleMainComplaintChange}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a main complaint" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {defaultMainComplaints.map(complaint => (
-                      <SelectItem key={complaint} value={complaint}>
-                        {complaint}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={() => setCustomComplaint(true)}
-                  title="Enter custom complaint"
-                  className="shrink-0"
-                >
-                  <span className="sr-only">Custom complaint</span>
-                  +
-                </Button>
-              </div>
-            )}
+            <Button 
+              variant="outline" 
+              className="w-full justify-between text-left"
+              onClick={() => setShowComplaints(!showComplaints)}
+            >
+              <span className="truncate">
+                {mainComplaintsDisplay.length > 60 
+                  ? mainComplaintsDisplay.substring(0, 60) + '...' 
+                  : mainComplaintsDisplay}
+              </span>
+              {showComplaints ? 
+                <ChevronUp className="h-4 w-4 shrink-0 opacity-50" /> : 
+                <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+              }
+            </Button>
           </div>
 
           {/* Fee */}
@@ -202,6 +158,18 @@ export function VisitEntry({
             </Button>
           </div>
         </div>
+
+        {/* Main Complaints MultiSelect */}
+        {showComplaints && (
+          <div className="mt-3">
+            <div className="text-sm font-medium mb-2">Main Complaint(s)/Reason for Visit:</div>
+            <MultiSelectComplaints
+              value={visit.mainComplaints || []}
+              onChange={handleComplaintsChange}
+              availableOptions={defaultMainComplaints}
+            />
+          </div>
+        )}
 
         {/* ICD-10 Codes */}
         <div className="mt-3">

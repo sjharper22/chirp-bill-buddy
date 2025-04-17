@@ -20,12 +20,24 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
   
-  // Get common complaints from visits
-  const complaints = superbill.visits
-    .map(visit => visit.mainComplaint)
-    .filter(complaint => complaint) as string[];
-  const uniqueComplaints = [...new Set(complaints)];
-  const mainComplaint = uniqueComplaints.length > 0 ? uniqueComplaints[0] : null;
+  // Get all complaints from all visits
+  const allComplaints: string[] = [];
+  superbill.visits.forEach(visit => {
+    if (visit.mainComplaints && visit.mainComplaints.length > 0) {
+      visit.mainComplaints.forEach(complaint => {
+        if (!allComplaints.includes(complaint)) {
+          allComplaints.push(complaint);
+        }
+      });
+    }
+  });
+  
+  // Display logic for complaints (showing up to 2, then "and X more")
+  const complaintsDisplay = allComplaints.length > 0 
+    ? (allComplaints.length > 2
+        ? `${allComplaints.slice(0, 2).join(", ")} and ${allComplaints.length - 2} more`
+        : allComplaints.join(", "))
+    : null;
   
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -44,10 +56,9 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
               Visit Period: {formatDate(earliestDate)} to {formatDate(latestDate)}
             </p>
           )}
-          {mainComplaint && (
+          {complaintsDisplay && (
             <p className="mt-1 font-medium text-foreground">
-              Primary Complaint: {mainComplaint}
-              {uniqueComplaints.length > 1 && " + others"}
+              Primary Complaints: {complaintsDisplay}
             </p>
           )}
         </div>
