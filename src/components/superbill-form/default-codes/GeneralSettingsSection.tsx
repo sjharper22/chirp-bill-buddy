@@ -23,8 +23,14 @@ export function GeneralSettingsSection({
   commonMainComplaints,
   hasVisits
 }: GeneralSettingsSectionProps) {
+  // Prevent form submission when interacting with main complaints
+  const preventFormSubmission = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" onClick={preventFormSubmission}>
       <div className="space-y-2">
         <Label htmlFor="defaultMainComplaints">Default Main Complaints</Label>
         <MultiTagInput
@@ -32,6 +38,7 @@ export function GeneralSettingsSection({
           tags={defaultMainComplaints || []}
           onChange={onMainComplaintsChange}
           suggestions={commonMainComplaints}
+          preventFormSubmission={true}
         />
         <p className="text-xs text-muted-foreground">
           Common complaints/reasons that will be available for selection in visits
@@ -55,7 +62,10 @@ export function GeneralSettingsSection({
             <Button 
               type="button" 
               variant="outline" 
-              onClick={onApplyToAllVisits}
+              onClick={(e) => {
+                e.preventDefault();
+                onApplyToAllVisits();
+              }}
             >
               Apply to All Visits
             </Button>

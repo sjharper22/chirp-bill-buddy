@@ -9,9 +9,16 @@ interface MultiTagInputProps {
   tags: string[];
   onChange: (tags: string[]) => void;
   suggestions?: { value: string; label: string }[];
+  preventFormSubmission?: boolean;
 }
 
-export function MultiTagInput({ placeholder, tags, onChange, suggestions = [] }: MultiTagInputProps) {
+export function MultiTagInput({ 
+  placeholder, 
+  tags, 
+  onChange, 
+  suggestions = [],
+  preventFormSubmission = false
+}: MultiTagInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState(suggestions);
@@ -30,7 +37,7 @@ export function MultiTagInput({ placeholder, tags, onChange, suggestions = [] }:
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      e.preventDefault();
+      e.preventDefault(); // Always prevent form submission on Enter
       addTag(inputValue);
     } else if (e.key === "Backspace" && !inputValue && tags.length > 0) {
       removeTag(tags[tags.length - 1]);
@@ -56,20 +63,29 @@ export function MultiTagInput({ placeholder, tags, onChange, suggestions = [] }:
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = (suggestion: string, e: React.MouseEvent) => {
+    if (preventFormSubmission) e.preventDefault();
     addTag(suggestion);
     setShowSuggestions(false);
   };
 
+  // Common function to prevent form submission
+  const handlePreventDefault = (e: React.MouseEvent) => {
+    if (preventFormSubmission) e.preventDefault();
+  };
+
   return (
-    <div className="relative">
+    <div className="relative" onClick={handlePreventDefault}>
       <div className="flex flex-wrap gap-2 p-2 border rounded-md focus-within:ring-1 focus-within:ring-primary bg-background">
         {tags.map((tag, index) => (
           <Badge key={index} variant="secondary" className="gap-1 pl-2">
             {tag}
             <X 
               className="h-3 w-3 cursor-pointer" 
-              onClick={() => removeTag(tag)}
+              onClick={(e) => {
+                if (preventFormSubmission) e.preventDefault();
+                removeTag(tag);
+              }}
             />
           </Badge>
         ))}
@@ -77,7 +93,10 @@ export function MultiTagInput({ placeholder, tags, onChange, suggestions = [] }:
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => inputValue.trim() && setShowSuggestions(true)}
+          onFocus={(e) => {
+            if (preventFormSubmission) e.preventDefault();
+            if (inputValue.trim()) setShowSuggestions(true);
+          }}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           placeholder={tags.length === 0 ? placeholder : ""}
           className="flex-grow border-0 p-0 pl-1 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -90,7 +109,7 @@ export function MultiTagInput({ placeholder, tags, onChange, suggestions = [] }:
             <div 
               key={index}
               className="px-3 py-2 hover:bg-muted cursor-pointer text-sm"
-              onClick={() => handleSuggestionClick(suggestion.value)}
+              onClick={(e) => handleSuggestionClick(suggestion.value, e)}
             >
               {suggestion.label}
             </div>
