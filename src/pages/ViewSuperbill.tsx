@@ -108,10 +108,10 @@ export default function ViewSuperbill() {
                     <div>
                       <p className="font-medium">Visit Date: {formatDate(visit.date)}</p>
                       
-                      {visit.mainComplaint && (
+                      {visit.mainComplaints && visit.mainComplaints.length > 0 && (
                         <div className="mt-2">
-                          <p className="text-sm font-medium">Main Complaint:</p>
-                          <p className="text-sm">{visit.mainComplaint}</p>
+                          <p className="text-sm font-medium">Main Complaints:</p>
+                          <p className="text-sm">{visit.mainComplaints.join(', ')}</p>
                         </div>
                       )}
                       

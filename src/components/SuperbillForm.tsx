@@ -132,7 +132,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
     
     // If there are default main complaints, use the first one
     if (superbill.defaultMainComplaints && superbill.defaultMainComplaints.length > 0) {
-      newVisit.mainComplaint = superbill.defaultMainComplaints[0];
+      newVisit.mainComplaints = [superbill.defaultMainComplaints[0]];
     }
     
     setSuperbill(prev => ({

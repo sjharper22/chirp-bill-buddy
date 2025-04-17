@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Superbill } from "@/types/superbill";
 import { 
@@ -19,15 +18,12 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  // Calculate total fee
   const totalFee = calculateTotalFee(superbill.visits);
   
-  // Get earliest and latest visit dates if visits exist
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
   
-  // Handle print superbill
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -39,7 +35,6 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
       return;
     }
     
-    // Generate printable HTML
     const printableContent = generatePrintableHTML(superbill);
     
     printWindow.document.write(printableContent);
@@ -50,15 +45,12 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
     }, 500);
   };
   
-  // Handle download as PDF
   const handleDownload = () => {
     toast({
       title: "PDF Download",
       description: "Preparing PDF download...",
     });
     
-    // In a real implementation, you would use a library like jsPDF to generate a PDF
-    // For now, we'll just show a notification
     setTimeout(() => {
       toast({
         title: "PDF Ready",
@@ -67,9 +59,7 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
     }, 1500);
   };
   
-  // Handle copy to clipboard
   const handleCopyToClipboard = () => {
-    // Create a plain text version of the superbill
     const textContent = [
       `SUPERBILL`,
       `Patient: ${superbill.patientName}`,
@@ -92,7 +82,7 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
           `ICD-10: ${visit.icdCodes.join(', ')}`,
           `CPT: ${visit.cptCodes.join(', ')}`,
           `Fee: ${formatCurrency(visit.fee)}`,
-          visit.mainComplaint ? `Main Complaint: ${visit.mainComplaint}` : '',
+          visit.mainComplaints && visit.mainComplaints.length > 0 ? `Main Complaints: ${visit.mainComplaints.join(', ')}` : '',
           visit.notes ? `Notes: ${visit.notes}` : '',
           `------------------`
         ].join('\n');
@@ -101,7 +91,6 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
       `TOTAL: ${formatCurrency(totalFee)}`
     ].join('\n');
     
-    // Copy to clipboard
     navigator.clipboard.writeText(textContent)
       .then(() => {
         toast({
@@ -119,7 +108,6 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
       });
   };
   
-  // Handle email to patient
   const handleEmailToPatient = () => {
     toast({
       title: "Email Feature",
@@ -140,12 +128,10 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
         </DialogHeader>
         
         <div className="mt-4 p-6 border rounded-lg">
-          {/* Header */}
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold">SUPERBILL</h2>
           </div>
           
-          {/* Patient and Clinic Info */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
               <h3 className="font-semibold mb-2">Patient Information</h3>
@@ -173,7 +159,6 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
             </div>
           </div>
           
-          {/* Visits Table */}
           <div className="mb-6">
             <h3 className="font-semibold mb-2">Services</h3>
             <div className="border rounded-lg overflow-hidden">
@@ -204,16 +189,17 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
             </div>
           </div>
           
-          {/* Notes */}
           <div className="mb-6">
             <h3 className="font-semibold mb-2">Notes</h3>
             <div className="border rounded-lg p-3 min-h-20 bg-muted/30 text-sm">
-              {superbill.visits.some(v => v.notes || v.mainComplaint) ? (
+              {superbill.visits.some(v => v.notes || (v.mainComplaints && v.mainComplaints.length > 0)) ? (
                 superbill.visits.map((visit, index) => (
-                  (visit.notes || visit.mainComplaint) && (
+                  (visit.notes || (visit.mainComplaints && visit.mainComplaints.length > 0)) && (
                     <div key={visit.id} className="mb-2">
                       <span className="font-medium">{formatDate(visit.date)}:</span>
-                      {visit.mainComplaint && <div><em>Main Complaint: </em>{visit.mainComplaint}</div>}
+                      {visit.mainComplaints && visit.mainComplaints.length > 0 && (
+                        <div><em>Main Complaints: </em>{visit.mainComplaints.join(', ')}</div>
+                      )}
                       {visit.notes && <div>{visit.notes}</div>}
                     </div>
                   )
@@ -224,14 +210,12 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
             </div>
           </div>
           
-          {/* Footer */}
           <div className="text-center text-sm text-muted-foreground border-t pt-4">
             <p>This is a superbill for services rendered. It is not a bill.</p>
             <p>Please submit to your insurance company for reimbursement.</p>
           </div>
         </div>
         
-        {/* Action Buttons */}
         <div className="flex flex-wrap justify-end gap-2 mt-4">
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="mr-2 h-4 w-4" />
@@ -255,11 +239,9 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
   );
 }
 
-// Generate HTML for printing
 function generatePrintableHTML(superbill: Superbill): string {
   const totalFee = calculateTotalFee(superbill.visits);
   
-  // Get earliest and latest visit dates if visits exist
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
@@ -389,13 +371,13 @@ function generatePrintableHTML(superbill: Superbill): string {
         
         <div class="info-title">Notes</div>
         <div class="notes">
-          ${superbill.visits.some(v => v.notes || v.mainComplaint) 
+          ${superbill.visits.some(v => v.notes || (v.mainComplaints && v.mainComplaints.length > 0)) 
             ? superbill.visits.map(visit => {
-                const hasContent = visit.notes || visit.mainComplaint;
+                const hasContent = visit.notes || (visit.mainComplaints && visit.mainComplaints.length > 0);
                 if (!hasContent) return "";
                 return `
                   <p><strong>${formatDate(visit.date)}:</strong></p>
-                  ${visit.mainComplaint ? `<p><em>Main Complaint:</em> ${visit.mainComplaint}</p>` : ""}
+                  ${visit.mainComplaints && visit.mainComplaints.length > 0 ? `<p><em>Main Complaints:</em> ${visit.mainComplaints.join(', ')}</p>` : ""}
                   ${visit.notes ? `<p>${visit.notes}</p>` : ""}
                 `;
               }).join("")

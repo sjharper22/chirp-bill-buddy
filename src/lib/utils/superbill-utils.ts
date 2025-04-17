@@ -35,7 +35,8 @@ export function createEmptyVisit(defaultIcdCodes: string[], defaultCptCodes: str
     icdCodes: [...defaultIcdCodes],
     cptCodes: [...defaultCptCodes],
     fee: defaultFee,
-    notes: ""
+    notes: "",
+    mainComplaints: []
   };
 }
 
