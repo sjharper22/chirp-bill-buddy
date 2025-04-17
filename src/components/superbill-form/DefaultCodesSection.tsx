@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { MultiTagInput } from "@/components/MultiTagInput";
 import { commonICD10Codes, commonCPTCodes } from "@/lib/utils/superbill-utils";
 
@@ -23,6 +24,22 @@ export function DefaultCodesSection({
   commonMainComplaints,
   updateVisitsWithDefaults 
 }: DefaultCodesSectionProps) {
+  const handleIcdCodeToggle = (code: string) => {
+    const currentCodes = superbill.defaultIcdCodes;
+    const newCodes = currentCodes.includes(code)
+      ? currentCodes.filter(c => c !== code)
+      : [...currentCodes, code];
+    updateField("defaultIcdCodes", newCodes);
+  };
+
+  const handleCptCodeToggle = (code: string) => {
+    const currentCodes = superbill.defaultCptCodes;
+    const newCodes = currentCodes.includes(code)
+      ? currentCodes.filter(c => c !== code)
+      : [...currentCodes, code];
+    updateField("defaultCptCodes", newCodes);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -31,25 +48,47 @@ export function DefaultCodesSection({
           Set default codes and fees for new visits
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="defaultIcdCodes">Default ICD-10 Codes</Label>
-          <MultiTagInput
-            placeholder="Add ICD-10 Codes"
-            tags={superbill.defaultIcdCodes}
-            onChange={codes => updateField("defaultIcdCodes", codes)}
-            suggestions={commonICD10Codes}
-          />
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <Label>Default ICD-10 Codes</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {commonICD10Codes.map((code) => (
+              <div key={code.value} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`icd-${code.value}`}
+                  checked={superbill.defaultIcdCodes.includes(code.value)}
+                  onCheckedChange={() => handleIcdCodeToggle(code.value)}
+                />
+                <label
+                  htmlFor={`icd-${code.value}`}
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {code.label}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="defaultCptCodes">Default CPT Codes</Label>
-          <MultiTagInput
-            placeholder="Add CPT Codes"
-            tags={superbill.defaultCptCodes}
-            onChange={codes => updateField("defaultCptCodes", codes)}
-            suggestions={commonCPTCodes}
-          />
+        <div className="space-y-4">
+          <Label>Default CPT Codes</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {commonCPTCodes.map((code) => (
+              <div key={code.value} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`cpt-${code.value}`}
+                  checked={superbill.defaultCptCodes.includes(code.value)}
+                  onCheckedChange={() => handleCptCodeToggle(code.value)}
+                />
+                <label
+                  htmlFor={`cpt-${code.value}`}
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {code.label}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
         
         <div className="space-y-2">

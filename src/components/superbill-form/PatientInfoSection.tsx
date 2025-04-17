@@ -19,6 +19,13 @@ interface PatientInfoSectionProps {
 }
 
 export function PatientInfoSection({ superbill, updateField }: PatientInfoSectionProps) {
+  const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const date = new Date(e.target.value);
+    if (!isNaN(date.getTime())) {
+      updateField("patientDob", date);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -39,61 +46,76 @@ export function PatientInfoSection({ superbill, updateField }: PatientInfoSectio
           
           <div className="space-y-2">
             <Label htmlFor="patientDob">Date of Birth</Label>
+            <div className="flex gap-2">
+              <Input
+                type="date"
+                id="patientDob"
+                value={superbill.patientDob ? format(superbill.patientDob, "yyyy-MM-dd") : ""}
+                onChange={handleDateInput}
+                className="flex-1"
+              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    type="button"
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={superbill.patientDob}
+                    onSelect={date => date && updateField("patientDob", date)}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                    fromYear={1900}
+                    toYear={new Date().getFullYear()}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="issueDate">Invoice/Issue Date</Label>
+          <div className="flex gap-2">
+            <Input
+              type="date"
+              id="issueDate"
+              value={superbill.issueDate ? format(superbill.issueDate, "yyyy-MM-dd") : ""}
+              onChange={(e) => {
+                const date = new Date(e.target.value);
+                if (!isNaN(date.getTime())) {
+                  updateField("issueDate", date);
+                }
+              }}
+              className="flex-1"
+            />
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  id="patientDob"
                   variant="outline"
-                  className="w-full justify-start text-left"
+                  size="icon"
+                  type="button"
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {superbill.patientDob ? (
-                    format(superbill.patientDob, "PP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
+                  <CalendarIcon className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="end">
                 <Calendar
                   mode="single"
-                  selected={superbill.patientDob}
-                  onSelect={date => date && updateField("patientDob", date)}
+                  selected={superbill.issueDate}
+                  onSelect={date => date && updateField("issueDate", date)}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
           </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="issueDate">Invoice/Issue Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="issueDate"
-                variant="outline"
-                className="w-full justify-start text-left"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {superbill.issueDate ? (
-                  format(superbill.issueDate, "PP")
-                ) : (
-                  <span>Pick a date</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={superbill.issueDate}
-                onSelect={date => date && updateField("issueDate", date)}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
         </div>
       </CardContent>
     </Card>
