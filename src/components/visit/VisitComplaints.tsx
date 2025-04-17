@@ -26,12 +26,18 @@ export function VisitComplaints({
     ? visit.mainComplaints.join(", ")
     : "No complaints selected";
 
+  const toggleComplaints = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevent form submission
+    setShowComplaints(!showComplaints);
+  };
+
   return (
     <div>
       <Button 
+        type="button" // Explicitly set type to button to prevent form submission
         variant="outline" 
         className="w-full justify-between text-left"
-        onClick={() => setShowComplaints(!showComplaints)}
+        onClick={toggleComplaints}
       >
         <span className="truncate">
           {mainComplaintsDisplay.length > 60 

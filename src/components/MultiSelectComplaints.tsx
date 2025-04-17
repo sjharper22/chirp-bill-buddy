@@ -30,13 +30,22 @@ export function MultiSelectComplaints({
     }
   };
 
-  const addCustomComplaint = () => {
+  const addCustomComplaint = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault(); // Prevent form submission
+    
     if (!customComplaint.trim()) return;
     
     // Only add if not already in the list
     if (!value.includes(customComplaint.trim())) {
       onChange([...value, customComplaint.trim()]);
       setCustomComplaint("");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent form submission
+      addCustomComplaint();
     }
   };
 
@@ -67,17 +76,12 @@ export function MultiSelectComplaints({
             value={customComplaint}
             onChange={(e) => setCustomComplaint(e.target.value)}
             className="flex-1"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addCustomComplaint();
-              }
-            }}
+            onKeyDown={handleKeyDown}
           />
           <Button
             type="button"
             size="sm"
-            onClick={addCustomComplaint}
+            onClick={(e) => addCustomComplaint(e)}
             disabled={!customComplaint.trim()}
           >
             <CheckIcon className="h-4 w-4" />
@@ -86,7 +90,8 @@ export function MultiSelectComplaints({
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault(); // Prevent form submission
               setShowCustomInput(false);
               setCustomComplaint("");
             }}
@@ -96,10 +101,13 @@ export function MultiSelectComplaints({
         </div>
       ) : (
         <Button
-          type="button"
+          type="button" // Explicitly set type to button
           variant="outline"
           size="sm"
-          onClick={() => setShowCustomInput(true)}
+          onClick={(e) => {
+            e.preventDefault(); // Prevent form submission
+            setShowCustomInput(true);
+          }}
           className="mt-3"
         >
           <PlusCircle className="h-4 w-4 mr-2" />
