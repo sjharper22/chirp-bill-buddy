@@ -15,6 +15,11 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
   const totalFee = calculateTotalFee(superbill.visits);
   const visitCount = superbill.visits.length;
   
+  // Get earliest and latest visit dates if visits exist
+  const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
+  const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
+  const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
+  
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-6">
@@ -27,9 +32,11 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
         
         <div className="text-sm text-muted-foreground mb-4">
           <p>DOB: {formatDate(superbill.patientDob)}</p>
-          <p>
-            Service Period: {formatDate(superbill.dateRangeStart)} to {formatDate(superbill.dateRangeEnd)}
-          </p>
+          {visitDates.length > 0 && (
+            <p>
+              Visit Period: {formatDate(earliestDate)} to {formatDate(latestDate)}
+            </p>
+          )}
         </div>
         
         <div className="flex justify-between">

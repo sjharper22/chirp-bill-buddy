@@ -22,6 +22,11 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
   // Calculate total fee
   const totalFee = calculateTotalFee(superbill.visits);
   
+  // Get earliest and latest visit dates if visits exist
+  const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
+  const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
+  const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
+  
   // Handle print superbill
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
@@ -70,7 +75,7 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
       `Patient: ${superbill.patientName}`,
       `DOB: ${formatDate(superbill.patientDob)}`,
       `Date: ${formatDate(superbill.issueDate)}`,
-      `Date Range: ${formatDate(superbill.dateRangeStart)} to ${formatDate(superbill.dateRangeEnd)}`,
+      visitDates.length > 0 ? `Visit Period: ${formatDate(earliestDate)} to ${formatDate(latestDate)}` : `No visits`,
       ``,
       `Provider: ${superbill.providerName}`,
       `${superbill.clinicName}`,
@@ -87,6 +92,7 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
           `ICD-10: ${visit.icdCodes.join(', ')}`,
           `CPT: ${visit.cptCodes.join(', ')}`,
           `Fee: ${formatCurrency(visit.fee)}`,
+          visit.mainComplaint ? `Main Complaint: ${visit.mainComplaint}` : '',
           visit.notes ? `Notes: ${visit.notes}` : '',
           `------------------`
         ].join('\n');
@@ -146,11 +152,13 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
               <p><span className="font-medium">Name:</span> {superbill.patientName}</p>
               <p><span className="font-medium">DOB:</span> {formatDate(superbill.patientDob)}</p>
               <p><span className="font-medium">Date:</span> {formatDate(superbill.issueDate)}</p>
-              <p>
-                <span className="font-medium">Service Period:</span> {formatDate(superbill.dateRangeStart)} 
-                {" to "} 
-                {formatDate(superbill.dateRangeEnd)}
-              </p>
+              {visitDates.length > 0 && (
+                <p>
+                  <span className="font-medium">Visit Period:</span> {formatDate(earliestDate)} 
+                  {" to "} 
+                  {formatDate(latestDate)}
+                </p>
+              )}
             </div>
             
             <div>
@@ -200,11 +208,13 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
           <div className="mb-6">
             <h3 className="font-semibold mb-2">Notes</h3>
             <div className="border rounded-lg p-3 min-h-20 bg-muted/30 text-sm">
-              {superbill.visits.some(v => v.notes) ? (
+              {superbill.visits.some(v => v.notes || v.mainComplaint) ? (
                 superbill.visits.map((visit, index) => (
-                  visit.notes && (
+                  (visit.notes || visit.mainComplaint) && (
                     <div key={visit.id} className="mb-2">
-                      <span className="font-medium">{formatDate(visit.date)}:</span> {visit.notes}
+                      <span className="font-medium">{formatDate(visit.date)}:</span>
+                      {visit.mainComplaint && <div><em>Main Complaint: </em>{visit.mainComplaint}</div>}
+                      {visit.notes && <div>{visit.notes}</div>}
                     </div>
                   )
                 ))
@@ -248,6 +258,11 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
 // Generate HTML for printing
 function generatePrintableHTML(superbill: Superbill): string {
   const totalFee = calculateTotalFee(superbill.visits);
+  
+  // Get earliest and latest visit dates if visits exist
+  const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
+  const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
+  const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
   
   return `
     <!DOCTYPE html>
@@ -331,7 +346,7 @@ function generatePrintableHTML(superbill: Superbill): string {
             <p>Name: ${superbill.patientName}</p>
             <p>DOB: ${formatDate(superbill.patientDob)}</p>
             <p>Date: ${formatDate(superbill.issueDate)}</p>
-            <p>Service Period: ${formatDate(superbill.dateRangeStart)} to ${formatDate(superbill.dateRangeEnd)}</p>
+            ${visitDates.length > 0 ? `<p>Visit Period: ${formatDate(earliestDate)} to ${formatDate(latestDate)}</p>` : ''}
           </div>
           
           <div class="info-block">
@@ -374,10 +389,16 @@ function generatePrintableHTML(superbill: Superbill): string {
         
         <div class="info-title">Notes</div>
         <div class="notes">
-          ${superbill.visits.some(v => v.notes) 
-            ? superbill.visits.map(visit => 
-                visit.notes ? `<p><strong>${formatDate(visit.date)}:</strong> ${visit.notes}</p>` : ""
-              ).join("")
+          ${superbill.visits.some(v => v.notes || v.mainComplaint) 
+            ? superbill.visits.map(visit => {
+                const hasContent = visit.notes || visit.mainComplaint;
+                if (!hasContent) return "";
+                return `
+                  <p><strong>${formatDate(visit.date)}:</strong></p>
+                  ${visit.mainComplaint ? `<p><em>Main Complaint:</em> ${visit.mainComplaint}</p>` : ""}
+                  ${visit.notes ? `<p>${visit.notes}</p>` : ""}
+                `;
+              }).join("")
             : "<p><em>No notes</em></p>"
           }
         </div>

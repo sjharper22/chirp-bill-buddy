@@ -34,6 +34,11 @@ export default function ViewSuperbill() {
     );
   }
   
+  // Get earliest and latest visit dates if visits exist
+  const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
+  const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
+  const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
+  
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-8">
@@ -68,7 +73,11 @@ export default function ViewSuperbill() {
             <div className="space-y-1">
               <p><span className="font-medium">Name:</span> {superbill.patientName}</p>
               <p><span className="font-medium">DOB:</span> {formatDate(superbill.patientDob)}</p>
-              <p><span className="font-medium">Service Period:</span> {formatDate(superbill.dateRangeStart)} to {formatDate(superbill.dateRangeEnd)}</p>
+              {visitDates.length > 0 && (
+                <p>
+                  <span className="font-medium">Visit Period:</span> {formatDate(earliestDate)} to {formatDate(latestDate)}
+                </p>
+              )}
             </div>
           </div>
           
@@ -98,6 +107,13 @@ export default function ViewSuperbill() {
                   <div className="flex flex-wrap justify-between gap-4">
                     <div>
                       <p className="font-medium">Visit Date: {formatDate(visit.date)}</p>
+                      
+                      {visit.mainComplaint && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium">Main Complaint:</p>
+                          <p className="text-sm">{visit.mainComplaint}</p>
+                        </div>
+                      )}
                       
                       <div className="mt-2">
                         <p className="text-sm font-medium">ICD-10 Codes:</p>

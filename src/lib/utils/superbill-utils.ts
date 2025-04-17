@@ -53,12 +53,14 @@ export function filterSuperbills(superbills: Superbill[], searchTerm: string): S
   
   const term = searchTerm.toLowerCase().trim();
   
-  return superbills.filter(bill => 
-    bill.patientName.toLowerCase().includes(term) ||
-    formatDate(bill.issueDate).includes(term) ||
-    formatDate(bill.dateRangeStart).includes(term) ||
-    formatDate(bill.dateRangeEnd).includes(term)
-  );
+  return superbills.filter(bill => {
+    // Get visit dates if they exist
+    const visitDates = bill.visits.map(visit => formatDate(visit.date));
+    
+    return bill.patientName.toLowerCase().includes(term) ||
+           formatDate(bill.issueDate).includes(term) ||
+           visitDates.some(date => date.includes(term));
+  });
 }
 
 // Sort superbills by date (newest first)
