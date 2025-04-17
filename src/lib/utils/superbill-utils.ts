@@ -71,7 +71,7 @@ export const filterSuperbills = (superbills: Superbill[], searchTerm: string): S
   const lowerCaseSearchTerm = searchTerm.toLowerCase();
   
   return superbills.filter(superbill => {
-    const patientName = `${superbill.patientFirstName} ${superbill.patientLastName}`.toLowerCase();
+    const patientName = superbill.patientName.toLowerCase();
     const dateStr = superbill.issueDate ? formatDate(superbill.issueDate).toLowerCase() : '';
     
     return patientName.includes(lowerCaseSearchTerm) || dateStr.includes(lowerCaseSearchTerm);
