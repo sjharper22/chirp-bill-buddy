@@ -13,6 +13,7 @@ const DEFAULT_CLINIC_INFO: ClinicDefaults = {
   providerName: "", // No provider name was provided
   defaultIcdCodes: [],
   defaultCptCodes: [],
+  defaultMainComplaints: [], // Added default main complaints array
   defaultFee: 0
 };
 

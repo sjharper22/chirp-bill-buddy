@@ -20,6 +20,13 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
   
+  // Get common complaints from visits
+  const complaints = superbill.visits
+    .map(visit => visit.mainComplaint)
+    .filter(complaint => complaint) as string[];
+  const uniqueComplaints = [...new Set(complaints)];
+  const mainComplaint = uniqueComplaints.length > 0 ? uniqueComplaints[0] : null;
+  
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-6">
@@ -35,6 +42,12 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
           {visitDates.length > 0 && (
             <p>
               Visit Period: {formatDate(earliestDate)} to {formatDate(latestDate)}
+            </p>
+          )}
+          {mainComplaint && (
+            <p className="mt-1 font-medium text-foreground">
+              Primary Complaint: {mainComplaint}
+              {uniqueComplaints.length > 1 && " + others"}
             </p>
           )}
         </div>

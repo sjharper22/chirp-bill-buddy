@@ -11,6 +11,21 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { commonICD10Codes, commonCPTCodes } from "@/lib/utils/superbill-utils";
 import { useToast } from "@/hooks/use-toast";
 
+// Common main complaints for chiropractic practice
+const commonMainComplaints = [
+  { value: "Back Pain", label: "Back Pain" },
+  { value: "Neck Pain", label: "Neck Pain" },
+  { value: "Headache", label: "Headache" },
+  { value: "Shoulder Pain", label: "Shoulder Pain" },
+  { value: "Knee Pain", label: "Knee Pain" },
+  { value: "Hip Pain", label: "Hip Pain" },
+  { value: "Sciatica", label: "Sciatica" },
+  { value: "Muscle Spasm", label: "Muscle Spasm" },
+  { value: "Joint Pain", label: "Joint Pain" },
+  { value: "Numbness/Tingling", label: "Numbness/Tingling" },
+  { value: "Maintenance/Wellness", label: "Maintenance/Wellness" }
+];
+
 export default function Settings() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -26,6 +41,7 @@ export default function Settings() {
     providerName: clinicDefaults.providerName,
     defaultIcdCodes: [...clinicDefaults.defaultIcdCodes],
     defaultCptCodes: [...clinicDefaults.defaultCptCodes],
+    defaultMainComplaints: [...(clinicDefaults.defaultMainComplaints || [])],
     defaultFee: clinicDefaults.defaultFee
   });
   
@@ -77,7 +93,7 @@ export default function Settings() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="providerName">Default Provider Name</Label>
+                <Label htmlFor="providerName">Provider Name</Label>
                 <Input
                   id="providerName"
                   value={formState.providerName}
@@ -126,12 +142,15 @@ export default function Settings() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="npi">NPI #</Label>
+                <Label htmlFor="npi">Provider NPI #</Label>
                 <Input
                   id="npi"
                   value={formState.npi}
                   onChange={handleInputChange}
                 />
+                <p className="text-xs text-muted-foreground">
+                  National Provider Identifier specific to the provider (e.g., Dr. Smith - NPI# 1234567890)
+                </p>
               </div>
             </div>
           </CardContent>
@@ -169,6 +188,19 @@ export default function Settings() {
               />
               <p className="text-xs text-muted-foreground mt-1">
                 These codes will be automatically added to new visits
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="defaultMainComplaints">Default Main Complaints/Reasons for Visit</Label>
+              <MultiTagInput
+                placeholder="Add Common Complaints"
+                tags={formState.defaultMainComplaints}
+                onChange={complaints => setFormState(prev => ({ ...prev, defaultMainComplaints: complaints }))}
+                suggestions={commonMainComplaints}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                These complaints will be available to select for each visit
               </p>
             </div>
             

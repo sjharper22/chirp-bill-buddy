@@ -17,6 +17,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface VisitEntryProps {
@@ -24,10 +31,20 @@ interface VisitEntryProps {
   onVisitChange: (updatedVisit: Visit) => void;
   onDuplicate: (visit: Visit) => void;
   onDelete: (id: string) => void;
+  defaultMainComplaints?: string[];
 }
 
-export function VisitEntry({ visit, onVisitChange, onDuplicate, onDelete }: VisitEntryProps) {
+export function VisitEntry({ 
+  visit, 
+  onVisitChange, 
+  onDuplicate, 
+  onDelete,
+  defaultMainComplaints = []
+}: VisitEntryProps) {
   const [showNotes, setShowNotes] = useState(false);
+  const [customComplaint, setCustomComplaint] = useState(
+    !defaultMainComplaints.includes(visit.mainComplaint || "") && visit.mainComplaint ? true : false
+  );
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -44,7 +61,12 @@ export function VisitEntry({ visit, onVisitChange, onDuplicate, onDelete }: Visi
     onVisitChange({ ...visit, notes: e.target.value });
   };
 
-  const handleMainComplaintChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMainComplaintChange = (value: string) => {
+    onVisitChange({ ...visit, mainComplaint: value });
+    setCustomComplaint(false);
+  };
+
+  const handleCustomComplaintChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onVisitChange({ ...visit, mainComplaint: e.target.value });
   };
 
@@ -93,14 +115,58 @@ export function VisitEntry({ visit, onVisitChange, onDuplicate, onDelete }: Visi
             </Popover>
           </div>
 
-          {/* Main Complaint - New field */}
+          {/* Main Complaint - Dropdown or custom input */}
           <div className="w-full sm:flex-1">
-            <Input
-              placeholder="Main Complaint/Reason for Visit"
-              value={visit.mainComplaint || ""}
-              onChange={handleMainComplaintChange}
-              className="w-full"
-            />
+            {customComplaint || defaultMainComplaints.length === 0 ? (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Main Complaint/Reason for Visit"
+                  value={visit.mainComplaint || ""}
+                  onChange={handleCustomComplaintChange}
+                  className="w-full"
+                />
+                {defaultMainComplaints.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={() => setCustomComplaint(false)}
+                    title="Select from common complaints"
+                    className="shrink-0"
+                  >
+                    <span className="sr-only">Use pre-defined complaints</span>
+                    ⋮
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Select
+                  value={visit.mainComplaint || ""}
+                  onValueChange={handleMainComplaintChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a main complaint" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {defaultMainComplaints.map(complaint => (
+                      <SelectItem key={complaint} value={complaint}>
+                        {complaint}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => setCustomComplaint(true)}
+                  title="Enter custom complaint"
+                  className="shrink-0"
+                >
+                  <span className="sr-only">Custom complaint</span>
+                  +
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Fee */}

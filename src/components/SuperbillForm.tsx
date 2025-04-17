@@ -24,6 +24,21 @@ import { CalendarIcon, Plus, Calendar as CalendarRange, Save } from "lucide-reac
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+// Common main complaints for displaying in form
+const commonMainComplaints = [
+  { value: "Back Pain", label: "Back Pain" },
+  { value: "Neck Pain", label: "Neck Pain" },
+  { value: "Headache", label: "Headache" },
+  { value: "Shoulder Pain", label: "Shoulder Pain" },
+  { value: "Knee Pain", label: "Knee Pain" },
+  { value: "Hip Pain", label: "Hip Pain" },
+  { value: "Sciatica", label: "Sciatica" },
+  { value: "Muscle Spasm", label: "Muscle Spasm" },
+  { value: "Joint Pain", label: "Joint Pain" },
+  { value: "Numbness/Tingling", label: "Numbness/Tingling" },
+  { value: "Maintenance/Wellness", label: "Maintenance/Wellness" }
+];
+
 interface SuperbillFormProps {
   existingSuperbill?: Superbill;
 }
@@ -44,7 +59,6 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
       patientName: "",
       patientDob: new Date(),
       issueDate: today,
-      // Removed dateRangeStart and dateRangeEnd
       clinicName: clinicDefaults.clinicName,
       clinicAddress: clinicDefaults.clinicAddress,
       clinicPhone: clinicDefaults.clinicPhone,
@@ -54,6 +68,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
       providerName: clinicDefaults.providerName,
       defaultIcdCodes: [...clinicDefaults.defaultIcdCodes],
       defaultCptCodes: [...clinicDefaults.defaultCptCodes],
+      defaultMainComplaints: [...(clinicDefaults.defaultMainComplaints || [])],
       defaultFee: clinicDefaults.defaultFee,
       visits: []
     };
@@ -115,6 +130,11 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
       superbill.defaultFee
     );
     
+    // If there are default main complaints, use the first one
+    if (superbill.defaultMainComplaints && superbill.defaultMainComplaints.length > 0) {
+      newVisit.mainComplaint = superbill.defaultMainComplaints[0];
+    }
+    
     setSuperbill(prev => ({
       ...prev,
       visits: [...prev.visits, newVisit]
@@ -125,7 +145,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
   const duplicateVisit = (visit: Visit) => {
     setSuperbill(prev => ({
       ...prev,
-      visits: [...prev.visits, visit]
+      visits: [...prev.visits, { ...visit, id: generateId() }]
     }));
   };
   
@@ -151,6 +171,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
         ...visit,
         icdCodes: [...prev.defaultIcdCodes],
         cptCodes: [...prev.defaultCptCodes],
+        // Don't update mainComplaint automatically
         fee: prev.defaultFee
       }))
     }));
@@ -307,12 +328,15 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="npi">NPI #</Label>
+              <Label htmlFor="npi">Provider NPI #</Label>
               <Input
                 id="npi"
                 value={superbill.npi}
                 onChange={e => updateField("npi", e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                National Provider Identifier specific to the provider
+              </p>
             </div>
           </div>
         </CardContent>
@@ -345,6 +369,19 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
               onChange={codes => updateField("defaultCptCodes", codes)}
               suggestions={commonCPTCodes}
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="defaultMainComplaints">Default Main Complaints</Label>
+            <MultiTagInput
+              placeholder="Add Main Complaints"
+              tags={superbill.defaultMainComplaints || []}
+              onChange={complaints => updateField("defaultMainComplaints", complaints)}
+              suggestions={commonMainComplaints}
+            />
+            <p className="text-xs text-muted-foreground">
+              Common complaints/reasons that will be available for selection in visits
+            </p>
           </div>
           
           <div className="space-y-2">
@@ -404,6 +441,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
                   onVisitChange={updateVisit}
                   onDuplicate={duplicateVisit}
                   onDelete={deleteVisit}
+                  defaultMainComplaints={superbill.defaultMainComplaints}
                 />
               ))}
               

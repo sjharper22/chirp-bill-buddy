@@ -24,6 +24,7 @@ export interface Superbill {
   providerName: string;
   defaultIcdCodes: string[];
   defaultCptCodes: string[];
+  defaultMainComplaints: string[]; // Added default main complaints
   defaultFee: number;
   visits: Visit[];
   createdAt: Date;
@@ -42,5 +43,6 @@ export interface ClinicDefaults {
   providerName: string;
   defaultIcdCodes: string[];
   defaultCptCodes: string[];
+  defaultMainComplaints: string[]; // Added default main complaints
   defaultFee: number;
 }
