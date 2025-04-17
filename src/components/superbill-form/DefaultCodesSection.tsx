@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultiTagInput } from "@/components/MultiTagInput";
 import { commonICD10Codes, commonCPTCodes } from "@/lib/utils/superbill-utils";
+import { useState } from "react";
+import { Plus } from "lucide-react";
 
 interface DefaultCodesSectionProps {
   superbill: Omit<Superbill, "id" | "createdAt" | "updatedAt">;
@@ -24,6 +26,9 @@ export function DefaultCodesSection({
   commonMainComplaints,
   updateVisitsWithDefaults 
 }: DefaultCodesSectionProps) {
+  const [customIcdCode, setCustomIcdCode] = useState("");
+  const [customIcdDescription, setCustomIcdDescription] = useState("");
+
   const handleIcdCodeToggle = (code: string) => {
     const currentCodes = superbill.defaultIcdCodes;
     const newCodes = currentCodes.includes(code)
@@ -40,6 +45,17 @@ export function DefaultCodesSection({
     updateField("defaultCptCodes", newCodes);
   };
 
+  const handleAddCustomIcdCode = () => {
+    if (customIcdCode && customIcdDescription) {
+      const code = customIcdCode.toUpperCase();
+      if (!superbill.defaultIcdCodes.includes(code)) {
+        updateField("defaultIcdCodes", [...superbill.defaultIcdCodes, code]);
+        setCustomIcdCode("");
+        setCustomIcdDescription("");
+      }
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -51,22 +67,103 @@ export function DefaultCodesSection({
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <Label>Default ICD-10 Codes</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {commonICD10Codes.map((code) => (
-              <div key={code.value} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`icd-${code.value}`}
-                  checked={superbill.defaultIcdCodes.includes(code.value)}
-                  onCheckedChange={() => handleIcdCodeToggle(code.value)}
-                />
-                <label
-                  htmlFor={`icd-${code.value}`}
-                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {code.label}
-                </label>
+          
+          {/* Custom ICD code input */}
+          <div className="flex gap-2 mb-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Custom ICD-10 code (e.g., M54.5)"
+                value={customIcdCode}
+                onChange={e => setCustomIcdCode(e.target.value)}
+                className="mb-2"
+              />
+              <Input
+                placeholder="Description"
+                value={customIcdDescription}
+                onChange={e => setCustomIcdDescription(e.target.value)}
+              />
+            </div>
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={handleAddCustomIcdCode}
+              className="h-20"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add
+            </Button>
+          </div>
+
+          {/* Group ICD codes by category */}
+          <div className="space-y-4">
+            <div>
+              <h4 className="text-sm font-medium mb-2">Spinal Codes</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {commonICD10Codes
+                  .filter(code => code.value.startsWith('M99') || code.value.startsWith('M54'))
+                  .map((code) => (
+                    <div key={code.value} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`icd-${code.value}`}
+                        checked={superbill.defaultIcdCodes.includes(code.value)}
+                        onCheckedChange={() => handleIcdCodeToggle(code.value)}
+                      />
+                      <label
+                        htmlFor={`icd-${code.value}`}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {code.label}
+                      </label>
+                    </div>
+                  ))}
               </div>
-            ))}
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-2">Extremity Codes</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {commonICD10Codes
+                  .filter(code => code.value.startsWith('M25') || code.value.startsWith('M79'))
+                  .map((code) => (
+                    <div key={code.value} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`icd-${code.value}`}
+                        checked={superbill.defaultIcdCodes.includes(code.value)}
+                        onCheckedChange={() => handleIcdCodeToggle(code.value)}
+                      />
+                      <label
+                        htmlFor={`icd-${code.value}`}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {code.label}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-2">Sprain/Strain Codes</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {commonICD10Codes
+                  .filter(code => code.value.startsWith('S'))
+                  .map((code) => (
+                    <div key={code.value} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`icd-${code.value}`}
+                        checked={superbill.defaultIcdCodes.includes(code.value)}
+                        onCheckedChange={() => handleIcdCodeToggle(code.value)}
+                      />
+                      <label
+                        htmlFor={`icd-${code.value}`}
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {code.label}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
         
