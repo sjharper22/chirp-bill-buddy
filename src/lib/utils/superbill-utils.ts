@@ -1,6 +1,6 @@
 
 import { format } from "date-fns";
-import { Visit } from "@/types/superbill";
+import { Visit, Superbill } from "@/types/superbill";
 
 /**
  * Generates a unique ID
@@ -57,6 +57,39 @@ export const duplicateVisit = (visit: Visit): Visit => {
     ...visit,
     id: generateId()
   };
+};
+
+/**
+ * Filters superbills based on search term
+ * Searches in patient name and formatted date
+ */
+export const filterSuperbills = (superbills: Superbill[], searchTerm: string): Superbill[] => {
+  if (!searchTerm.trim()) {
+    return superbills;
+  }
+  
+  const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  
+  return superbills.filter(superbill => {
+    const patientName = `${superbill.patientFirstName} ${superbill.patientLastName}`.toLowerCase();
+    const dateStr = superbill.issueDate ? formatDate(superbill.issueDate).toLowerCase() : '';
+    
+    return patientName.includes(lowerCaseSearchTerm) || dateStr.includes(lowerCaseSearchTerm);
+  });
+};
+
+/**
+ * Sorts superbills by date in descending order (newest first)
+ */
+export const sortSuperbillsByDate = (superbills: Superbill[]): Superbill[] => {
+  return [...superbills].sort((a, b) => {
+    // Get the dates, defaulting to current date if undefined
+    const dateA = a.issueDate ? new Date(a.issueDate).getTime() : Date.now();
+    const dateB = b.issueDate ? new Date(b.issueDate).getTime() : Date.now();
+    
+    // Sort in descending order (newest first)
+    return dateB - dateA;
+  });
 };
 
 // Common ICD-10 codes for physical therapy, chiropractic, and related fields
