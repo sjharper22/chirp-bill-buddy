@@ -6,6 +6,7 @@ export interface Visit {
   cptCodes: string[];
   fee: number;
   notes?: string;
+  mainComplaint?: string; // Added main complaint field
 }
 
 export interface Superbill {
@@ -13,8 +14,7 @@ export interface Superbill {
   patientName: string;
   patientDob: Date;
   issueDate: Date;
-  dateRangeStart: Date;
-  dateRangeEnd: Date;
+  // Removed dateRangeStart and dateRangeEnd
   clinicName: string;
   clinicAddress: string;
   clinicPhone: string;

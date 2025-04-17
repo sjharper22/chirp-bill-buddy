@@ -44,6 +44,10 @@ export function VisitEntry({ visit, onVisitChange, onDuplicate, onDelete }: Visi
     onVisitChange({ ...visit, notes: e.target.value });
   };
 
+  const handleMainComplaintChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onVisitChange({ ...visit, mainComplaint: e.target.value });
+  };
+
   const addIcdCode = (code: string) => {
     if (!visit.icdCodes.includes(code)) {
       onVisitChange({ ...visit, icdCodes: [...visit.icdCodes, code] });
@@ -87,6 +91,16 @@ export function VisitEntry({ visit, onVisitChange, onDuplicate, onDelete }: Visi
                 />
               </PopoverContent>
             </Popover>
+          </div>
+
+          {/* Main Complaint - New field */}
+          <div className="w-full sm:flex-1">
+            <Input
+              placeholder="Main Complaint/Reason for Visit"
+              value={visit.mainComplaint || ""}
+              onChange={handleMainComplaintChange}
+              className="w-full"
+            />
           </div>
 
           {/* Fee */}

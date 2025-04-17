@@ -44,8 +44,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
       patientName: "",
       patientDob: new Date(),
       issueDate: today,
-      dateRangeStart: today,
-      dateRangeEnd: today,
+      // Removed dateRangeStart and dateRangeEnd
       clinicName: clinicDefaults.clinicName,
       clinicAddress: clinicDefaults.clinicAddress,
       clinicPhone: clinicDefaults.clinicPhone,
@@ -210,92 +209,33 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="issueDate">Invoice/Issue Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="issueDate"
-                    variant="outline"
-                    className="w-full justify-start text-left"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {superbill.issueDate ? (
-                      format(superbill.issueDate, "PP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={superbill.issueDate}
-                    onSelect={date => date && updateField("issueDate", date)}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Date Range Covered</Label>
-              <div className="flex items-center space-x-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="justify-start text-left flex-1"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {superbill.dateRangeStart ? (
-                        format(superbill.dateRangeStart, "PP")
-                      ) : (
-                        <span>Start date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={superbill.dateRangeStart}
-                      onSelect={date => date && updateField("dateRangeStart", date)}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-                
-                <span>to</span>
-                
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="justify-start text-left flex-1"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {superbill.dateRangeEnd ? (
-                        format(superbill.dateRangeEnd, "PP")
-                      ) : (
-                        <span>End date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={superbill.dateRangeEnd}
-                      onSelect={date => date && updateField("dateRangeEnd", date)}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="issueDate">Invoice/Issue Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="issueDate"
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {superbill.issueDate ? (
+                    format(superbill.issueDate, "PP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={superbill.issueDate}
+                  onSelect={date => date && updateField("issueDate", date)}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
       </Card>

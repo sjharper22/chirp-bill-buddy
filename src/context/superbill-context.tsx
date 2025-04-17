@@ -41,8 +41,8 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
       try {
         // Convert string dates back to Date objects
         const parsed = JSON.parse(savedSuperbills, (key, value) => {
-          if (key === "patientDob" || key === "issueDate" || key === "dateRangeStart" || 
-              key === "dateRangeEnd" || key === "date" || key === "createdAt" || key === "updatedAt") {
+          if (key === "patientDob" || key === "issueDate" || key === "date" || 
+              key === "createdAt" || key === "updatedAt") {
             return new Date(value);
           }
           return value;
