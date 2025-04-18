@@ -15,7 +15,7 @@ export function Preview({ superbill }: PreviewProps) {
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
   
   return (
-    <div className="mt-4 p-6 border rounded-lg">
+    <div className="mt-4 p-6 border rounded-lg superbill-preview-content">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold">SUPERBILL</h2>
       </div>

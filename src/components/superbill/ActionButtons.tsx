@@ -1,10 +1,12 @@
-
 import { Superbill } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, Copy, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generatePrintableHTML } from "@/lib/utils/html-generator";
 import { formatDate } from "@/lib/utils/superbill-utils";
+import { useState } from "react";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 interface ActionButtonsProps {
   superbill: Superbill;
@@ -12,6 +14,7 @@ interface ActionButtonsProps {
 
 export function ActionButtons({ superbill }: ActionButtonsProps) {
   const { toast } = useToast();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
@@ -34,18 +37,59 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
     }, 500);
   };
   
-  const handleDownload = () => {
+  const handleDownload = async () => {
+    setIsGeneratingPDF(true);
     toast({
       title: "PDF Download",
       description: "Preparing PDF download...",
     });
     
-    setTimeout(() => {
-      toast({
-        title: "PDF Ready",
-        description: "Your superbill has been downloaded.",
+    const tempContainer = document.createElement("div");
+    tempContainer.style.position = "absolute";
+    tempContainer.style.left = "-9999px";
+    tempContainer.style.top = "-9999px";
+    tempContainer.innerHTML = generatePrintableHTML(superbill);
+    document.body.appendChild(tempContainer);
+    
+    try {
+      const canvas = await html2canvas(tempContainer, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff"
       });
-    }, 1500);
+      
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+      
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      const imgData = canvas.toDataURL("image/png");
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      
+      const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate, "MM-dd-yyyy")}.pdf`;
+      
+      pdf.save(fileName);
+      
+      toast({
+        title: "PDF Downloaded",
+        description: "Your superbill has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast({
+        title: "Download Failed",
+        description: "There was an error generating your PDF. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      document.body.removeChild(tempContainer);
+      setIsGeneratingPDF(false);
+    }
   };
   
   const handleCopyToClipboard = () => {
@@ -114,9 +158,9 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
         <Printer className="mr-2 h-4 w-4" />
         Print
       </Button>
-      <Button variant="outline" onClick={handleDownload}>
+      <Button variant="outline" onClick={handleDownload} disabled={isGeneratingPDF}>
         <Download className="mr-2 h-4 w-4" />
-        Download PDF
+        {isGeneratingPDF ? "Generating..." : "Download PDF"}
       </Button>
       <Button variant="outline" onClick={handleCopyToClipboard}>
         <Copy className="mr-2 h-4 w-4" />
