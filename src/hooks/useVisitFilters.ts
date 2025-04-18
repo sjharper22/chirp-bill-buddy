@@ -20,15 +20,19 @@ export function useVisitFilters({ visits, onFilteredVisitsChange }: UseVisitFilt
   });
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  // Helper function to ensure consistent date comparison
+  const sortVisitsByDate = (visitsToSort: Visit[], order: "asc" | "desc" = sortOrder) => {
+    return [...visitsToSort].sort((a, b) => {
+      // Force date conversion to ensure consistent comparison
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return order === "asc" ? dateA - dateB : dateB - dateA;
+    });
+  };
+
   // Apply initial sorting and whenever visits array changes
   useEffect(() => {
-    const sortedVisits = [...visits].sort((a, b) => {
-      // Ensure we're comparing date objects
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      const comparison = dateA.getTime() - dateB.getTime();
-      return sortOrder === "asc" ? comparison : -comparison;
-    });
+    const sortedVisits = sortVisitsByDate(visits);
     onFilteredVisitsChange(sortedVisits);
   }, [visits, sortOrder, onFilteredVisitsChange]);
 
@@ -38,13 +42,8 @@ export function useVisitFilters({ visits, onFilteredVisitsChange }: UseVisitFilt
     setDateRange({ from: undefined, to: undefined });
     setSortOrder("desc");
     
-    // Apply the same sorting logic when resetting filters
-    const sortedVisits = [...visits].sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      return dateB.getTime() - dateA.getTime();
-    });
-    
+    // Use the helper function to ensure consistent sorting
+    const sortedVisits = sortVisitsByDate(visits, "desc");
     onFilteredVisitsChange(sortedVisits);
   };
 
@@ -80,15 +79,9 @@ export function useVisitFilters({ visits, onFilteredVisitsChange }: UseVisitFilt
       });
     }
 
-    // Ensure proper date sorting by explicitly creating Date objects
-    filteredVisits.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      const comparison = dateA.getTime() - dateB.getTime();
-      return sortOrder === "asc" ? comparison : -comparison;
-    });
-
-    onFilteredVisitsChange(filteredVisits);
+    // Use the helper function to ensure consistent sorting
+    const sortedAndFilteredVisits = sortVisitsByDate(filteredVisits);
+    onFilteredVisitsChange(sortedAndFilteredVisits);
   };
 
   return {
