@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, Download, Copy, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils/superbill-utils";
+import { generatePrintableHTML } from "@/lib/utils/html-generator";
 
 interface ActionButtonsProps {
   superbill: Superbill;
