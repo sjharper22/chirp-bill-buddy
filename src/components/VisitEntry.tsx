@@ -32,6 +32,24 @@ export function VisitEntry({
     onVisitChange({ ...visit, fee: value });
   };
 
+  const handleDuplicate = (e: React.MouseEvent) => {
+    // Prevent default action to stop form submission behavior
+    e.preventDefault();
+    // Prevent any bubbling that might trigger navigation
+    e.stopPropagation();
+    
+    onDuplicate(duplicateVisit(visit));
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    // Prevent default action to stop form submission behavior
+    e.preventDefault();
+    // Prevent any bubbling that might trigger navigation
+    e.stopPropagation();
+    
+    onDelete(visit.id);
+  };
+
   return (
     <Card className="mb-4">
       <CardContent className="p-4">
@@ -71,16 +89,18 @@ export function VisitEntry({
             <Button 
               variant="outline" 
               size="icon" 
-              onClick={() => onDuplicate(duplicateVisit(visit))}
+              onClick={handleDuplicate}
               title="Duplicate visit"
+              type="button"
             >
               <Copy className="h-4 w-4" />
             </Button>
             <Button 
               variant="outline" 
               size="icon" 
-              onClick={() => onDelete(visit.id)}
+              onClick={handleDelete}
               title="Delete visit"
+              type="button"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

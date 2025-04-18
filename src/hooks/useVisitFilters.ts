@@ -23,7 +23,10 @@ export function useVisitFilters({ visits, onFilteredVisitsChange }: UseVisitFilt
   // Apply initial sorting and whenever visits array changes
   useEffect(() => {
     const sortedVisits = [...visits].sort((a, b) => {
-      const comparison = a.date.getTime() - b.date.getTime();
+      // Ensure we're comparing date objects
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      const comparison = dateA.getTime() - dateB.getTime();
       return sortOrder === "asc" ? comparison : -comparison;
     });
     onFilteredVisitsChange(sortedVisits);
@@ -34,7 +37,15 @@ export function useVisitFilters({ visits, onFilteredVisitsChange }: UseVisitFilt
     setSearchTerm("");
     setDateRange({ from: undefined, to: undefined });
     setSortOrder("desc");
-    onFilteredVisitsChange([...visits].sort((a, b) => b.date.getTime() - a.date.getTime()));
+    
+    // Apply the same sorting logic when resetting filters
+    const sortedVisits = [...visits].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
+    
+    onFilteredVisitsChange(sortedVisits);
   };
 
   const applyFilters = (e: React.MouseEvent) => {
@@ -69,8 +80,11 @@ export function useVisitFilters({ visits, onFilteredVisitsChange }: UseVisitFilt
       });
     }
 
+    // Ensure proper date sorting by explicitly creating Date objects
     filteredVisits.sort((a, b) => {
-      const comparison = a.date.getTime() - b.date.getTime();
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      const comparison = dateA.getTime() - dateB.getTime();
       return sortOrder === "asc" ? comparison : -comparison;
     });
 

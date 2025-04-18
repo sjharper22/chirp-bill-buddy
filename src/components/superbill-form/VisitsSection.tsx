@@ -36,9 +36,19 @@ export function VisitsSection({
     setFilteredVisits(superbill.visits);
   }, [superbill.visits]);
 
-  const handleAddVisit = () => {
+  const handleAddVisit = (e: React.MouseEvent) => {
+    // Prevent default behavior
+    e.preventDefault();
+    // Stop propagation to prevent any parent handlers from triggering
+    e.stopPropagation();
+    
     addVisit();
     // No need to update filteredVisits here as the useEffect will handle it
+  };
+  
+  const handleDuplicateVisit = (visit: Visit) => {
+    // Use a function that wraps the duplicateVisit call
+    duplicateVisit(visit);
   };
 
   return (
@@ -74,7 +84,7 @@ export function VisitsSection({
                 key={visit.id}
                 visit={visit}
                 onVisitChange={updateVisit}
-                onDuplicate={duplicateVisit}
+                onDuplicate={handleDuplicateVisit}
                 onDelete={deleteVisit}
                 defaultMainComplaints={superbill.defaultMainComplaints}
               />
