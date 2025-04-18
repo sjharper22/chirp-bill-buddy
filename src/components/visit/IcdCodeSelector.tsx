@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface IcdCodeSelectorProps {
   visit: Visit;
@@ -20,6 +21,7 @@ interface IcdCodeSelectorProps {
 export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const { toast } = useToast();
 
   const addIcdCode = (code: string) => {
     if (!visit.icdCodes.includes(code)) {
@@ -42,7 +44,25 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
 
   const handleCustomCodeAdd = () => {
     if (inputValue && !visit.icdCodes.includes(inputValue.toUpperCase())) {
-      addIcdCode(inputValue.toUpperCase());
+      const customCode = inputValue.toUpperCase();
+      
+      // Check if code already exists in commonICD10Codes
+      const existingCodeIndex = commonICD10Codes.findIndex(code => code.value === customCode);
+      
+      // If code doesn't exist in commonICD10Codes, add it
+      if (existingCodeIndex === -1) {
+        commonICD10Codes.push({
+          value: customCode,
+          label: `${customCode} - Custom Code`
+        });
+        
+        toast({
+          title: "Custom ICD Code Added",
+          description: `${customCode} has been added to your available codes.`
+        });
+      }
+      
+      addIcdCode(customCode);
       setOpen(false);
     }
   };
