@@ -5,6 +5,7 @@ import { SuperbillPreview } from "@/components/SuperbillPreview";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit } from "lucide-react";
 import { formatDate } from "@/lib/utils/superbill-utils";
+import { NotesSection } from "@/components/superbill/NotesSection";
 
 export default function ViewSuperbill() {
   const { id } = useParams<{ id: string }>();
@@ -151,6 +152,11 @@ export default function ViewSuperbill() {
             </div>
           )}
         </div>
+        
+        {/* Add NotesSection component */}
+        {superbill.visits.length > 0 && (
+          <NotesSection visits={superbill.visits} />
+        )}
       </div>
     </div>
   );
