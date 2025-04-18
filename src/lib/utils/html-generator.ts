@@ -1,13 +1,8 @@
 
-import { Superbill, Visit } from "@/types/superbill";
-import { formatCurrency, formatDate, calculateTotalFee } from "./superbill-utils";
+import { Superbill } from "@/types/superbill";
+import { formatDate, formatCurrency } from "./superbill-utils";
 
-/**
- * Generates printable HTML for a superbill
- */
 export function generatePrintableHTML(superbill: Superbill): string {
-  const totalFee = calculateTotalFee(superbill.visits);
-  
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
@@ -130,7 +125,7 @@ export function generatePrintableHTML(superbill: Superbill): string {
             `).join("")}
             <tr class="total-row">
               <td colspan="3" style="text-align: right;">Total:</td>
-              <td style="text-align: right;">${formatCurrency(totalFee)}</td>
+              <td style="text-align: right;">${formatCurrency(superbill.visits.reduce((total, visit) => total + (visit.fee || 0), 0))}</td>
             </tr>
           </tbody>
         </table>
