@@ -1,3 +1,4 @@
+
 import { Superbill } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, Copy, Send } from "lucide-react";
@@ -71,7 +72,7 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
       const imgData = canvas.toDataURL("image/png");
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       
-      const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate, "MM-dd-yyyy")}.pdf`;
+      const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       
       pdf.save(fileName);
       

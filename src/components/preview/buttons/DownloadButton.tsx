@@ -55,7 +55,7 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       
       // Generate a filename based on the patient name and date
-      const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate, "MM-dd-yyyy")}.pdf`;
+      const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       
       // Save the PDF
       pdf.save(fileName);
