@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarIcon, Search, ArrowDownAZ, ArrowUpAZ } from "lucide-react";
 import { Visit } from "@/types/superbill";
 import { formatDate } from "@/lib/utils/superbill-utils";
@@ -28,14 +27,18 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
   });
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const handleReset = () => {
+  const handleReset = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    
     setSearchTerm("");
     setDateRange({ from: undefined, to: undefined });
     setSortOrder("desc");
     onFilteredVisitsChange([...visits].sort((a, b) => b.date.getTime() - a.date.getTime()));
   };
 
-  const applyFilters = () => {
+  const applyFilters = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    
     let filteredVisits = [...visits];
 
     // Apply date range filter
@@ -74,6 +77,21 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
     });
 
     onFilteredVisitsChange(filteredVisits);
+  };
+
+  const handleSortToggle = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    
+    const newOrder = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(newOrder);
+    
+    // Apply the sort immediately
+    const sortedVisits = [...visits].sort((a, b) => {
+      const comparison = a.date.getTime() - b.date.getTime();
+      return newOrder === "asc" ? comparison : -comparison;
+    });
+    
+    onFilteredVisitsChange(sortedVisits);
   };
 
   return (
@@ -141,11 +159,8 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
           <Button
             variant="outline"
             className="w-full justify-between"
-            onClick={() => {
-              const newOrder = sortOrder === "asc" ? "desc" : "asc";
-              setSortOrder(newOrder);
-              applyFilters();
-            }}
+            onClick={handleSortToggle}
+            type="button"
           >
             {sortOrder === "asc" ? (
               <>
@@ -177,10 +192,17 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
       </div>
 
       <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={handleReset}>
+        <Button 
+          variant="outline" 
+          onClick={handleReset}
+          type="button"
+        >
           Reset Filters
         </Button>
-        <Button onClick={applyFilters}>
+        <Button 
+          onClick={applyFilters}
+          type="button"
+        >
           Apply Filters
         </Button>
       </div>
