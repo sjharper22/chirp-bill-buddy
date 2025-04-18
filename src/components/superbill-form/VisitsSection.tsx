@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Visit, Superbill } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,16 @@ export function VisitsSection({
 }: VisitsSectionProps) {
   const [filteredVisits, setFilteredVisits] = useState<Visit[]>(superbill.visits);
 
+  // Update filtered visits when superbill.visits changes (e.g., when new visits are added)
+  useEffect(() => {
+    setFilteredVisits(superbill.visits);
+  }, [superbill.visits]);
+
+  const handleAddVisit = () => {
+    addVisit();
+    // No need to update filteredVisits here as the useEffect will handle it
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -45,7 +55,7 @@ export function VisitsSection({
             <p className="text-muted-foreground">No visits added yet.</p>
             <Button 
               type="button"
-              onClick={addVisit}
+              onClick={handleAddVisit}
               className="mt-2"
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -73,7 +83,7 @@ export function VisitsSection({
             <div className="flex justify-between items-center mt-4">
               <Button 
                 type="button"
-                onClick={addVisit}
+                onClick={handleAddVisit}
                 variant="outline"
               >
                 <Plus className="mr-2 h-4 w-4" />

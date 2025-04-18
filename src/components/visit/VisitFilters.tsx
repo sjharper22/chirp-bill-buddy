@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -26,6 +26,15 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
     to: undefined,
   });
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  // Apply initial sorting and whenever visits array changes
+  useEffect(() => {
+    const sortedVisits = [...visits].sort((a, b) => {
+      const comparison = a.date.getTime() - b.date.getTime();
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+    onFilteredVisitsChange(sortedVisits);
+  }, [visits, sortOrder, onFilteredVisitsChange]);
 
   const handleReset = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
