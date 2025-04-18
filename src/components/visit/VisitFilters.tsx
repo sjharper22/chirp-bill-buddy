@@ -1,13 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Search, ArrowDownAZ, ArrowUpAZ } from "lucide-react";
 import { Visit } from "@/types/superbill";
-import { formatDate } from "@/lib/utils/superbill-utils";
-import { cn } from "@/lib/utils";
+import { DateRangeSelector } from "./filters/DateRangeSelector";
+import { SortOrderSelector } from "./filters/SortOrderSelector";
+import { SearchVisits } from "./filters/SearchVisits";
 
 interface DateRange {
   from: Date | undefined;
@@ -37,8 +34,7 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
   }, [visits, sortOrder, onFilteredVisitsChange]);
 
   const handleReset = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    
+    e.preventDefault();
     setSearchTerm("");
     setDateRange({ from: undefined, to: undefined });
     setSortOrder("desc");
@@ -46,11 +42,10 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
   };
 
   const applyFilters = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     
     let filteredVisits = [...visits];
 
-    // Apply date range filter
     if (dateRange.from || dateRange.to) {
       filteredVisits = filteredVisits.filter(visit => {
         const visitDate = new Date(visit.date).getTime();
@@ -60,7 +55,6 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
       });
     }
 
-    // Apply search filter
     if (searchTerm) {
       filteredVisits = filteredVisits.filter(visit => {
         const searchLower = searchTerm.toLowerCase();
@@ -79,7 +73,6 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
       });
     }
 
-    // Apply sorting
     filteredVisits.sort((a, b) => {
       const comparison = a.date.getTime() - b.date.getTime();
       return sortOrder === "asc" ? comparison : -comparison;
@@ -88,116 +81,25 @@ export function VisitFilters({ visits, onFilteredVisitsChange }: VisitFiltersPro
     onFilteredVisitsChange(filteredVisits);
   };
 
-  const handleSortToggle = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    
-    const newOrder = sortOrder === "asc" ? "desc" : "asc";
-    setSortOrder(newOrder);
-    
-    // Apply the sort immediately
-    const sortedVisits = [...visits].sort((a, b) => {
-      const comparison = a.date.getTime() - b.date.getTime();
-      return newOrder === "asc" ? comparison : -comparison;
-    });
-    
-    onFilteredVisitsChange(sortedVisits);
-  };
-
   return (
     <div className="mb-6 space-y-4 border rounded-lg p-4">
       <h3 className="font-semibold mb-4">Filter Visits</h3>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Date Range */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Date Range</label>
-          <div className="flex gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange.from ? (
-                    formatDate(dateRange.from)
-                  ) : (
-                    <span>From date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateRange.from}
-                  onSelect={(date) => {
-                    setDateRange(prev => ({ ...prev, from: date }));
-                  }}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange.to ? (
-                    formatDate(dateRange.to)
-                  ) : (
-                    <span>To date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateRange.to}
-                  onSelect={(date) => {
-                    setDateRange(prev => ({ ...prev, to: date }));
-                  }}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-
-        {/* Sort Order */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Sort Order</label>
-          <Button
-            variant="outline"
-            className="w-full justify-between"
-            onClick={handleSortToggle}
-            type="button"
-          >
-            {sortOrder === "asc" ? (
-              <>
-                Oldest First
-                <ArrowUpAZ className="ml-2 h-4 w-4" />
-              </>
-            ) : (
-              <>
-                Newest First
-                <ArrowDownAZ className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
-        </div>
-
-        {/* Search */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Search</label>
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search visits..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8"
-            />
-          </div>
-        </div>
+        <DateRangeSelector 
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+        />
+        
+        <SortOrderSelector
+          sortOrder={sortOrder}
+          onSortOrderChange={setSortOrder}
+        />
+        
+        <SearchVisits
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
       </div>
 
       <div className="flex justify-between pt-4">
