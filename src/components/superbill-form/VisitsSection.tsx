@@ -1,10 +1,12 @@
 
+import { useState } from "react";
 import { Visit, Superbill } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { VisitEntry } from "@/components/VisitEntry";
 import { Plus, Save } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/superbill-utils";
+import { VisitFilters } from "@/components/visit/VisitFilters";
 
 interface VisitsSectionProps {
   superbill: Omit<Superbill, "id" | "createdAt" | "updatedAt">;
@@ -27,6 +29,8 @@ export function VisitsSection({
   isEdit,
   onSubmit
 }: VisitsSectionProps) {
+  const [filteredVisits, setFilteredVisits] = useState<Visit[]>(superbill.visits);
+
   return (
     <Card>
       <CardHeader>
@@ -50,7 +54,12 @@ export function VisitsSection({
           </div>
         ) : (
           <div>
-            {superbill.visits.map(visit => (
+            <VisitFilters 
+              visits={superbill.visits}
+              onFilteredVisitsChange={setFilteredVisits}
+            />
+            
+            {filteredVisits.map(visit => (
               <VisitEntry
                 key={visit.id}
                 visit={visit}
