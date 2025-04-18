@@ -14,17 +14,19 @@ export function NotesSection({ visits }: NotesSectionProps) {
       <h3 className="font-semibold mb-2">Notes</h3>
       <div className="border rounded-lg p-3 min-h-20 bg-muted/30 text-sm">
         {hasNotes ? (
-          visits.map((visit, index) => (
-            (visit.notes || (visit.mainComplaints && visit.mainComplaints.length > 0)) && (
-              <div key={visit.id} className="mb-2">
-                <span className="font-medium">{formatDate(visit.date)}:</span>
-                {visit.mainComplaints && visit.mainComplaints.length > 0 && (
-                  <div><em>Main Complaints: </em>{visit.mainComplaints.join(', ')}</div>
-                )}
-                {visit.notes && <div>{visit.notes}</div>}
-              </div>
-            )
-          ))
+          <div className="space-y-4">
+            {visits.map((visit) => (
+              (visit.notes || (visit.mainComplaints && visit.mainComplaints.length > 0)) && (
+                <div key={visit.id} className="pb-3 last:pb-0 border-b last:border-0">
+                  <div className="font-medium mb-1">{formatDate(visit.date)}</div>
+                  {visit.mainComplaints && visit.mainComplaints.length > 0 && (
+                    <div><em>Main Complaints: </em>{visit.mainComplaints.join(', ')}</div>
+                  )}
+                  {visit.notes && <div className="mt-1">{visit.notes}</div>}
+                </div>
+              )
+            ))}
+          </div>
         ) : (
           <p className="text-muted-foreground italic">No notes</p>
         )}

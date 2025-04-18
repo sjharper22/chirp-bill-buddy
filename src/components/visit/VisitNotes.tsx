@@ -2,7 +2,7 @@
 import { Visit } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface VisitNotesProps {
   visit: Visit;
@@ -11,10 +11,21 @@ interface VisitNotesProps {
 }
 
 export function VisitNotes({ visit, onVisitChange, initialShowNotes = false }: VisitNotesProps) {
-  const [showNotes, setShowNotes] = useState(initialShowNotes);
+  // Initialize showNotes based on whether we have existing notes
+  const [showNotes, setShowNotes] = useState(initialShowNotes || !!visit.notes);
+
+  // Update showNotes if notes are added/removed externally
+  useEffect(() => {
+    if (visit.notes && !showNotes) {
+      setShowNotes(true);
+    }
+  }, [visit.notes]);
 
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onVisitChange({ ...visit, notes: e.target.value });
+    onVisitChange({ 
+      ...visit, 
+      notes: e.target.value.trim() === '' ? undefined : e.target.value 
+    });
   };
 
   // Prevent form submission when clicking the button
