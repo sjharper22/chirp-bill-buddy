@@ -67,10 +67,26 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
       });
       
       const imgWidth = 210;
+      const pageHeight = 295; // A4 height in mm (297mm) minus margins
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      const imgData = canvas.toDataURL("image/png");
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      // Add the image to the PDF with multi-page support
+      let heightLeft = imgHeight;
+      let position = 0;
+      let pageNumber = 1;
+      
+      // Add first page
+      pdf.addImage(canvas, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      // Add additional pages if content overflows
+      while (heightLeft > 0) {
+        position = -pageHeight * pageNumber;
+        pdf.addPage();
+        pdf.addImage(canvas, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        pageNumber++;
+      }
       
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       
