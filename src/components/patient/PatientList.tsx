@@ -2,10 +2,14 @@
 import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { formatDate } from "@/lib/utils/superbill-utils";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Group, ClipboardList } from "lucide-react";
 import { useState } from "react";
 import { PatientProfile } from "./PatientProfile";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { formatDate } from "@/lib/utils/superbill-utils";
 
 interface PatientListProps {
   patients: PatientProfileType[];
@@ -22,6 +26,7 @@ export function PatientList({
   onSelectAll,
   onClearSelection
 }: PatientListProps) {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   
   // Filter patients based on search term
@@ -33,7 +38,7 @@ export function PatientList({
   
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
           <Checkbox 
             id="select-all"
@@ -50,39 +55,56 @@ export function PatientList({
             htmlFor="select-all" 
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            Select All
+            Select All Patients ({filteredPatients.length})
           </label>
         </div>
         
-        <div className="flex items-center">
-          <input
-            type="text"
-            placeholder="Search patients..."
-            className="px-3 py-2 border rounded-md text-sm"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="text"
+              placeholder="Search patients..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
           {selectedPatientIds.length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onClearSelection}
-              className="ml-2"
-            >
-              Clear ({selectedPatientIds.length})
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={onClearSelection}
+                size="sm"
+              >
+                Clear Selection ({selectedPatientIds.length})
+              </Button>
+              <Button 
+                onClick={() => navigate("/grouped-submission", { 
+                  state: { selectedPatientIds } 
+                })}
+                size="sm"
+              >
+                <Group className="h-4 w-4 mr-2" />
+                Create Group Submission
+              </Button>
+            </div>
           )}
         </div>
       </div>
       
-      <div className="border rounded-md divide-y">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredPatients.length === 0 ? (
-          <div className="p-4 text-center text-muted-foreground">
-            No patients found
+          <div className="col-span-full text-center py-16 border-2 border-dashed rounded-lg">
+            <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground" />
+            <p className="text-lg font-medium mt-4 mb-2">No patients found</p>
+            <p className="text-muted-foreground">
+              {searchTerm ? "Try adjusting your search terms" : "Add your first patient to get started"}
+            </p>
           </div>
         ) : (
           filteredPatients.map(patient => (
-            <PatientRow
+            <PatientCard
               key={patient.id}
               patient={patient}
               isSelected={selectedPatientIds.includes(patient.id)}
@@ -95,25 +117,27 @@ export function PatientList({
   );
 }
 
-interface PatientRowProps {
+interface PatientCardProps {
   patient: PatientProfileType;
   isSelected: boolean;
   onToggleSelection: () => void;
 }
 
-function PatientRow({ patient, isSelected, onToggleSelection }: PatientRowProps) {
+function PatientCard({ patient, isSelected, onToggleSelection }: PatientCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   
   return (
-    <div className={`p-4 flex items-center justify-between ${isSelected ? "bg-muted/30" : ""}`}>
-      <div className="flex items-center space-x-4">
-        <Checkbox checked={isSelected} onCheckedChange={onToggleSelection} />
+    <Card className={`relative ${isSelected ? "ring-2 ring-primary" : ""}`}>
+      <CardContent className="p-4">
+        <div className="absolute top-4 left-4">
+          <Checkbox checked={isSelected} onCheckedChange={onToggleSelection} />
+        </div>
         
-        <div>
+        <div className="ml-8">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="link" className="p-0 h-auto">
-                <span className="font-semibold">{patient.name}</span>
+                <span className="font-semibold text-lg">{patient.name}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-xl">
@@ -124,19 +148,17 @@ function PatientRow({ patient, isSelected, onToggleSelection }: PatientRowProps)
             </DialogContent>
           </Dialog>
           
-          <p className="text-sm text-muted-foreground">
-            DOB: {formatDate(patient.dob)}
-          </p>
+          <div className="text-sm text-muted-foreground space-y-1 mt-2">
+            <p>DOB: {formatDate(patient.dob)}</p>
+            {patient.lastSuperbillDate && (
+              <p>Last Superbill: {formatDate(patient.lastSuperbillDate)}</p>
+            )}
+            {patient.commonIcdCodes?.length > 0 && (
+              <p>Common ICDs: {patient.commonIcdCodes.length}</p>
+            )}
+          </div>
         </div>
-      </div>
-      
-      <div className="text-sm">
-        {patient.lastSuperbillDate && (
-          <p className="text-muted-foreground">
-            Last superbill: {formatDate(patient.lastSuperbillDate)}
-          </p>
-        )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
