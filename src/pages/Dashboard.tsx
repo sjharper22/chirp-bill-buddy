@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SuperbillCard } from "@/components/SuperbillCard";
-import { DollarSign, Users, FileText, Calendar, Plus, Search, Activity } from "lucide-react";
+import { DollarSign, Users, FileText, Calendar, Plus, Search, Activity, ClipboardList, LayoutTemplate } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { formatCurrency } from "@/lib/utils/superbill-utils";
 
