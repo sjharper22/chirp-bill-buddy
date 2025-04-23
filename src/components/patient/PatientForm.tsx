@@ -1,34 +1,32 @@
-
-import { useState } from "react";
-import { PatientProfileFormData } from "@/types/patient";
+import React, { useState } from 'react';
+import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Save } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MultiTagInput } from "@/components/MultiTagInput";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PatientFormProps {
-  onSubmit: (patient: PatientProfileFormData) => void;
+  onSubmit: (patient: PatientProfileType) => void;
   onCancel?: () => void;
 }
 
 export function PatientForm({ onSubmit, onCancel }: PatientFormProps) {
-  const [patient, setPatient] = useState<PatientProfileFormData>({
+  const [patient, setPatient] = useState<PatientProfileType>({
     name: "",
     dob: new Date(),
     commonIcdCodes: [],
     commonCptCodes: [],
   });
   
-  const handleChange = <K extends keyof PatientProfileFormData>(
+  const handleChange = <K extends keyof PatientProfileType>(
     field: K, 
-    value: PatientProfileFormData[K]
+    value: PatientProfileType[K]
   ) => {
     setPatient(prev => ({ ...prev, [field]: value }));
   };

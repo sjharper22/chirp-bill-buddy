@@ -1,79 +1,80 @@
-
-import { useState } from "react";
+import React, { useState } from 'react';
 import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save } from "lucide-react";
-import { PatientViewMode } from "./profile/PatientViewMode";
-import { PatientEditMode } from "./profile/PatientEditMode";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { MultiTagInput } from "@/components/MultiTagInput";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { PatientViewMode } from './PatientViewMode';
+import { PatientEditMode } from './PatientEditMode';
+import { usePatient } from '@/context/patient-context';
 
 interface PatientProfileProps {
   patient: PatientProfileType;
-  onUpdate: (patient: PatientProfileType) => void;
+  onUpdate: () => void;
 }
 
 export function PatientProfile({ patient, onUpdate }: PatientProfileProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const { updatePatient } = usePatient();
+  const [isEditMode, setIsEditMode] = useState(false);
   const [editedPatient, setEditedPatient] = useState<PatientProfileType>(patient);
-  
-  const handleChange = <K extends keyof PatientProfileType>(
-    field: K, 
-    value: PatientProfileType[K]
-  ) => {
-    setEditedPatient(prev => ({ ...prev, [field]: value }));
+
+  const handleChange = <K extends keyof PatientProfileType>(field: K, value: PatientProfileType[K]) => {
+    setEditedPatient(prev => ({
+      ...prev,
+      [field]: value,
+    }));
   };
-  
+
   const handleSave = () => {
-    onUpdate(editedPatient);
-    setIsEditing(false);
+    updatePatient(patient.id, editedPatient);
+    setIsEditMode(false);
+    onUpdate();
   };
-  
+
   const handleCancel = () => {
     setEditedPatient(patient);
-    setIsEditing(false);
+    setIsEditMode(false);
   };
-  
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>{patient.name}</CardTitle>
-          {!isEditing && (
-            <Button variant="outline" onClick={() => setIsEditing(true)}>
+    <div>
+      <div className="md:flex md:items-center md:justify-between mb-4">
+        <h2 className="text-2xl font-bold">{patient.name}</h2>
+        <div className="mt-2 md:mt-0">
+          {isEditMode ? (
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSave}>
+                Save
+              </Button>
+            </div>
+          ) : (
+            <Button size="sm" onClick={() => setIsEditMode(true)}>
               Edit Profile
             </Button>
           )}
         </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {!isEditing ? (
-          <PatientViewMode 
-            patient={patient}
-            onEdit={() => setIsEditing(true)}
-          />
-        ) : (
-          <PatientEditMode 
-            patient={patient}
-            editedPatient={editedPatient}
-            handleChange={handleChange}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        )}
-      </CardContent>
-      
-      {isEditing && (
-        <CardFooter className="flex justify-end gap-2 border-t pt-4">
-          <Button variant="ghost" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Profile
-          </Button>
-        </CardFooter>
+      </div>
+
+      {isEditMode ? (
+        <PatientEditMode
+          patient={patient}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          editedPatient={editedPatient}
+          handleChange={handleChange}
+        />
+      ) : (
+        <PatientViewMode patient={patient} onEdit={() => setIsEditMode(true)} />
       )}
-    </Card>
+    </div>
   );
 }
