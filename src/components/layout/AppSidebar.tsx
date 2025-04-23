@@ -18,9 +18,11 @@ import {
   FileText,
   ClipboardList,
   PlusSquare,
-  Activity,
-  FileSpreadsheet,
   Settings,
+  FileSpreadsheet,
+  Activity,
+  Menu,
+  LayoutTemplate
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -29,22 +31,20 @@ const menuItems = [
     label: "DASHBOARD",
     items: [
       { title: "Home", icon: Home, url: "/" },
-      { title: "Appointments", icon: CalendarDays, url: "/appointments" },
-      { title: "Messages", icon: MessageSquare, url: "/messages" },
       { title: "Patients", icon: Users, url: "/patients" },
     ],
   },
   {
     label: "SUPERBILLS",
     items: [
-      { title: "All Superbills", icon: FileText, url: "/superbills" },
       { title: "Create New", icon: PlusSquare, url: "/new" },
-      { title: "Submissions", icon: ClipboardList, url: "/grouped-submission" },
+      { title: "Group Submissions", icon: ClipboardList, url: "/grouped-submission" },
     ],
   },
   {
     label: "OTHER",
     items: [
+      { title: "Templates", icon: LayoutTemplate, url: "/templates" },
       { title: "Reports", icon: FileSpreadsheet, url: "/reports" },
       { title: "Settings", icon: Settings, url: "/settings" },
     ],

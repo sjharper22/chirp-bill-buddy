@@ -1,14 +1,17 @@
+
 import { useSuperbill } from "@/context/superbill-context";
+
 export function PracticeLogo() {
-  const {
-    clinicDefaults
-  } = useSuperbill();
-  return <div className="text-center mb-6">
-      <h2 className="text-xl font-bold text-left">{clinicDefaults.clinicName}</h2>
-      <p className="text-sm text-muted-foreground text-left">{clinicDefaults.clinicAddress}</p>
-      <p className="text-sm text-muted-foreground text-left">
-        Phone: {clinicDefaults.clinicPhone} | Email: {clinicDefaults.clinicEmail}
-      </p>
-      <p className="text-sm text-muted-foreground text-left">Tax ID (EIN): {clinicDefaults.ein}</p>
-    </div>;
+  const { clinicDefaults } = useSuperbill();
+  
+  return (
+    <div className="space-y-1">
+      <h2 className="text-lg font-bold">{clinicDefaults.clinicName}</h2>
+      <div className="text-xs text-muted-foreground space-y-0.5">
+        <p className="line-clamp-1">{clinicDefaults.clinicAddress}</p>
+        <p>Phone: {clinicDefaults.clinicPhone}</p>
+        <p className="truncate">Email: {clinicDefaults.clinicEmail}</p>
+      </div>
+    </div>
+  );
 }

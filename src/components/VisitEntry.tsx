@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Visit } from "@/types/superbill";
 import { duplicateVisit, formatCurrency } from "@/lib/utils/superbill-utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Copy, GripVertical, Trash2 } from "lucide-react";
+import { Copy, GripVertical, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { VisitDatePicker } from "@/components/visit/VisitDatePicker";
 import { VisitComplaints } from "@/components/visit/VisitComplaints";
 import { IcdCodeSelector } from "@/components/visit/IcdCodeSelector";
@@ -29,6 +30,7 @@ export function VisitEntry({
 }: VisitEntryProps) {
   const { sectionOrder, moveSection } = useVisitSections();
   const [draggingSection, setDraggingSection] = useState<number | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleFeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
@@ -134,32 +136,60 @@ export function VisitEntry({
 
   return (
     <Card className="mb-4">
-      <CardContent className="p-4">
-        <div className="space-y-2">
-          {sectionOrder.map((section, index) => renderSection(section, index))}
-          
-          <div className="flex justify-end gap-2 mt-4">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={handleDuplicate}
-              title="Duplicate visit"
-              type="button"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={handleDelete}
-              title="Delete visit"
-              type="button"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+      <div 
+        className="flex justify-between items-center p-3 border-b cursor-pointer" 
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
+        <div className="flex items-center gap-2">
+          {isCollapsed ? (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          )}
+          <h3 className="font-medium">
+            Visit on {new Date(visit.date).toLocaleDateString()}
+          </h3>
+          {visit.mainComplaints && visit.mainComplaints.length > 0 && (
+            <span className="text-sm text-muted-foreground">
+              - {visit.mainComplaints.join(", ")}
+            </span>
+          )}
         </div>
-      </CardContent>
+        
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">{formatCurrency(visit.fee)}</span>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleDuplicate}
+            title="Duplicate visit"
+            type="button"
+            className="h-8 w-8 p-0"
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleDelete}
+            title="Delete visit"
+            type="button"
+            className="h-8 w-8 p-0 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      {!isCollapsed && (
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            {sectionOrder.map((section, index) => renderSection(section, index))}
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 }

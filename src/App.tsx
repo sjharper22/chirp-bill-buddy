@@ -15,6 +15,8 @@ import ViewSuperbill from "./pages/ViewSuperbill";
 import Settings from "./pages/Settings";
 import Patients from "./pages/Patients";
 import GroupedSubmission from "./pages/GroupedSubmission";
+import Templates from "./pages/Templates";
+import Reports from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
@@ -26,18 +28,54 @@ const App = () => (
       <SuperbillProvider>
         <PatientProvider>
           <BrowserRouter>
-            <AppLayout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/new" element={<NewSuperbill />} />
-                <Route path="/edit/:id" element={<EditSuperbill />} />
-                <Route path="/view/:id" element={<ViewSuperbill />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/patients" element={<Patients />} />
-                <Route path="/grouped-submission" element={<GroupedSubmission />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AppLayout>
+            <Routes>
+              <Route path="/" element={
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
+              } />
+              <Route path="/new" element={
+                <AppLayout>
+                  <NewSuperbill />
+                </AppLayout>
+              } />
+              <Route path="/edit/:id" element={
+                <AppLayout>
+                  <EditSuperbill />
+                </AppLayout>
+              } />
+              <Route path="/view/:id" element={
+                <AppLayout>
+                  <ViewSuperbill />
+                </AppLayout>
+              } />
+              <Route path="/settings" element={
+                <AppLayout>
+                  <Settings />
+                </AppLayout>
+              } />
+              <Route path="/patients" element={
+                <AppLayout>
+                  <Patients />
+                </AppLayout>
+              } />
+              <Route path="/grouped-submission" element={
+                <AppLayout>
+                  <GroupedSubmission />
+                </AppLayout>
+              } />
+              <Route path="/templates" element={
+                <AppLayout>
+                  <Templates />
+                </AppLayout>
+              } />
+              <Route path="/reports" element={
+                <AppLayout>
+                  <Reports />
+                </AppLayout>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </BrowserRouter>
         </PatientProvider>
       </SuperbillProvider>
