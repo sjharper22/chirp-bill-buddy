@@ -1,4 +1,3 @@
-
 import { Visit } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,18 +12,30 @@ interface VisitNotesProps {
 export function VisitNotes({ visit, onVisitChange, initialShowNotes = false }: VisitNotesProps) {
   // Initialize showNotes based on whether we have existing notes
   const [showNotes, setShowNotes] = useState(initialShowNotes || !!visit.notes);
+  // State to track the notes value directly without relying on the visit prop for rendering
+  const [notesValue, setNotesValue] = useState(visit.notes || "");
 
-  // Update showNotes if notes are added/removed externally
+  // Update local state when visit.notes changes externally
   useEffect(() => {
+    if (visit.notes !== notesValue) {
+      setNotesValue(visit.notes || "");
+    }
+    
     if (visit.notes && !showNotes) {
       setShowNotes(true);
     }
   }, [visit.notes]);
 
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    
+    // Update local state immediately to keep cursor position
+    setNotesValue(newValue);
+    
+    // Then update parent component state
     onVisitChange({ 
       ...visit, 
-      notes: e.target.value.trim() === '' ? undefined : e.target.value 
+      notes: newValue.trim() === '' ? undefined : newValue 
     });
   };
 
@@ -49,7 +60,7 @@ export function VisitNotes({ visit, onVisitChange, initialShowNotes = false }: V
       {showNotes && (
         <Textarea
           placeholder="Visit notes..."
-          value={visit.notes || ""}
+          value={notesValue} // Use the local state value
           onChange={handleNotesChange}
           className="mt-2"
           // Prevent the Enter key from submitting the form
