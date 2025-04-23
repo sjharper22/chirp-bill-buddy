@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit } from "lucide-react";
 import { formatDate } from "@/lib/utils/superbill-utils";
 import { NotesSection } from "@/components/superbill/NotesSection";
+import { VisitSummary } from "@/components/summary/VisitSummary";
 
 export default function ViewSuperbill() {
   const { id } = useParams<{ id: string }>();
@@ -95,6 +96,12 @@ export default function ViewSuperbill() {
             </div>
           </div>
         </div>
+        
+        {superbill.visits.length > 0 && (
+          <div className="mb-6">
+            <VisitSummary visits={superbill.visits} />
+          </div>
+        )}
         
         <div className="mt-8">
           <h3 className="text-lg font-semibold mb-4">Visits ({superbill.visits.length})</h3>

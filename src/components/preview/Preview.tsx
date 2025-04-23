@@ -4,6 +4,7 @@ import { InfoSection } from "./InfoSection";
 import { ServicesTable } from "./ServicesTable";
 import { NotesPreview } from "./NotesPreview";
 import { Footer } from "./Footer";
+import { VisitSummary } from "@/components/summary/VisitSummary";
 
 interface PreviewProps {
   superbill: Superbill;
@@ -25,6 +26,10 @@ export function Preview({ superbill }: PreviewProps) {
         earliestDate={earliestDate}
         latestDate={latestDate}
       />
+      
+      {superbill.visits.length > 0 && (
+        <VisitSummary visits={superbill.visits} />
+      )}
       
       <ServicesTable visits={superbill.visits} />
       
