@@ -8,14 +8,23 @@ import { SuperbillCard } from "@/components/SuperbillCard";
 import { filterSuperbills, sortSuperbillsByDate } from "@/lib/utils/superbill-utils";
 import { Plus, ClipboardList, User } from "lucide-react";
 import { PracticeLogo } from "@/components/PracticeLogo";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { superbills } = useSuperbill();
+  const { superbills, deleteSuperbill } = useSuperbill();
   const [searchTerm, setSearchTerm] = useState("");
   
   const filteredSuperbills = filterSuperbills(superbills, searchTerm);
   const sortedSuperbills = sortSuperbillsByDate(filteredSuperbills);
+  
+  const handleDeleteSuperbill = (id: string) => {
+    deleteSuperbill(id);
+    toast({
+      title: "Superbill deleted",
+      description: "The superbill has been deleted successfully.",
+    });
+  };
   
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
@@ -86,6 +95,7 @@ export default function Dashboard() {
           <SuperbillCard
             key={superbill.id}
             superbill={superbill}
+            onDelete={handleDeleteSuperbill}
             onClick={() => navigate(`/view/${superbill.id}`)}
           />
         ))}

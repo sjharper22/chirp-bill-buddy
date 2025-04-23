@@ -9,9 +9,10 @@ import { Edit, Eye, Trash2 } from "lucide-react";
 interface SuperbillCardProps {
   superbill: Superbill;
   onDelete: (id: string) => void;
+  onClick?: () => void; // Add optional onClick prop
 }
 
-export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
+export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardProps) {
   const totalFee = calculateTotalFee(superbill.visits);
   const visitCount = superbill.visits.length;
   
@@ -40,7 +41,7 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
     : null;
   
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-2">
           <h3 className="font-semibold text-lg truncate">{superbill.patientName}</h3>
@@ -80,7 +81,10 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={() => onDelete(superbill.id)}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent triggering card onClick
+            onDelete(superbill.id);
+          }}
           className="text-destructive hover:text-destructive/90"
         >
           <Trash2 className="h-4 w-4 mr-1" />
@@ -88,14 +92,24 @@ export function SuperbillCard({ superbill, onDelete }: SuperbillCardProps) {
         </Button>
         
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            asChild 
+            onClick={(e) => e.stopPropagation()} // Prevent triggering card onClick
+          >
             <Link to={`/view/${superbill.id}`}>
               <Eye className="h-4 w-4 mr-1" />
               View
             </Link>
           </Button>
           
-          <Button variant="outline" size="sm" asChild>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            asChild
+            onClick={(e) => e.stopPropagation()} // Prevent triggering card onClick
+          >
             <Link to={`/edit/${superbill.id}`}>
               <Edit className="h-4 w-4 mr-1" />
               Edit

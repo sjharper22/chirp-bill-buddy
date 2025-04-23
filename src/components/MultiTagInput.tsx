@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 
 interface MultiTagInputProps {
   placeholder: string;
-  tags: string[];
+  tags?: string[];
+  value?: string[];  // Add value as an alternative to tags
   onChange: (tags: string[]) => void;
   suggestions?: { value: string; label: string }[];
   preventFormSubmission?: boolean;
@@ -14,11 +15,14 @@ interface MultiTagInputProps {
 
 export function MultiTagInput({ 
   placeholder, 
-  tags, 
+  tags: propTags, 
+  value: propValue, 
   onChange, 
   suggestions = [],
   preventFormSubmission = false
 }: MultiTagInputProps) {
+  // Use either 'value' or 'tags' prop, with 'value' taking precedence
+  const tags = propValue || propTags || [];
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState(suggestions);
