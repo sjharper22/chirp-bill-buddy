@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SuperbillProvider } from "@/context/superbill-context";
 import { PatientProvider } from "@/context/patient-context";
+import { AppLayout } from "@/components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import NewSuperbill from "./pages/NewSuperbill";
@@ -25,16 +26,18 @@ const App = () => (
       <SuperbillProvider>
         <PatientProvider>
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/new" element={<NewSuperbill />} />
-              <Route path="/edit/:id" element={<EditSuperbill />} />
-              <Route path="/view/:id" element={<ViewSuperbill />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/patients" element={<Patients />} />
-              <Route path="/grouped-submission" element={<GroupedSubmission />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AppLayout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/new" element={<NewSuperbill />} />
+                <Route path="/edit/:id" element={<EditSuperbill />} />
+                <Route path="/view/:id" element={<ViewSuperbill />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/patients" element={<Patients />} />
+                <Route path="/grouped-submission" element={<GroupedSubmission />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AppLayout>
           </BrowserRouter>
         </PatientProvider>
       </SuperbillProvider>

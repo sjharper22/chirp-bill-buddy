@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SuperbillCard } from "@/components/SuperbillCard";
 import { filterSuperbills, sortSuperbillsByDate } from "@/lib/utils/superbill-utils";
-import { Plus, ClipboardList, User } from "lucide-react";
-import { PracticeLogo } from "@/components/PracticeLogo";
+import { Plus, Search } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Dashboard() {
@@ -27,70 +26,34 @@ export default function Dashboard() {
   };
   
   return (
-    <div className="container max-w-screen-xl mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div className="flex items-center gap-4">
-          <PracticeLogo />
-          <div>
-            <h1 className="text-3xl font-bold">Superbill Dashboard</h1>
-            <p className="text-muted-foreground">
-              Create, manage, and track superbills for your patients
-            </p>
-          </div>
+    <div>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">
+            View and manage your superbills
+          </p>
         </div>
         
-        <div className="flex gap-2 w-full md:w-auto">
-          <Button variant="outline" onClick={() => navigate("/patients")} className="flex-shrink-0">
-            <User className="mr-2 h-4 w-4" />
-            Patient Profiles
-          </Button>
-          <Button onClick={() => navigate("/new")} className="flex-shrink-0">
-            <Plus className="mr-2 h-4 w-4" />
-            New Superbill
-          </Button>
-        </div>
+        <Button onClick={() => navigate("/new")}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Superbill
+        </Button>
       </div>
       
-      <div className="mb-6">
-        <div className="flex gap-2">
+      <div className="mb-6 max-w-md">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search by patient name or date..."
+            placeholder="Search superbills..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="max-w-sm"
+            className="pl-10"
           />
         </div>
       </div>
       
-      {sortedSuperbills.length === 0 && (
-        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-          {searchTerm ? (
-            <>
-              <p className="text-lg font-medium mb-2">No matching superbills</p>
-              <p className="text-muted-foreground mb-6">
-                Try a different search term or clear your search
-              </p>
-              <Button variant="outline" onClick={() => setSearchTerm("")}>
-                Clear Search
-              </Button>
-            </>
-          ) : (
-            <>
-              <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground" />
-              <p className="text-lg font-medium mt-4 mb-2">No superbills created yet</p>
-              <p className="text-muted-foreground mb-6">
-                Create your first superbill to get started
-              </p>
-              <Button onClick={() => navigate("/new")}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create First Superbill
-              </Button>
-            </>
-          )}
-        </div>
-      )}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sortedSuperbills.map(superbill => (
           <SuperbillCard
             key={superbill.id}
@@ -100,6 +63,23 @@ export default function Dashboard() {
           />
         ))}
       </div>
+
+      {sortedSuperbills.length === 0 && (
+        <div className="text-center py-16 bg-white border rounded-lg shadow-sm">
+          <div className="max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-gray-900">No superbills found</h3>
+            <p className="mt-1 text-gray-500">
+              {searchTerm ? "Try adjusting your search terms" : "Create your first superbill to get started"}
+            </p>
+            {!searchTerm && (
+              <Button onClick={() => navigate("/new")} className="mt-4">
+                <Plus className="mr-2 h-4 w-4" />
+                Create First Superbill
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
