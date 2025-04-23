@@ -3,12 +3,16 @@ import React from 'react';
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UserMenu } from "./UserMenu";
+import { MobileNavigation } from "./MobileNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
@@ -20,9 +24,10 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
             <UserMenu />
           </header>
-          <main className="flex-1 p-8 overflow-auto">
+          <main className="flex-1 p-8 overflow-auto pb-24 md:pb-8">
             {children}
           </main>
+          <MobileNavigation />
         </div>
       </div>
     </SidebarProvider>
