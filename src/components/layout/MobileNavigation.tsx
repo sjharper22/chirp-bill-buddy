@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Users, PlusSquare, ClipboardList, LayoutTemplate, Menu } from 'lucide-react';
@@ -17,7 +16,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
-// Reuse the same menu structure from AppSidebar
 const menuItems = [
   {
     label: "DASHBOARD",
@@ -69,10 +67,10 @@ export function MobileNavigation() {
         </Button>
         
         <Button 
-          variant="primary" 
+          variant="default" 
           size="icon" 
           onClick={() => navigate('/new')}
-          className="rounded-full bg-primary text-primary-foreground"
+          className="rounded-full"
         >
           <PlusSquare className="h-5 w-5" />
         </Button>
