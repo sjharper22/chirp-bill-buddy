@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ import { MultiTagInput } from "@/components/MultiTagInput";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Save } from "lucide-react";
 
 interface PatientFormProps {
   onSubmit: (patient: PatientProfileType) => void;
@@ -18,6 +21,7 @@ interface PatientFormProps {
 
 export function PatientForm({ onSubmit, onCancel }: PatientFormProps) {
   const [patient, setPatient] = useState<PatientProfileType>({
+    id: crypto.randomUUID(), // Generate a unique ID
     name: "",
     dob: new Date(),
     commonIcdCodes: [],
