@@ -172,7 +172,7 @@ export function LetterTemplateEditor({
         title={title}
         setTitle={setTitle}
         category={category}
-        setCategory={(value) => setCategory(value as "cover_letter" | "appeal_letter" | "general")}
+        setCategory={setCategory}
         selectedTemplateId={selectedTemplateId}
         setSelectedTemplateId={setSelectedTemplateId}
         selectedPatientId={selectedPatientId}

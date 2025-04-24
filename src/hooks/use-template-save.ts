@@ -18,7 +18,7 @@ export function useTemplateSave() {
   }: {
     title: string;
     content: string;
-    category: string;
+    category: "cover_letter" | "appeal_letter" | "general";
     selectedPatientId: string | null;
     user: any;
   }) => {
