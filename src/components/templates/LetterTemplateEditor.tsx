@@ -1,30 +1,14 @@
-
 import React, { useEffect, useState } from 'react';
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/auth-context";
-import { Textarea } from "@/components/ui/textarea";
-import { PatientProfile } from "@/types/patient";
-import { Superbill } from "@/types/superbill";
 import { usePatient } from "@/context/patient-context";
 import { useSuperbill } from "@/context/superbill-context";
-import { useQuery } from "@tanstack/react-query";
-
-interface LetterTemplateEditorProps {
-  patientData?: PatientProfile;
-  superbillData?: Superbill;
-  onSave?: () => void;
-}
+import { TemplateHeaderControls } from "./editor/TemplateHeaderControls";
+import { TemplateEditor } from "./editor/TemplateEditor";
+import { useTemplateSave } from "@/hooks/use-template-save";
+import { PatientProfile } from "@/types/patient";
+import { Superbill } from "@/types/superbill";
 
 const DEFAULT_TEMPLATE = `Out-of-Network Insurance Reimbursement Guide & Cover Sheet
 Supporting your wellness — every step of the way
@@ -72,13 +56,17 @@ If you misplace this form or have questions, we're here to support you. You can 
 
 Thank you for choosing Collective Family Chiropractic. We're honored to be a part of your wellness journey!`;
 
+interface LetterTemplateEditorProps {
+  patientData?: PatientProfile;
+  superbillData?: Superbill;
+  onSave?: () => void;
+}
+
 export function LetterTemplateEditor({ 
   patientData, 
   superbillData,
   onSave 
 }: LetterTemplateEditorProps) {
-  const { toast } = useToast();
-  const { user } = useAuth();
   const { patients } = usePatient();
   const { superbills } = useSuperbill();
   const [title, setTitle] = useState("Out-of-Network Insurance Guide");
@@ -87,7 +75,7 @@ export function LetterTemplateEditor({
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [selectedSuperbillId, setSelectedSuperbillId] = useState<string>("");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
-  const [totalCharges, setTotalCharges] = useState<string>("0.00");
+  const { saveTemplate, totalCharges, setTotalCharges } = useTemplateSave();
 
   // Fetch existing templates
   const { data: templates, isLoading: isLoadingTemplates } = useQuery({
@@ -103,7 +91,7 @@ export function LetterTemplateEditor({
     },
   });
 
-  // If patientData or superbillData are passed in, set the selected IDs
+  // Set initial data from props
   useEffect(() => {
     if (patientData) {
       setSelectedPatientId(patientData.id);
@@ -113,13 +101,12 @@ export function LetterTemplateEditor({
     }
   }, [patientData, superbillData]);
 
-  // When template is selected, update content and title
+  // Update template content when selections change
   useEffect(() => {
     if (selectedTemplateId && templates) {
       const template = templates.find(t => t.id === selectedTemplateId);
       if (template) {
         setTitle(template.title);
-        // Handle content as a JSON object with a text field or as a direct string
         const templateContent = typeof template.content === 'object' && template.content !== null 
           ? (template.content as any).text || JSON.stringify(template.content)
           : String(template.content);
@@ -129,12 +116,11 @@ export function LetterTemplateEditor({
     }
   }, [selectedTemplateId, templates]);
 
-  // When patient and superbill are selected, populate template variables
+  // Update template variables
   useEffect(() => {
     if (selectedPatientId || selectedSuperbillId) {
       let updatedContent = content;
       
-      // Replace patient variables
       if (selectedPatientId) {
         const patient = patients.find(p => p.id === selectedPatientId);
         if (patient) {
@@ -143,7 +129,6 @@ export function LetterTemplateEditor({
         }
       }
       
-      // Replace superbill variables
       if (selectedSuperbillId) {
         const superbill = superbills.find(sb => sb.id === selectedSuperbillId);
         if (superbill) {
@@ -151,7 +136,6 @@ export function LetterTemplateEditor({
           const totalChargesValue = superbill.visits.reduce((total, visit) => total + visit.fee, 0);
           setTotalCharges(totalChargesValue.toFixed(2));
           
-          // Get earliest and latest visit dates
           const visitDates = superbill.visits.map(v => new Date(v.date).getTime());
           const startDate = new Date(Math.min(...visitDates));
           const endDate = new Date(Math.max(...visitDates));
@@ -168,146 +152,41 @@ export function LetterTemplateEditor({
   }, [selectedPatientId, selectedSuperbillId, patients, superbills, content]);
 
   const handleSaveTemplate = async () => {
-    try {
-      if (!user) {
-        throw new Error("You must be logged in to save templates");
-      }
+    const success = await saveTemplate({
+      title,
+      content,
+      category,
+      selectedPatientId,
+      user: { id: 'dummy' },
+    });
 
-      const { error } = await supabase
-        .from('letter_templates')
-        .insert({
-          title,
-          content: { text: content },
-          category,
-          created_by: user.id,
-          is_default: true
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Template saved successfully",
-      });
-
-      // If patient is selected, save to patient record in local storage
-      // We'll temporarily store documents in the client side until database schema is updated
-      if (selectedPatientId) {
-        // Store in local storage until database schema is updated
-        const existingDocuments = JSON.parse(localStorage.getItem('patient_documents') || '[]');
-        
-        existingDocuments.push({
-          id: Math.random().toString(36).substring(2, 11),
-          patient_id: selectedPatientId,
-          document_type: category,
-          title,
-          content: { text: content },
-          created_by: user.id,
-          created_at: new Date().toISOString()
-        });
-        
-        localStorage.setItem('patient_documents', JSON.stringify(existingDocuments));
-        
-        toast({
-          title: "Success",
-          description: "Document saved to patient record",
-        });
-      }
-
-      if (onSave) onSave();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+    if (success && onSave) {
+      onSave();
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-4">
-          <div className="flex gap-4">
-            <Input
-              placeholder="Template Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="flex-1"
-            />
-            <Select value={category} onValueChange={(value: any) => setCategory(value)}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cover_letter">Cover Letter</SelectItem>
-                <SelectItem value="appeal_letter">Appeal Letter</SelectItem>
-                <SelectItem value="general">General</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select template" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">New Template</SelectItem>
-                {templates?.map(template => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <TemplateHeaderControls
+        title={title}
+        setTitle={setTitle}
+        category={category}
+        setCategory={setCategory}
+        selectedTemplateId={selectedTemplateId}
+        setSelectedTemplateId={setSelectedTemplateId}
+        selectedPatientId={selectedPatientId}
+        setSelectedPatientId={setSelectedPatientId}
+        selectedSuperbillId={selectedSuperbillId}
+        setSelectedSuperbillId={setSelectedSuperbillId}
+        templates={templates || []}
+        patients={patients}
+        superbills={superbills}
+      />
 
-            <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select patient" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">No Patient</SelectItem>
-                {patients.map(patient => (
-                  <SelectItem key={patient.id} value={patient.id}>
-                    {patient.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {selectedPatientId && (
-              <Select value={selectedSuperbillId} onValueChange={setSelectedSuperbillId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select superbill" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">No Superbill</SelectItem>
-                  {superbills
-                    .filter(sb => {
-                      const patient = patients.find(p => p.id === selectedPatientId);
-                      return patient && sb.patientName === patient.name;
-                    })
-                    .map(superbill => (
-                      <SelectItem key={superbill.id} value={superbill.id}>
-                        {new Date(superbill.issueDate).toLocaleDateString()} ({superbill.visits.length} visits)
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <Card className="p-4">
-        <Textarea
-          className="w-full min-h-[400px] p-4 font-mono text-sm"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Start writing your template..."
-        />
-      </Card>
+      <TemplateEditor 
+        content={content}
+        setContent={setContent}
+      />
 
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onSave}>Cancel</Button>
