@@ -87,7 +87,7 @@ export function LetterTemplateEditor({
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [selectedSuperbillId, setSelectedSuperbillId] = useState<string>("");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
-  const [totalCharges, setTotalCharges] = useState<string>("0.00"); // Add this line to define totalCharges
+  const [totalCharges, setTotalCharges] = useState<string>("0.00");
 
   // Fetch existing templates
   const { data: templates, isLoading: isLoadingTemplates } = useQuery({
@@ -149,7 +149,7 @@ export function LetterTemplateEditor({
         if (superbill) {
           const visitCount = superbill.visits.length;
           const totalChargesValue = superbill.visits.reduce((total, visit) => total + visit.fee, 0);
-          setTotalCharges(totalChargesValue.toFixed(2)); // Update the totalCharges state
+          setTotalCharges(totalChargesValue.toFixed(2));
           
           // Get earliest and latest visit dates
           const visitDates = superbill.visits.map(v => new Date(v.date).getTime());
