@@ -92,6 +92,5 @@ export function LetterTemplateEditor({
         <Button onClick={handleSaveTemplate}>Save Template</Button>
       </div>
     </div>
-  </div>
   );
 }
