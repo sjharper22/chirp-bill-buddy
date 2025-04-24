@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface TemplateHeaderControlsProps {
   title: string;
   setTitle: (title: string) => void;
-  category: string;
-  setCategory: (category: string) => void;
+  category: "cover_letter" | "appeal_letter" | "general";
+  setCategory: (category: "cover_letter" | "appeal_letter" | "general") => void;
   selectedTemplateId: string;
   setSelectedTemplateId: (id: string) => void;
   selectedPatientId: string;
@@ -43,7 +43,10 @@ export function TemplateHeaderControls({
           onChange={(e) => setTitle(e.target.value)}
           className="flex-1"
         />
-        <Select value={category} onValueChange={(value: any) => setCategory(value)}>
+        <Select 
+          value={category} 
+          onValueChange={(value: "cover_letter" | "appeal_letter" | "general") => setCategory(value)}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select category" />
           </SelectTrigger>

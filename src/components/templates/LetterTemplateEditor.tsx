@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useQuery } from '@tanstack/react-query';
@@ -111,7 +112,7 @@ export function LetterTemplateEditor({
           ? (template.content as any).text || JSON.stringify(template.content)
           : String(template.content);
         setContent(templateContent);
-        setCategory(template.category);
+        setCategory(template.category as "cover_letter" | "appeal_letter" | "general");
       }
     }
   }, [selectedTemplateId, templates]);
@@ -149,7 +150,7 @@ export function LetterTemplateEditor({
       
       setContent(updatedContent);
     }
-  }, [selectedPatientId, selectedSuperbillId, patients, superbills, content]);
+  }, [selectedPatientId, selectedSuperbillId, patients, superbills, content, setTotalCharges]);
 
   const handleSaveTemplate = async () => {
     const success = await saveTemplate({
@@ -171,7 +172,7 @@ export function LetterTemplateEditor({
         title={title}
         setTitle={setTitle}
         category={category}
-        setCategory={setCategory}
+        setCategory={(value) => setCategory(value as "cover_letter" | "appeal_letter" | "general")}
         selectedTemplateId={selectedTemplateId}
         setSelectedTemplateId={setSelectedTemplateId}
         selectedPatientId={selectedPatientId}
