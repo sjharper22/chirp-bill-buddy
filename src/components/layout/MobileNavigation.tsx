@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Users, PlusSquare, ClipboardList, LayoutTemplate, Menu, FileEdit } from 'lucide-react';
+import { Home, Users, PlusSquare, ClipboardList, LayoutTemplate, Menu } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -16,40 +15,35 @@ import {
   SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/auth-context";
+
+const menuItems = [
+  {
+    label: "DASHBOARD",
+    items: [
+      { title: "Home", icon: Home, url: "/" },
+      { title: "Patients", icon: Users, url: "/patients" },
+    ],
+  },
+  {
+    label: "SUPERBILLS",
+    items: [
+      { title: "Create New", icon: PlusSquare, url: "/new" },
+      { title: "Group Submissions", icon: ClipboardList, url: "/grouped-submission" },
+    ],
+  },
+  {
+    label: "OTHER",
+    items: [
+      { title: "Templates", icon: LayoutTemplate, url: "/templates" },
+      { title: "Reports", icon: Users, url: "/reports" },
+      { title: "Settings", icon: Users, url: "/settings" },
+    ],
+  },
+];
 
 export function MobileNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isEditor } = useAuth();
-
-  // Define menu items based on user role
-  const menuGroups = [
-    {
-      label: "DASHBOARD",
-      items: [
-        { title: "Home", icon: Home, url: "/" },
-        { title: "Patients", icon: Users, url: "/patients" },
-      ],
-    },
-    {
-      label: "SUPERBILLS",
-      items: [
-        ...(isAdmin || isEditor ? [{ title: "Create New", icon: PlusSquare, url: "/new" }] : []),
-        { title: "Group Submissions", icon: ClipboardList, url: "/grouped-submission" },
-        ...(isAdmin || isEditor ? [{ title: "Letter Builder", icon: FileEdit, url: "/letter-builder" }] : []),
-      ],
-    },
-    {
-      label: "OTHER",
-      items: [
-        ...(isAdmin || isEditor ? [{ title: "Templates", icon: LayoutTemplate, url: "/templates" }] : []),
-        { title: "Reports", icon: Users, url: "/reports" },
-        { title: "Settings", icon: Users, url: "/settings" },
-        ...(isAdmin ? [{ title: "Team", icon: Users, url: "/team" }] : []),
-      ],
-    },
-  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
@@ -84,10 +78,10 @@ export function MobileNavigation() {
         <Button 
           variant="ghost" 
           size="icon"
-          onClick={() => navigate('/letter-builder')}
-          className={location.pathname === '/letter-builder' ? 'bg-accent' : ''}
+          onClick={() => navigate('/grouped-submission')}
+          className={location.pathname === '/grouped-submission' ? 'bg-accent' : ''}
         >
-          <FileEdit className="h-5 w-5" />
+          <ClipboardList className="h-5 w-5" />
         </Button>
         
         <Sheet>
@@ -102,7 +96,7 @@ export function MobileNavigation() {
           <SheetContent side="right" className="w-[80%] sm:w-[385px]">
             <div className="py-6">
               <h2 className="text-xl font-semibold mb-6">Menu</h2>
-              {menuGroups.map((group) => (
+              {menuItems.map((group) => (
                 <SidebarGroup key={group.label}>
                   <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
                   <SidebarGroupContent>

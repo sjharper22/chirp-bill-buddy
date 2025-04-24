@@ -1,15 +1,25 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useQuery } from '@tanstack/react-query';
+import { Input } from "@/components/ui/input";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { usePatient } from "@/context/patient-context";
-import { useSuperbill } from "@/context/superbill-context";
-import { TemplateHeaderControls } from "./editor/TemplateHeaderControls";
-import { TemplateEditor } from "./editor/TemplateEditor";
-import { useTemplateSave } from "@/hooks/use-template-save";
-import { PatientProfile } from "@/types/patient";
-import { Superbill } from "@/types/superbill";
+import { useAuth } from "@/context/auth-context";
+import { Textarea } from "@/components/ui/textarea";
+
+interface LetterTemplateEditorProps {
+  patientData?: any;
+  superbillData?: any;
+  onSave?: () => void;
+}
 
 const DEFAULT_TEMPLATE = `Out-of-Network Insurance Reimbursement Guide & Cover Sheet
 Supporting your wellness — every step of the way
@@ -17,15 +27,15 @@ Supporting your wellness — every step of the way
 We've prepared this document to help you submit your superbill to your insurance provider for possible out-of-network reimbursement. While we do not bill insurance directly, many of our patients receive partial or full reimbursement depending on their plan. If you have any questions or need a new copy, we're happy to help!
 
 Patient & Superbill Summary
-Patient Name: {{patientName}}
+Patient Name: _____________________________
 
-Date of Birth: {{patientDOB}}
+Date of Birth: _____________________________
 
-Dates of Service: {{serviceStartDate}} to {{serviceEndDate}}
+Dates of Service: _____________________________
 
-Total Number of Visits: {{visitCount}}
+Total Number of Visits: _____________________________
 
-Total Charges: ${{totalCharges}}
+Total Charges: $_____________________________
 
 Note: This is not a bill. It is a superbill, a detailed receipt to support your claim for insurance reimbursement.
 
@@ -57,142 +67,82 @@ If you misplace this form or have questions, we're here to support you. You can 
 
 Thank you for choosing Collective Family Chiropractic. We're honored to be a part of your wellness journey!`;
 
-interface LetterTemplateEditorProps {
-  patientData?: PatientProfile;
-  superbillData?: Superbill;
-  onSave?: () => void;
-}
-
 export function LetterTemplateEditor({ 
   patientData, 
   superbillData,
   onSave 
 }: LetterTemplateEditorProps) {
-  const { patients } = usePatient();
-  const { superbills } = useSuperbill();
-  const [title, setTitle] = useState("Out-of-Network Insurance Guide");
-  const [category, setCategory] = useState<"cover_letter" | "appeal_letter" | "general">("cover_letter");
-  const [content, setContent] = useState(DEFAULT_TEMPLATE);
-  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
-  const [selectedSuperbillId, setSelectedSuperbillId] = useState<string>("");
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
-  const { saveTemplate, setTotalCharges } = useTemplateSave();
-  const [localTotalCharges, setLocalTotalCharges] = useState<string>("0.00");
-
-  // Fetch existing templates
-  const { data: templates, isLoading: isLoadingTemplates } = useQuery({
-    queryKey: ['templates'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('letter_templates')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Set initial data from props
-  useEffect(() => {
-    if (patientData) {
-      setSelectedPatientId(patientData.id);
-    }
-    if (superbillData) {
-      setSelectedSuperbillId(superbillData.id);
-    }
-  }, [patientData, superbillData]);
-
-  // Update template content when selections change
-  useEffect(() => {
-    if (selectedTemplateId && templates) {
-      const template = templates.find(t => t.id === selectedTemplateId);
-      if (template) {
-        setTitle(template.title);
-        const templateContent = typeof template.content === 'object' && template.content !== null 
-          ? (template.content as any).text || JSON.stringify(template.content)
-          : String(template.content);
-        setContent(templateContent);
-        setCategory(template.category as "cover_letter" | "appeal_letter" | "general");
-      }
-    }
-  }, [selectedTemplateId, templates]);
-
-  // Update template variables
-  useEffect(() => {
-    if (selectedPatientId || selectedSuperbillId) {
-      let updatedContent = content;
-      
-      if (selectedPatientId) {
-        const patient = patients.find(p => p.id === selectedPatientId);
-        if (patient) {
-          updatedContent = updatedContent.replace(/{{patientName}}/g, patient.name);
-          updatedContent = updatedContent.replace(/{{patientDOB}}/g, patient.dob.toLocaleDateString());
-        }
-      }
-      
-      if (selectedSuperbillId) {
-        const superbill = superbills.find(sb => sb.id === selectedSuperbillId);
-        if (superbill) {
-          const visitCount = superbill.visits.length;
-          const totalChargesValue = superbill.visits.reduce((total, visit) => total + visit.fee, 0);
-          setLocalTotalCharges(totalChargesValue.toFixed(2));
-          setTotalCharges(totalChargesValue.toFixed(2));
-          
-          const visitDates = superbill.visits.map(v => new Date(v.date).getTime());
-          const startDate = new Date(Math.min(...visitDates));
-          const endDate = new Date(Math.max(...visitDates));
-          
-          updatedContent = updatedContent.replace(/{{visitCount}}/g, visitCount.toString());
-          updatedContent = updatedContent.replace(/{{totalCharges}}/g, localTotalCharges);
-          updatedContent = updatedContent.replace(/{{serviceStartDate}}/g, startDate.toLocaleDateString());
-          updatedContent = updatedContent.replace(/{{serviceEndDate}}/g, endDate.toLocaleDateString());
-        }
-      }
-      
-      setContent(updatedContent);
-    }
-  }, [selectedPatientId, selectedSuperbillId, patients, superbills, content, setTotalCharges, localTotalCharges]);
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [title, setTitle] = React.useState("Out-of-Network Insurance Guide");
+  const [category, setCategory] = React.useState<"cover_letter" | "appeal_letter" | "general">("cover_letter");
+  const [content, setContent] = React.useState(DEFAULT_TEMPLATE);
 
   const handleSaveTemplate = async () => {
-    const success = await saveTemplate({
-      title,
-      content,
-      category,
-      selectedPatientId,
-      user: { id: 'dummy' },
-    });
+    try {
+      if (!user) {
+        throw new Error("You must be logged in to save templates");
+      }
 
-    if (success && onSave) {
-      onSave();
+      const { error } = await supabase
+        .from('letter_templates')
+        .insert({
+          title,
+          content: { text: content },
+          category,
+          created_by: user.id,
+          is_default: true
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Template saved successfully",
+      });
+
+      if (onSave) onSave();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
   return (
     <div className="space-y-4">
-      <TemplateHeaderControls
-        title={title}
-        setTitle={setTitle}
-        category={category}
-        setCategory={setCategory}
-        selectedTemplateId={selectedTemplateId}
-        setSelectedTemplateId={setSelectedTemplateId}
-        selectedPatientId={selectedPatientId}
-        setSelectedPatientId={setSelectedPatientId}
-        selectedSuperbillId={selectedSuperbillId}
-        setSelectedSuperbillId={setSelectedSuperbillId}
-        templates={templates || []}
-        patients={patients}
-        superbills={superbills}
-      />
+      <div className="flex gap-4">
+        <Input
+          placeholder="Template Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="flex-1"
+        />
+        <Select value={category} onValueChange={(value: any) => setCategory(value)}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="cover_letter">Cover Letter</SelectItem>
+            <SelectItem value="appeal_letter">Appeal Letter</SelectItem>
+            <SelectItem value="general">General</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-      <TemplateEditor 
-        content={content}
-        setContent={setContent}
-      />
+      <Card className="p-4">
+        <Textarea
+          className="w-full min-h-[400px] p-4 font-mono text-sm"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Start writing your template..."
+        />
+      </Card>
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={onSave}>Cancel</Button>
+        <Button variant="outline">Cancel</Button>
         <Button onClick={handleSaveTemplate}>Save Template</Button>
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,7 +21,6 @@ import Reports from "./pages/Reports";
 import Auth from "./pages/Auth";
 import Unauthorized from "./pages/Unauthorized";
 import Team from "./pages/Team";
-import LetterBuilder from "./pages/LetterBuilder";
 
 const queryClient = new QueryClient();
 
@@ -92,13 +90,6 @@ const App = () => (
                   <ProtectedRoute requiredRoles={["admin", "editor"]}>
                     <AppLayout>
                       <Templates />
-                    </AppLayout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/letter-builder" element={
-                  <ProtectedRoute requiredRoles={["admin", "editor"]}>
-                    <AppLayout>
-                      <LetterBuilder />
                     </AppLayout>
                   </ProtectedRoute>
                 } />
