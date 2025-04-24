@@ -77,6 +77,7 @@ export function LetterTemplateEditor({
   const [selectedSuperbillId, setSelectedSuperbillId] = useState<string>("");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const { saveTemplate, totalCharges, setTotalCharges } = useTemplateSave();
+  const [localTotalCharges, setLocalTotalCharges] = useState<string>("0.00");
 
   // Fetch existing templates
   const { data: templates, isLoading: isLoadingTemplates } = useQuery({
@@ -135,6 +136,7 @@ export function LetterTemplateEditor({
         if (superbill) {
           const visitCount = superbill.visits.length;
           const totalChargesValue = superbill.visits.reduce((total, visit) => total + visit.fee, 0);
+          setLocalTotalCharges(totalChargesValue.toFixed(2));
           setTotalCharges(totalChargesValue.toFixed(2));
           
           const visitDates = superbill.visits.map(v => new Date(v.date).getTime());
