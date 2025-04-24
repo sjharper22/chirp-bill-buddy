@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "@/context/patient-context";
@@ -10,6 +11,8 @@ import { GroupFilters } from "@/components/group-submission/GroupFilters";
 import { BulkActions } from "@/components/group-submission/BulkActions";
 import { GroupTable } from "@/components/group-submission/GroupTable";
 import { GroupStats } from "@/components/group-submission/GroupStats";
+import { Superbill } from "@/types/superbill";
+import { generatePrintableHTML } from "@/lib/utils/html-generator";
 
 // Helper function to determine superbill status
 const determineStatus = (superbills: Superbill[]): "Complete" | "Missing Info" | "Draft" | "No Superbill" => {

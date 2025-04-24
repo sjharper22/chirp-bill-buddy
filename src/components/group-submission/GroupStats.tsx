@@ -1,4 +1,5 @@
 
+import { Button } from "@/components/ui/button";
 import { PatientWithSuperbills } from "./types";
 
 interface GroupStatsProps {
