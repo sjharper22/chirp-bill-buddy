@@ -36,6 +36,39 @@ export type Database = {
         }
         Relationships: []
       }
+      letter_templates: {
+        Row: {
+          category: Database["public"]["Enums"]["template_category"]
+          content: Json
+          created_at: string | null
+          created_by: string
+          id: string
+          is_default: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["template_category"]
+          content: Json
+          created_at?: string | null
+          created_by: string
+          id?: string
+          is_default?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["template_category"]
+          content?: Json
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          is_default?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       patient_superbills: {
         Row: {
           created_at: string
@@ -185,6 +218,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "editor" | "viewer"
+      template_category: "cover_letter" | "appeal_letter" | "general"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -301,6 +335,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "viewer"],
+      template_category: ["cover_letter", "appeal_letter", "general"],
     },
   },
 } as const
