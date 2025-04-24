@@ -1,10 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Preview } from "@/components/preview/Preview";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Table,
@@ -15,8 +11,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PatientWithSuperbills } from "./types";
-import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "@/lib/utils/superbill-utils";
+import { EmptyState } from "./table/EmptyState";
+import { StatusBadge } from "./table/StatusBadge";
+import { TableActions } from "./table/TableActions";
+import { PreviewDialog } from "./table/PreviewDialog";
+import { Superbill } from "@/types/superbill";
 
 interface GroupTableProps {
   filteredPatients: PatientWithSuperbills[];
@@ -33,36 +33,11 @@ export function GroupTable({
   clearSelection,
   selectAll
 }: GroupTableProps) {
-  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [previewSuperbill, setPreviewSuperbill] = useState<Superbill | null>(null);
 
-  const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case "Complete":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">{status}</Badge>;
-      case "Missing Info":
-        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">{status}</Badge>;
-      case "Draft":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">{status}</Badge>;
-      case "No Superbill":
-      default:
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">{status}</Badge>;
-    }
-  };
-
   if (filteredPatients.length === 0) {
-    return (
-      <div className="text-center py-16 border-2 border-dashed rounded-lg">
-        <p className="text-lg font-medium mb-2">No patients found</p>
-        <p className="text-muted-foreground mb-6">
-          Try adjusting your search or filters
-        </p>
-        <Button onClick={() => navigate("/patients")}>
-          Manage Patients
-        </Button>
-      </div>
-    );
+    return <EmptyState />;
   }
 
   return (
@@ -109,53 +84,33 @@ export function GroupTable({
               </TableCell>
               <TableCell>{patient.totalVisits}</TableCell>
               <TableCell>{formatCurrency(patient.totalAmount)}</TableCell>
-              <TableCell>{renderStatusBadge(patient.status)}</TableCell>
+              <TableCell>
+                <StatusBadge status={patient.status} />
+              </TableCell>
               <TableCell className="text-right">
-                {patient.superbills.length > 0 ? (
-                  <div className="flex justify-end gap-2">
-                    <Dialog open={dialogOpen && previewSuperbill?.patientName === patient.name} onOpenChange={(open) => {
-                      setDialogOpen(open);
-                      if (!open) setPreviewSuperbill(null);
-                    }}>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => {
-                            setPreviewSuperbill(patient.superbills[0]);
-                            setDialogOpen(true);
-                          }}
-                        >
-                          Preview
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Superbill Preview</DialogTitle>
-                        </DialogHeader>
-                        {previewSuperbill && (
-                          <Preview superbill={previewSuperbill} />
-                        )}
-                      </DialogContent>
-                    </Dialog>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => navigate(`/edit/${patient.superbills[0].id}`)}
-                    >
-                      Edit
-                    </Button>
-                  </div>
-                ) : (
-                  <Button 
-                    size="sm"
-                    onClick={() => {
-                      navigate("/new", { state: { patientId: patient.id } });
-                    }}
-                  >
-                    Create Superbill
-                  </Button>
-                )}
+                <Dialog 
+                  open={dialogOpen && previewSuperbill?.patientName === patient.name} 
+                  onOpenChange={(open) => {
+                    setDialogOpen(open);
+                    if (!open) setPreviewSuperbill(null);
+                  }}
+                >
+                  <DialogTrigger asChild>
+                    <TableActions
+                      superbills={patient.superbills}
+                      patientId={patient.id}
+                      onPreview={(superbill) => {
+                        setPreviewSuperbill(superbill);
+                        setDialogOpen(true);
+                      }}
+                    />
+                  </DialogTrigger>
+                  <PreviewDialog
+                    open={dialogOpen}
+                    superbill={previewSuperbill}
+                    onOpenChange={setDialogOpen}
+                  />
+                </Dialog>
               </TableCell>
             </TableRow>
           ))}
