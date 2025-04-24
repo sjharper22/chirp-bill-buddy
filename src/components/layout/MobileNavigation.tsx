@@ -23,7 +23,8 @@ export function MobileNavigation() {
   const location = useLocation();
   const { isAdmin, isEditor } = useAuth();
 
-  const menuItems = [
+  // Define menu items based on user role
+  const menuGroups = [
     {
       label: "DASHBOARD",
       items: [
@@ -34,17 +35,18 @@ export function MobileNavigation() {
     {
       label: "SUPERBILLS",
       items: [
-        { title: "Create New", icon: PlusSquare, url: "/new" },
+        ...(isAdmin || isEditor ? [{ title: "Create New", icon: PlusSquare, url: "/new" }] : []),
         { title: "Group Submissions", icon: ClipboardList, url: "/grouped-submission" },
-        { title: "Letter Builder", icon: FileEdit, url: "/letter-builder" },
+        ...(isAdmin || isEditor ? [{ title: "Letter Builder", icon: FileEdit, url: "/letter-builder" }] : []),
       ],
     },
     {
       label: "OTHER",
       items: [
-        { title: "Templates", icon: LayoutTemplate, url: "/templates" },
+        ...(isAdmin || isEditor ? [{ title: "Templates", icon: LayoutTemplate, url: "/templates" }] : []),
         { title: "Reports", icon: Users, url: "/reports" },
         { title: "Settings", icon: Users, url: "/settings" },
+        ...(isAdmin ? [{ title: "Team", icon: Users, url: "/team" }] : []),
       ],
     },
   ];
@@ -100,7 +102,7 @@ export function MobileNavigation() {
           <SheetContent side="right" className="w-[80%] sm:w-[385px]">
             <div className="py-6">
               <h2 className="text-xl font-semibold mb-6">Menu</h2>
-              {menuItems.map((group) => (
+              {menuGroups.map((group) => (
                 <SidebarGroup key={group.label}>
                   <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
                   <SidebarGroupContent>

@@ -118,7 +118,11 @@ export function LetterTemplateEditor({
       const template = templates.find(t => t.id === selectedTemplateId);
       if (template) {
         setTitle(template.title);
-        setContent(template.content.text);
+        // Handle content as a JSON object with a text field or as a direct string
+        const templateContent = typeof template.content === 'object' && template.content !== null 
+          ? (template.content as any).text || JSON.stringify(template.content)
+          : String(template.content);
+        setContent(templateContent);
         setCategory(template.category);
       }
     }
@@ -143,7 +147,7 @@ export function LetterTemplateEditor({
         const superbill = superbills.find(sb => sb.id === selectedSuperbillId);
         if (superbill) {
           const visitCount = superbill.visits.length;
-          const totalCharges = superbill.visits.reduce((total, visit) => total + visit.fee, 0);
+          const totalChargesValue = superbill.visits.reduce((total, visit) => total + visit.fee, 0);
           
           // Get earliest and latest visit dates
           const visitDates = superbill.visits.map(v => new Date(v.date).getTime());
@@ -151,7 +155,7 @@ export function LetterTemplateEditor({
           const endDate = new Date(Math.max(...visitDates));
           
           updatedContent = updatedContent.replace(/{{visitCount}}/g, visitCount.toString());
-          updatedContent = updatedContent.replace(/{{totalCharges}}/g, totalCharges.toFixed(2));
+          updatedContent = updatedContent.replace(/{{totalCharges}}/g, totalChargesValue.toFixed(2));
           updatedContent = updatedContent.replace(/{{serviceStartDate}}/g, startDate.toLocaleDateString());
           updatedContent = updatedContent.replace(/{{serviceEndDate}}/g, endDate.toLocaleDateString());
         }
@@ -159,7 +163,7 @@ export function LetterTemplateEditor({
       
       setContent(updatedContent);
     }
-  }, [selectedPatientId, selectedSuperbillId, patients, superbills]);
+  }, [selectedPatientId, selectedSuperbillId, patients, superbills, content]);
 
   const handleSaveTemplate = async () => {
     try {
@@ -187,7 +191,6 @@ export function LetterTemplateEditor({
       // If patient is selected, save to patient record
       if (selectedPatientId) {
         const timestamp = new Date().toISOString();
-        const documentRef = `letters/${user.id}/${selectedPatientId}/${timestamp}.json`;
         
         const { error: saveError } = await supabase
           .from('patient_documents')

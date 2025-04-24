@@ -23,12 +23,24 @@ import {
 } from "@/components/ui/card";
 import { usePatient } from "@/context/patient-context";
 
+// Document interface to match our database structure
+interface PatientDocument {
+  id: string;
+  patient_id: string;
+  document_type: string;
+  title: string;
+  content: { text: string } | string;
+  created_by: string;
+  created_at: string;
+}
+
 export default function LetterBuilder() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [selectedLetterId, setSelectedLetterId] = useState<string | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const { patients } = usePatient();
 
+  // Fetch letter templates
   const { data: templates, isLoading, refetch } = useQuery({
     queryKey: ['templates'],
     queryFn: async () => {
@@ -43,10 +55,11 @@ export default function LetterBuilder() {
   });
 
   // Get patient documents for the patient documents tab
-  const { data: patientDocuments, isLoading: isLoadingDocuments, refetch: refetchDocuments } = useQuery({
+  const { data: patientDocuments, isLoading: isLoadingDocuments, refetch: refetchDocuments } = useQuery<PatientDocument[]>({
     queryKey: ['patient_documents', selectedPatientId],
-    enabled: !!selectedPatientId,
     queryFn: async () => {
+      if (!selectedPatientId) return [];
+      
       const { data, error } = await supabase
         .from('patient_documents')
         .select('*')
@@ -54,8 +67,9 @@ export default function LetterBuilder() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as PatientDocument[];
     },
+    enabled: !!selectedPatientId,
   });
 
   const coverLetters = templates?.filter(t => t.category === 'cover_letter') || [];
@@ -65,6 +79,16 @@ export default function LetterBuilder() {
   const handleCreateNewLetter = (template?: any) => {
     setSelectedLetterId(template?.id || null);
     setIsEditorOpen(true);
+  };
+
+  // Helper function to get content text safely
+  const getContentText = (content: any): string => {
+    if (!content) return '';
+    if (typeof content === 'string') return content;
+    if (typeof content === 'object' && content !== null && 'text' in content) {
+      return content.text as string;
+    }
+    return JSON.stringify(content);
   };
 
   return (
@@ -92,7 +116,9 @@ export default function LetterBuilder() {
               onSave={() => {
                 setIsEditorOpen(false);
                 refetch();
-                refetchDocuments();
+                if (selectedPatientId) {
+                  refetchDocuments();
+                }
               }}
             />
           </DialogContent>
@@ -159,7 +185,7 @@ export default function LetterBuilder() {
                         </CardHeader>
                         <CardContent>
                           <p className="text-sm text-muted-foreground truncate">
-                            {template.content.text?.substring(0, 100)}...
+                            {getContentText(template.content).substring(0, 100)}...
                           </p>
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
@@ -212,7 +238,7 @@ export default function LetterBuilder() {
                         </CardHeader>
                         <CardContent>
                           <p className="text-sm text-muted-foreground truncate">
-                            {template.content.text?.substring(0, 100)}...
+                            {getContentText(template.content).substring(0, 100)}...
                           </p>
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
@@ -265,7 +291,7 @@ export default function LetterBuilder() {
                         </CardHeader>
                         <CardContent>
                           <p className="text-sm text-muted-foreground truncate">
-                            {template.content.text?.substring(0, 100)}...
+                            {getContentText(template.content).substring(0, 100)}...
                           </p>
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
@@ -314,12 +340,12 @@ export default function LetterBuilder() {
                           <CardHeader>
                             <CardTitle>{doc.title}</CardTitle>
                             <CardDescription>
-                              {doc.document_type.replace('_', ' ')} • {new Date(doc.created_at).toLocaleDateString()}
+                              {doc.document_type} • {new Date(doc.created_at).toLocaleDateString()}
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
                             <p className="text-sm text-muted-foreground truncate">
-                              {doc.content.text?.substring(0, 100)}...
+                              {getContentText(doc.content).substring(0, 100)}...
                             </p>
                           </CardContent>
                           <CardFooter className="flex justify-end gap-2">
