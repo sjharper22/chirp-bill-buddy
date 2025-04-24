@@ -188,33 +188,28 @@ export function LetterTemplateEditor({
         description: "Template saved successfully",
       });
 
-      // If patient is selected, save to patient record
+      // If patient is selected, save to patient record in local storage
+      // We'll temporarily store documents in the client side until database schema is updated
       if (selectedPatientId) {
-        const timestamp = new Date().toISOString();
+        // Store in local storage until database schema is updated
+        const existingDocuments = JSON.parse(localStorage.getItem('patient_documents') || '[]');
         
-        const { error: saveError } = await supabase
-          .from('patient_documents')
-          .insert({
-            patient_id: selectedPatientId,
-            document_type: category,
-            title,
-            content: { text: content },
-            created_by: user.id,
-            created_at: timestamp
-          });
-          
-        if (saveError) {
-          toast({
-            title: "Warning",
-            description: "Template saved but failed to link to patient record",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Success",
-            description: "Document saved to patient record",
-          });
-        }
+        existingDocuments.push({
+          id: Math.random().toString(36).substring(2, 11),
+          patient_id: selectedPatientId,
+          document_type: category,
+          title,
+          content: { text: content },
+          created_by: user.id,
+          created_at: new Date().toISOString()
+        });
+        
+        localStorage.setItem('patient_documents', JSON.stringify(existingDocuments));
+        
+        toast({
+          title: "Success",
+          description: "Document saved to patient record",
+        });
       }
 
       if (onSave) onSave();

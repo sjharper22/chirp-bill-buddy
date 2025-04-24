@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { LetterTemplateEditor } from "@/components/templates/LetterTemplateEditor";
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/card";
 import { usePatient } from "@/context/patient-context";
 
-// Document interface to match our database structure
+// Document interface to match our data structure
 interface PatientDocument {
   id: string;
   patient_id: string;
@@ -39,6 +39,8 @@ export default function LetterBuilder() {
   const [selectedLetterId, setSelectedLetterId] = useState<string | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const { patients } = usePatient();
+  const [patientDocuments, setPatientDocuments] = useState<PatientDocument[]>([]);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
 
   // Fetch letter templates
   const { data: templates, isLoading, refetch } = useQuery({
@@ -54,23 +56,37 @@ export default function LetterBuilder() {
     },
   });
 
-  // Get patient documents for the patient documents tab
-  const { data: patientDocuments, isLoading: isLoadingDocuments, refetch: refetchDocuments } = useQuery<PatientDocument[]>({
-    queryKey: ['patient_documents', selectedPatientId],
-    queryFn: async () => {
-      if (!selectedPatientId) return [];
-      
-      const { data, error } = await supabase
-        .from('patient_documents')
-        .select('*')
-        .eq('patient_id', selectedPatientId)
-        .order('created_at', { ascending: false });
+  // Get patient documents from localStorage
+  useEffect(() => {
+    if (selectedPatientId) {
+      setIsLoadingDocuments(true);
+      try {
+        // Get documents from localStorage
+        const allDocuments: PatientDocument[] = JSON.parse(localStorage.getItem('patient_documents') || '[]');
+        const filteredDocuments = allDocuments.filter(doc => doc.patient_id === selectedPatientId);
+        setPatientDocuments(filteredDocuments);
+      } catch (error) {
+        console.error("Error loading patient documents:", error);
+        setPatientDocuments([]);
+      } finally {
+        setIsLoadingDocuments(false);
+      }
+    } else {
+      setPatientDocuments([]);
+    }
+  }, [selectedPatientId]);
 
-      if (error) throw error;
-      return data as PatientDocument[];
-    },
-    enabled: !!selectedPatientId,
-  });
+  const refetchDocuments = () => {
+    if (selectedPatientId) {
+      try {
+        const allDocuments: PatientDocument[] = JSON.parse(localStorage.getItem('patient_documents') || '[]');
+        const filteredDocuments = allDocuments.filter(doc => doc.patient_id === selectedPatientId);
+        setPatientDocuments(filteredDocuments);
+      } catch (error) {
+        console.error("Error reloading patient documents:", error);
+      }
+    }
+  };
 
   const coverLetters = templates?.filter(t => t.category === 'cover_letter') || [];
   const appealLetters = templates?.filter(t => t.category === 'appeal_letter') || [];
