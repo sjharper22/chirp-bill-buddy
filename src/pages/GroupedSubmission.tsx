@@ -1,36 +1,15 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "@/context/patient-context";
 import { useSuperbill } from "@/context/superbill-context";
-import { Superbill } from "@/types/superbill";
-import { PatientProfile } from "@/types/patient";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatDate, formatCurrency } from "@/lib/utils/superbill-utils";
-import { ArrowLeft, Search, Download, Mail, Check, Filter } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { CoverSheet } from "@/components/cover-sheet/CoverSheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Preview } from "@/components/preview/Preview";
-import { generatePrintableHTML } from "@/lib/utils/html-generator";
-
-interface PatientWithSuperbills extends PatientProfile {
-  superbills: Superbill[];
-  totalVisits: number;
-  totalAmount: number;
-  status: "Complete" | "Missing Info" | "Draft" | "No Superbill";
-  dateRange: { start: Date; end: Date } | null;
-}
+import { PatientWithSuperbills } from "@/components/group-submission/types";
+import { GroupFilters } from "@/components/group-submission/GroupFilters";
+import { BulkActions } from "@/components/group-submission/BulkActions";
+import { GroupTable } from "@/components/group-submission/GroupTable";
+import { GroupStats } from "@/components/group-submission/GroupStats";
 
 // Helper function to determine superbill status
 const determineStatus = (superbills: Superbill[]): "Complete" | "Missing Info" | "Draft" | "No Superbill" => {
@@ -67,8 +46,6 @@ export default function GroupedSubmission() {
   const [patientsWithSuperbills, setPatientsWithSuperbills] = useState<PatientWithSuperbills[]>([]);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [previewSuperbill, setPreviewSuperbill] = useState<Superbill | null>(null);
   const [showCoverSheet, setShowCoverSheet] = useState(false);
   
   // Process patients and their superbills
@@ -146,11 +123,6 @@ export default function GroupedSubmission() {
   );
   
   const selectedSuperbills = selectedPatients.flatMap(patient => patient.superbills);
-  
-  // Group statistics
-  const groupTotalPatients = selectedPatients.length;
-  const groupTotalVisits = selectedPatients.reduce((total, patient) => total + patient.totalVisits, 0);
-  const groupTotalAmount = selectedPatients.reduce((total, patient) => total + patient.totalAmount, 0);
   
   // Handle print/download all
   const handleDownloadAll = () => {
@@ -292,21 +264,6 @@ export default function GroupedSubmission() {
     `;
   };
 
-  // Render status badge with appropriate color
-  const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case "Complete":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">{status}</Badge>;
-      case "Missing Info":
-        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">{status}</Badge>;
-      case "Draft":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">{status}</Badge>;
-      case "No Superbill":
-      default:
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">{status}</Badge>;
-    }
-  };
-  
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
       <Button variant="outline" onClick={() => navigate(-1)} className="mb-6">
@@ -322,274 +279,36 @@ export default function GroupedSubmission() {
           </p>
         </div>
         
-        {selectedPatientIds.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mt-2 md:mt-0">
-            <div className="text-sm font-medium mr-2">
-              <span className="px-2 py-1 bg-primary/10 rounded-md">
-                {groupTotalPatients} Patient{groupTotalPatients !== 1 ? 's' : ''}
-              </span>
-              <span className="px-2 py-1 bg-primary/10 rounded-md ml-2">
-                {groupTotalVisits} Visit{groupTotalVisits !== 1 ? 's' : ''}
-              </span>
-              <span className="px-2 py-1 bg-primary/10 rounded-md ml-2">
-                {formatCurrency(groupTotalAmount)}
-              </span>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={clearSelection}
-              className="text-xs"
-            >
-              Clear Selection
-            </Button>
-          </div>
-        )}
+        <GroupStats 
+          selectedPatients={selectedPatients}
+          onClearSelection={clearSelection}
+        />
       </div>
       
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Search patients..."
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        <div className="flex gap-2">
-          <div className="flex items-center">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setFilterStatus(null)}
-              className={`mr-2 ${!filterStatus ? 'bg-muted' : ''}`}
-            >
-              <Filter className="mr-2 h-4 w-4" />
-              All
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setFilterStatus("Complete")}
-              className={filterStatus === "Complete" ? 'bg-muted' : ''}
-            >
-              Complete
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setFilterStatus("Missing Info")}
-              className={filterStatus === "Missing Info" ? 'bg-muted' : ''}
-            >
-              Missing Info
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setFilterStatus("Draft")}
-              className={filterStatus === "Draft" ? 'bg-muted' : ''}
-            >
-              Draft
-            </Button>
-          </div>
-        </div>
-      </div>
+      <GroupFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+      />
       
       {selectedPatientIds.length > 0 && (
-        <div className="mb-6 p-4 bg-muted rounded-lg">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold">Bulk Actions</h3>
-              <p className="text-sm text-muted-foreground">
-                Apply actions to {selectedPatientIds.length} selected patient{selectedPatientIds.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <div className="flex items-center mr-4">
-                <Checkbox 
-                  id="cover-sheet" 
-                  checked={showCoverSheet}
-                  onCheckedChange={() => setShowCoverSheet(!showCoverSheet)}
-                />
-                <label 
-                  htmlFor="cover-sheet" 
-                  className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Include cover sheet
-                </label>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleDownloadAll}
-                disabled={selectedSuperbills.length === 0}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Download All PDFs
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                disabled={selectedSuperbills.length === 0}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Email to Patients
-              </Button>
-              {showCoverSheet && selectedSuperbills.length > 0 && (
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const printWindow = window.open('', '_blank');
-                    if (!printWindow) {
-                      alert('Please allow pop-ups to print the cover sheet.');
-                      return;
-                    }
-                    
-                    const coverSheetHtml = `
-                      <!DOCTYPE html>
-                      <html>
-                        <head>
-                          <title>Submission Cover Sheet</title>
-                          <style>
-                            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                          </style>
-                        </head>
-                        <body>
-                          ${generateCoverSheetHtml(selectedSuperbills)}
-                        </body>
-                      </html>
-                    `;
-                    
-                    printWindow.document.open();
-                    printWindow.document.write(coverSheetHtml);
-                    printWindow.document.close();
-                    
-                    setTimeout(() => {
-                      printWindow.print();
-                    }, 500);
-                  }}
-                >
-                  <Check className="mr-2 h-4 w-4" />
-                  Print Cover Sheet Only
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
+        <BulkActions
+          selectedSuperbills={selectedSuperbills}
+          showCoverSheet={showCoverSheet}
+          setShowCoverSheet={setShowCoverSheet}
+          handleDownloadAll={handleDownloadAll}
+          generateCoverSheetHtml={generateCoverSheetHtml}
+        />
       )}
       
-      {filteredPatients.length > 0 ? (
-        <div className="border rounded-md">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <Checkbox 
-                    checked={filteredPatients.length > 0 && selectedPatientIds.length === filteredPatients.length}
-                    onCheckedChange={() => {
-                      if (selectedPatientIds.length === filteredPatients.length) {
-                        clearSelection();
-                      } else {
-                        selectAll();
-                      }
-                    }}
-                  />
-                </TableHead>
-                <TableHead>Patient</TableHead>
-                <TableHead>Date Range</TableHead>
-                <TableHead>Visits</TableHead>
-                <TableHead>Total Billed</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPatients.map((patient) => (
-                <TableRow key={patient.id}>
-                  <TableCell>
-                    <Checkbox 
-                      checked={selectedPatientIds.includes(patient.id)}
-                      onCheckedChange={() => togglePatientSelection(patient.id)}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{patient.name}</TableCell>
-                  <TableCell>
-                    {patient.dateRange ? (
-                      `${formatDate(patient.dateRange.start)} - ${formatDate(patient.dateRange.end)}`
-                    ) : (
-                      "N/A"
-                    )}
-                  </TableCell>
-                  <TableCell>{patient.totalVisits}</TableCell>
-                  <TableCell>{formatCurrency(patient.totalAmount)}</TableCell>
-                  <TableCell>{renderStatusBadge(patient.status)}</TableCell>
-                  <TableCell className="text-right">
-                    {patient.superbills.length > 0 ? (
-                      <div className="flex justify-end gap-2">
-                        <Dialog open={dialogOpen && previewSuperbill?.patientName === patient.name} onOpenChange={(open) => {
-                          setDialogOpen(open);
-                          if (!open) setPreviewSuperbill(null);
-                        }}>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => {
-                                setPreviewSuperbill(patient.superbills[0]);
-                                setDialogOpen(true);
-                              }}
-                            >
-                              Preview
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Superbill Preview</DialogTitle>
-                            </DialogHeader>
-                            {previewSuperbill && (
-                              <Preview superbill={previewSuperbill} />
-                            )}
-                          </DialogContent>
-                        </Dialog>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => navigate(`/edit/${patient.superbills[0].id}`)}
-                        >
-                          Edit
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button 
-                        size="sm"
-                        onClick={() => {
-                          navigate("/new", { state: { patientId: patient.id } });
-                        }}
-                      >
-                        Create Superbill
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      ) : (
-        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-          <p className="text-lg font-medium mb-2">No patients found</p>
-          <p className="text-muted-foreground mb-6">
-            {searchTerm || filterStatus ? "Try adjusting your search or filters" : "Add patients to create group submissions"}
-          </p>
-          <Button onClick={() => navigate("/patients")}>
-            Manage Patients
-          </Button>
-        </div>
-      )}
+      <GroupTable
+        filteredPatients={filteredPatients}
+        selectedPatientIds={selectedPatientIds}
+        togglePatientSelection={togglePatientSelection}
+        clearSelection={clearSelection}
+        selectAll={selectAll}
+      />
       
       {showCoverSheet && selectedSuperbills.length > 0 && (
         <div className="mt-8">
