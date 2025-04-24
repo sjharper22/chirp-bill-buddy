@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/auth-context";
 
 interface LetterTemplateEditorProps {
   patientData?: any;
@@ -25,18 +26,24 @@ export function LetterTemplateEditor({
   onSave 
 }: LetterTemplateEditorProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [title, setTitle] = React.useState("");
   const [category, setCategory] = React.useState<"cover_letter" | "appeal_letter" | "general">("cover_letter");
   const [content, setContent] = React.useState("");
 
   const handleSaveTemplate = async () => {
     try {
+      if (!user) {
+        throw new Error("You must be logged in to save templates");
+      }
+
       const { error } = await supabase
         .from('letter_templates')
         .insert({
           title,
           content: { text: content },
-          category
+          category,
+          created_by: user.id
         });
 
       if (error) throw error;
