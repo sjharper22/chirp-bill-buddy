@@ -76,7 +76,7 @@ export function LetterTemplateEditor({
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [selectedSuperbillId, setSelectedSuperbillId] = useState<string>("");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
-  const { saveTemplate, totalCharges, setTotalCharges } = useTemplateSave();
+  const { saveTemplate, setTotalCharges } = useTemplateSave();
   const [localTotalCharges, setLocalTotalCharges] = useState<string>("0.00");
 
   // Fetch existing templates
@@ -144,7 +144,7 @@ export function LetterTemplateEditor({
           const endDate = new Date(Math.max(...visitDates));
           
           updatedContent = updatedContent.replace(/{{visitCount}}/g, visitCount.toString());
-          updatedContent = updatedContent.replace(/{{totalCharges}}/g, totalChargesValue.toFixed(2));
+          updatedContent = updatedContent.replace(/{{totalCharges}}/g, localTotalCharges);
           updatedContent = updatedContent.replace(/{{serviceStartDate}}/g, startDate.toLocaleDateString());
           updatedContent = updatedContent.replace(/{{serviceEndDate}}/g, endDate.toLocaleDateString());
         }
@@ -152,7 +152,7 @@ export function LetterTemplateEditor({
       
       setContent(updatedContent);
     }
-  }, [selectedPatientId, selectedSuperbillId, patients, superbills, content, setTotalCharges]);
+  }, [selectedPatientId, selectedSuperbillId, patients, superbills, content, setTotalCharges, localTotalCharges]);
 
   const handleSaveTemplate = async () => {
     const success = await saveTemplate({
