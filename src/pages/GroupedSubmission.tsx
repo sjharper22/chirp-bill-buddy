@@ -2,16 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "@/context/patient-context";
 import { useSuperbill } from "@/context/superbill-context";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { CoverSheet } from "@/components/cover-sheet/CoverSheet";
 import { PatientWithSuperbills } from "@/components/group-submission/types";
 import { GroupFilters } from "@/components/group-submission/GroupFilters";
 import { BulkActions } from "@/components/group-submission/BulkActions";
 import { GroupTable } from "@/components/group-submission/GroupTable";
-import { GroupStats } from "@/components/group-submission/GroupStats";
-import { Superbill } from "@/types/superbill";
+import { GroupHeader } from "@/components/group-submission/GroupHeader";
+import { GroupPreview } from "@/components/group-submission/GroupPreview";
+import { generateCoverSheetHtml } from "@/lib/utils/cover-sheet-generator";
 import { generatePrintableHTML } from "@/lib/utils/html-generator";
+import { Superbill } from "@/types/superbill";
 
 // Helper function to determine superbill status
 const determineStatus = (superbills: Superbill[]): "Complete" | "Missing Info" | "Draft" | "No Superbill" => {
@@ -186,107 +185,14 @@ export default function GroupedSubmission() {
       printWindow.print();
     }, 500);
   };
-  
-  // Generate HTML for cover sheet
-  const generateCoverSheetHtml = (superbills: Superbill[]): string => {
-    if (superbills.length === 0) return '';
-    
-    const firstSuperbill = superbills[0];
-    const totalPatients = new Set(superbills.map(bill => bill.patientName)).size;
-    const totalVisits = superbills.reduce((total, bill) => total + bill.visits.length, 0);
-    const totalCharges = superbills.reduce((total, bill) => {
-      return total + bill.visits.reduce((subtotal, visit) => subtotal + visit.fee, 0);
-    }, 0);
-    
-    return `
-      <div style="max-width: 800px; margin: 0 auto; border: 2px solid #ddd; padding: 20px; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h1 style="margin: 0;">Insurance Submission Cover Sheet</h1>
-          <p style="color: #666;">Generated on ${new Date().toLocaleDateString()}</p>
-        </div>
-        
-        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
-          <h3 style="margin-bottom: 10px;">Submission Summary</h3>
-          <div style="display: flex; justify-content: space-between;">
-            <div>
-              <p style="color: #666; margin: 0;">Total Patients</p>
-              <p style="font-size: 24px; font-weight: bold; margin: 0;">${totalPatients}</p>
-            </div>
-            <div>
-              <p style="color: #666; margin: 0;">Total Visits</p>
-              <p style="font-size: 24px; font-weight: bold; margin: 0;">${totalVisits}</p>
-            </div>
-            <div>
-              <p style="color: #666; margin: 0;">Total Charges</p>
-              <p style="font-size: 24px; font-weight: bold; margin: 0;">$${totalCharges.toFixed(2)}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
-          <h3 style="margin-bottom: 10px;">Provider Information</h3>
-          <p><span style="font-weight: 500;">Provider:</span> ${firstSuperbill.providerName}</p>
-          <p><span style="font-weight: 500;">Clinic:</span> ${firstSuperbill.clinicName}</p>
-          <p><span style="font-weight: 500;">Address:</span> ${firstSuperbill.clinicAddress}</p>
-          <p><span style="font-weight: 500;">Phone:</span> ${firstSuperbill.clinicPhone}</p>
-          <p><span style="font-weight: 500;">Email:</span> ${firstSuperbill.clinicEmail}</p>
-          <p><span style="font-weight: 500;">EIN:</span> ${firstSuperbill.ein}</p>
-          <p><span style="font-weight: 500;">NPI #:</span> ${firstSuperbill.npi}</p>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <h3 style="margin-bottom: 10px;">Submission Instructions</h3>
-          <div style="background: #f7f7f7; padding: 15px; border-radius: 6px;">
-            <ol style="padding-left: 20px; margin: 0;">
-              <li style="margin-bottom: 8px;">Submit all attached superbills to your insurance provider.</li>
-              <li style="margin-bottom: 8px;">Include this cover sheet with your submission.</li>
-              <li style="margin-bottom: 8px;">Keep copies of all documents for your records.</li>
-              <li style="margin-bottom: 8px;">Contact your insurance provider if you have any questions about the submission process.</li>
-              <li style="margin-bottom: 0;">For billing questions, contact the provider using the information above.</li>
-            </ol>
-          </div>
-        </div>
-        
-        <div style="border-top: 1px solid #eee; padding-top: 20px;">
-          <h3 style="margin-bottom: 10px;">Included Patients</h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">
-            ${superbills.map(bill => `
-              <div style="border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
-                <p style="font-weight: 500; margin: 0;">${bill.patientName}</p>
-                <p style="color: #666; font-size: 14px; margin: 5px 0;">DOB: ${new Date(bill.patientDob).toLocaleDateString()}</p>
-                <p style="font-size: 14px; margin: 0;">
-                  Visits: ${bill.visits.length}, 
-                  Total: $${bill.visits.reduce((t, v) => t + v.fee, 0).toFixed(2)}
-                </p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-  };
 
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
-      <Button variant="outline" onClick={() => navigate(-1)} className="mb-6">
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Go Back
-      </Button>
-      
-      {/* Page header with title and stats */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Group Submissions</h1>
-          <p className="text-muted-foreground">
-            Manage and submit multiple superbills together
-          </p>
-        </div>
-        
-        <GroupStats 
-          selectedPatients={selectedPatients}
-          onClearSelection={clearSelection}
-        />
-      </div>
+      <GroupHeader 
+        selectedPatients={selectedPatients}
+        onClearSelection={clearSelection}
+        onNavigateBack={() => navigate(-1)}
+      />
       
       <GroupFilters
         searchTerm={searchTerm}
@@ -313,12 +219,10 @@ export default function GroupedSubmission() {
         selectAll={selectAll}
       />
       
-      {showCoverSheet && selectedSuperbills.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Cover Sheet Preview</h2>
-          <CoverSheet superbills={selectedSuperbills} />
-        </div>
-      )}
+      <GroupPreview 
+        showCoverSheet={showCoverSheet}
+        selectedSuperbills={selectedSuperbills}
+      />
     </div>
   );
 }
