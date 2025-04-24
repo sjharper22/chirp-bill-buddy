@@ -2,19 +2,9 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
-import { LetterTemplateEditor } from "@/components/templates/LetterTemplateEditor";
 import { PatientList } from "@/components/templates/PatientList";
-import { TemplatesGrid } from "@/components/templates/TemplatesGrid";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LetterBuilderHeader } from "@/components/letter-builder/LetterBuilderHeader";
+import { LetterBuilderTabs } from "@/components/letter-builder/LetterBuilderTabs";
 
 export default function LetterBuilder() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -58,29 +48,11 @@ export default function LetterBuilder() {
 
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Letter Builder</h1>
-          <p className="text-muted-foreground">
-            Create, edit, and send letters for insurance claims and appeals
-          </p>
-        </div>
-
-        <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New Letter
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Letter</DialogTitle>
-            </DialogHeader>
-            <LetterTemplateEditor onSave={handleEditorClose} />
-          </DialogContent>
-        </Dialog>
-      </div>
+      <LetterBuilderHeader
+        isEditorOpen={isEditorOpen}
+        setIsEditorOpen={setIsEditorOpen}
+        onEditorClose={handleEditorClose}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-1">
@@ -91,56 +63,16 @@ export default function LetterBuilder() {
         </div>
         
         <div className="md:col-span-3">
-          <Tabs defaultValue="cover_letters">
-            <TabsList className="mb-4">
-              <TabsTrigger value="cover_letters">Cover Letters</TabsTrigger>
-              <TabsTrigger value="appeal_letters">Appeal Letters</TabsTrigger>
-              <TabsTrigger value="general">General</TabsTrigger>
-              {selectedPatientId && <TabsTrigger value="patient_documents">Patient Documents</TabsTrigger>}
-            </TabsList>
-            
-            <TabsContent value="cover_letters">
-              <TemplatesGrid
-                templates={coverLetters}
-                isLoading={isLoading}
-                templateType="Cover Letter"
-                onCreateNew={handleCreateNewLetter}
-                onEditTemplate={handleCreateNewLetter}
-              />
-            </TabsContent>
-            
-            <TabsContent value="appeal_letters">
-              <TemplatesGrid
-                templates={appealLetters}
-                isLoading={isLoading}
-                templateType="Appeal Letter"
-                onCreateNew={handleCreateNewLetter}
-                onEditTemplate={handleCreateNewLetter}
-              />
-            </TabsContent>
-            
-            <TabsContent value="general">
-              <TemplatesGrid
-                templates={generalTemplates}
-                isLoading={isLoading}
-                templateType="Template"
-                onCreateNew={handleCreateNewLetter}
-                onEditTemplate={handleCreateNewLetter}
-              />
-            </TabsContent>
-            
-            {selectedPatientId && (
-              <TabsContent value="patient_documents">
-                <TemplatesGrid
-                  templates={patientDocuments}
-                  isLoading={false}
-                  templateType="Document"
-                  onCreateNew={handleCreateNewLetter}
-                  onEditTemplate={handleCreateNewLetter}
-                />
-              </TabsContent>
-            )}
-          </Tabs>
+          <LetterBuilderTabs
+            coverLetters={coverLetters}
+            appealLetters={appealLetters}
+            generalTemplates={generalTemplates}
+            patientDocuments={patientDocuments}
+            isLoading={isLoading}
+            selectedPatientId={selectedPatientId}
+            onCreateNew={handleCreateNewLetter}
+            onEditTemplate={handleCreateNewLetter}
+          />
         </div>
       </div>
     </div>
