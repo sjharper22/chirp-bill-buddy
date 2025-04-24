@@ -107,7 +107,8 @@ export function GroupTable({
                   </DialogTrigger>
                   <PreviewDialog
                     open={dialogOpen}
-                    superbill={previewSuperbill}
+                    content={previewSuperbill}
+                    contentType="superbill"
                     onOpenChange={setDialogOpen}
                   />
                 </Dialog>

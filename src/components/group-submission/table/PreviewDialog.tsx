@@ -46,11 +46,10 @@ export function PreviewDialog({
                 <p>{new Date((content as PatientProfile).dob).toLocaleDateString()}</p>
               </div>
               
-              {/* Display patient information here */}
               <div>
                 <p className="text-sm text-muted-foreground">Common ICD Codes</p>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {(content as PatientProfile).commonIcdCodes.map(code => (
+                  {(content as PatientProfile).commonIcdCodes?.map(code => (
                     <div key={code} className="bg-muted px-2 py-1 rounded text-xs">
                       {code}
                     </div>
@@ -61,7 +60,7 @@ export function PreviewDialog({
               <div>
                 <p className="text-sm text-muted-foreground">Common CPT Codes</p>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {(content as PatientProfile).commonCptCodes.map(code => (
+                  {(content as PatientProfile).commonCptCodes?.map(code => (
                     <div key={code} className="bg-muted px-2 py-1 rounded text-xs">
                       {code}
                     </div>

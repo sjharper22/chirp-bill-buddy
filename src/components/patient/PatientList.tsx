@@ -17,6 +17,8 @@ interface PatientListProps {
   togglePatientSelection: (id: string) => void;
   onSelectAll: () => void;
   onClearSelection: () => void;
+  canEdit?: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
 export function PatientList({
@@ -24,7 +26,9 @@ export function PatientList({
   selectedPatientIds,
   togglePatientSelection,
   onSelectAll,
-  onClearSelection
+  onClearSelection,
+  canEdit = false,
+  onRefresh
 }: PatientListProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
