@@ -9,16 +9,182 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      invitations: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      patient_superbills: {
+        Row: {
+          created_at: string
+          id: string
+          patient_id: string
+          superbill_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patient_id: string
+          superbill_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patient_id?: string
+          superbill_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_superbills_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          common_complaints: Json | null
+          created_at: string
+          created_by: string | null
+          default_cpt_codes: Json | null
+          default_icd_codes: Json | null
+          dob: string
+          email: string | null
+          id: string
+          last_visit_date: string | null
+          name: string
+          phone: string | null
+          total_billed: number | null
+          updated_at: string
+          visit_count: number | null
+        }
+        Insert: {
+          common_complaints?: Json | null
+          created_at?: string
+          created_by?: string | null
+          default_cpt_codes?: Json | null
+          default_icd_codes?: Json | null
+          dob: string
+          email?: string | null
+          id?: string
+          last_visit_date?: string | null
+          name: string
+          phone?: string | null
+          total_billed?: number | null
+          updated_at?: string
+          visit_count?: number | null
+        }
+        Update: {
+          common_complaints?: Json | null
+          created_at?: string
+          created_by?: string | null
+          default_cpt_codes?: Json | null
+          default_icd_codes?: Json | null
+          dob?: string
+          email?: string | null
+          id?: string
+          last_visit_date?: string | null
+          name?: string
+          phone?: string | null
+          total_billed?: number | null
+          updated_at?: string
+          visit_count?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_roles: {
+        Args: { _user_id?: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id?: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "editor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +299,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "editor", "viewer"],
+    },
   },
 } as const

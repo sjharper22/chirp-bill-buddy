@@ -1,46 +1,100 @@
 
-import { useState } from "react";
-import { usePatient } from "@/context/patient-context";
-import { useSuperbill } from "@/context/superbill-context";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/auth-context";
+import { PatientProfile } from "@/types/patient";
 import { PatientList } from "@/components/patient/PatientList";
 import { PatientForm } from "@/components/patient/PatientForm";
-import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { Plus, User, Search, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { patientService } from "@/services/patientService";
 
 export default function Patients() {
   const navigate = useNavigate();
-  const { 
-    patients, 
-    addPatient, 
-    updatePatient,
-    selectedPatientIds,
-    togglePatientSelection,
-    selectAllPatients,
-    clearPatientSelection
-  } = usePatient();
+  const { isAdmin, isEditor, user } = useAuth();
+  const { toast } = useToast();
   
-  const { superbills } = useSuperbill();
-  
+  const [patients, setPatients] = useState<PatientProfile[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<PatientProfile[]>([]);
+  const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
   
-  // Handler for adding a new patient
-  const handleAddPatient = (patientData: Omit<PatientProfileType, "id">) => {
-    addPatient(patientData);
-    setDialogOpen(false);
-    toast({
-      title: "Patient Added",
-      description: `${patientData.name} has been added successfully.`,
+  const canEdit = isAdmin || isEditor;
+  
+  const fetchPatients = async () => {
+    setLoading(true);
+    try {
+      const data = await patientService.getAll();
+      setPatients(data);
+      setFilteredPatients(data);
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load patients",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+  
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredPatients(patients);
+    } else {
+      const filtered = patients.filter(patient => 
+        patient.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredPatients(filtered);
+    }
+  }, [searchQuery, patients]);
+  
+  const handleAddPatient = async (patientData: Omit<PatientProfile, "id">) => {
+    try {
+      await patientService.create(patientData);
+      setDialogOpen(false);
+      toast({
+        title: "Patient Added",
+        description: `${patientData.name} has been added successfully.`,
+      });
+      fetchPatients();
+    } catch (error: any) {
+      console.error("Error adding patient:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add patient",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const togglePatientSelection = (id: string) => {
+    setSelectedPatientIds(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(patientId => patientId !== id);
+      } else {
+        return [...prev, id];
+      }
     });
   };
   
-  // Get superbills for selected patients
-  const selectedSuperbills = superbills.filter(bill => 
-    selectedPatientIds.includes(patients.find(p => p.name === bill.patientName)?.id || '')
-  );
+  const selectAllPatients = () => {
+    setSelectedPatientIds(filteredPatients.map(patient => patient.id));
+  };
+  
+  const clearPatientSelection = () => {
+    setSelectedPatientIds([]);
+  };
   
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
@@ -53,23 +107,25 @@ export default function Patients() {
         </div>
         
         <div className="flex gap-2">
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Patient
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-xl">
-              <DialogHeader>
-                <DialogTitle>New Patient</DialogTitle>
-              </DialogHeader>
-              <PatientForm 
-                onSubmit={handleAddPatient}
-                onCancel={() => setDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+          {canEdit && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Patient
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>New Patient</DialogTitle>
+                </DialogHeader>
+                <PatientForm 
+                  onSubmit={handleAddPatient}
+                  onCancel={() => setDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
           
           {selectedPatientIds.length > 0 && (
             <Button
@@ -84,25 +140,55 @@ export default function Patients() {
         </div>
       </div>
       
-      {patients.length === 0 ? (
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input 
+            placeholder="Search patients..." 
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+      
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : patients.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed rounded-lg">
           <User className="h-12 w-12 mx-auto text-muted-foreground" />
           <p className="text-lg font-medium mt-4 mb-2">No patients added yet</p>
           <p className="text-muted-foreground mb-6">
             Add patient profiles to streamline your superbill creation process
           </p>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Your First Patient
+          {canEdit && (
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Your First Patient
+            </Button>
+          )}
+        </div>
+      ) : filteredPatients.length === 0 ? (
+        <div className="text-center py-16 border-2 border-dashed rounded-lg">
+          <p className="text-lg font-medium mb-2">No matching patients</p>
+          <p className="text-muted-foreground mb-6">
+            Try adjusting your search criteria
+          </p>
+          <Button variant="outline" onClick={() => setSearchQuery("")}>
+            Clear Search
           </Button>
         </div>
       ) : (
         <PatientList
-          patients={patients}
+          patients={filteredPatients}
           selectedPatientIds={selectedPatientIds}
           togglePatientSelection={togglePatientSelection}
           onSelectAll={selectAllPatients}
           onClearSelection={clearPatientSelection}
+          canEdit={canEdit}
+          onRefresh={fetchPatients}
         />
       )}
     </div>
