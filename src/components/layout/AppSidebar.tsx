@@ -23,7 +23,8 @@ import {
   Activity,
   Menu,
   LayoutTemplate,
-  UserCog
+  UserCog,
+  FileEdit
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -42,6 +43,7 @@ export function AppSidebar() {
   const superbillItems = [
     ...(isAdmin || isEditor ? [{ title: "Create New", icon: PlusSquare, url: "/new" }] : []),
     { title: "Group Submissions", icon: ClipboardList, url: "/grouped-submission" },
+    ...(isAdmin || isEditor ? [{ title: "Letter Builder", icon: FileEdit, url: "/letter-builder" }] : []),
   ];
   
   const otherItems = [
