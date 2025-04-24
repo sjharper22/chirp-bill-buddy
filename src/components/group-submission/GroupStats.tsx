@@ -12,6 +12,7 @@ export function GroupStats({ selectedPatients, onClearSelection }: GroupStatsPro
   const groupTotalVisits = selectedPatients.reduce((total, patient) => total + patient.totalVisits, 0);
   const groupTotalAmount = selectedPatients.reduce((total, patient) => total + patient.totalAmount, 0);
 
+  // Return null if no patients are selected
   if (selectedPatients.length === 0) return null;
 
   return (

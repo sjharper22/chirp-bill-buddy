@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "@/context/patient-context";
@@ -274,6 +273,7 @@ export default function GroupedSubmission() {
         Go Back
       </Button>
       
+      {/* Page header with title and stats */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold">Group Submissions</h1>
