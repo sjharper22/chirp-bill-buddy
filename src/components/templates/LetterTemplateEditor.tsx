@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,12 +81,13 @@ export function LetterTemplateEditor({
   const { user } = useAuth();
   const { patients } = usePatient();
   const { superbills } = useSuperbill();
-  const [title, setTitle] = React.useState("Out-of-Network Insurance Guide");
-  const [category, setCategory] = React.useState<"cover_letter" | "appeal_letter" | "general">("cover_letter");
-  const [content, setContent] = React.useState(DEFAULT_TEMPLATE);
-  const [selectedPatientId, setSelectedPatientId] = React.useState<string>("");
-  const [selectedSuperbillId, setSelectedSuperbillId] = React.useState<string>("");
-  const [selectedTemplateId, setSelectedTemplateId] = React.useState<string>("");
+  const [title, setTitle] = useState("Out-of-Network Insurance Guide");
+  const [category, setCategory] = useState<"cover_letter" | "appeal_letter" | "general">("cover_letter");
+  const [content, setContent] = useState(DEFAULT_TEMPLATE);
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [selectedSuperbillId, setSelectedSuperbillId] = useState<string>("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [totalCharges, setTotalCharges] = useState<string>("0.00"); // Add this line to define totalCharges
 
   // Fetch existing templates
   const { data: templates, isLoading: isLoadingTemplates } = useQuery({
@@ -148,6 +149,7 @@ export function LetterTemplateEditor({
         if (superbill) {
           const visitCount = superbill.visits.length;
           const totalChargesValue = superbill.visits.reduce((total, visit) => total + visit.fee, 0);
+          setTotalCharges(totalChargesValue.toFixed(2)); // Update the totalCharges state
           
           // Get earliest and latest visit dates
           const visitDates = superbill.visits.map(v => new Date(v.date).getTime());
