@@ -50,8 +50,8 @@ export default function Dashboard() {
   };
   
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1">
@@ -72,11 +72,17 @@ export default function Dashboard() {
         averageFee={averageFee}
       />
       
-      <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
+      <Tabs 
+        defaultValue="list" 
+        value={activeTab} 
+        onValueChange={setActiveTab} 
+        className="w-full mt-8"
+      >
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="list">List View</TabsTrigger>
           <TabsTrigger value="board">Board View</TabsTrigger>
         </TabsList>
+        
         <TabsContent value="list" className="mt-6">
           <RecentSuperbills 
             filteredSuperbills={filteredSuperbills}
@@ -85,19 +91,22 @@ export default function Dashboard() {
             onDelete={handleDeleteSuperbill}
             totalSuperbills={superbills.length}
           />
+          
+          <QuickActions />
         </TabsContent>
+        
         <TabsContent value="board" className="mt-6">
-          <KanbanBoard
-            superbills={superbills}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            onDelete={handleDeleteSuperbill}
-            onStatusChange={handleStatusChange}
-          />
+          <div className="mb-6">
+            <KanbanBoard
+              superbills={superbills}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onDelete={handleDeleteSuperbill}
+              onStatusChange={handleStatusChange}
+            />
+          </div>
         </TabsContent>
       </Tabs>
-      
-      <QuickActions />
     </div>
   );
 }

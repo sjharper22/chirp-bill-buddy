@@ -64,6 +64,7 @@ export function KanbanBoard({
   onStatusChange
 }: KanbanBoardProps) {
   const navigate = useNavigate();
+  const [draggedBillId, setDraggedBillId] = useState<string | null>(null);
 
   // Filter superbills based on search term
   const filteredSuperbills = superbills.filter(bill => 
@@ -71,7 +72,54 @@ export function KanbanBoard({
     bill.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Move a superbill to another status
+  // Start dragging a superbill
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedBillId(id);
+    // Set ghost drag image
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  };
+
+  // Handle drag over column to allow drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.currentTarget) {
+      e.currentTarget.classList.add('bg-muted/50');
+    }
+  };
+
+  // Handle drag leave to remove highlighting
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (e.currentTarget) {
+      e.currentTarget.classList.remove('bg-muted/50');
+    }
+  };
+
+  // Handle drop of superbill in a column
+  const handleDrop = (e: React.DragEvent, newStatus: SuperbillStatus) => {
+    e.preventDefault();
+    
+    // Remove highlighting
+    if (e.currentTarget) {
+      e.currentTarget.classList.remove('bg-muted/50');
+    }
+    
+    // If we have a dragged bill and it's not already in this status
+    if (draggedBillId) {
+      const bill = superbills.find(b => b.id === draggedBillId);
+      if (bill && bill.status !== newStatus) {
+        onStatusChange(draggedBillId, newStatus);
+        toast({
+          title: "Status updated",
+          description: `Superbill for ${bill.patientName} moved to ${newStatus.replace('_', ' ')}.`,
+        });
+      }
+      setDraggedBillId(null);
+    }
+  };
+
+  // Move a superbill to another status (button click)
   const moveSuperbill = (id: string, newStatus: SuperbillStatus) => {
     onStatusChange(id, newStatus);
     toast({
@@ -82,16 +130,16 @@ export function KanbanBoard({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-xl font-semibold">Superbills Board</h2>
-        <div className="flex items-center gap-4">
-          <div className="relative">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Search superbills..."
               value={searchTerm}
               onChange={e => onSearchChange(e.target.value)}
-              className="pl-10 w-[250px]"
+              className="pl-10 w-full sm:w-[250px]"
             />
           </div>
           <Button onClick={() => navigate("/new")}>
@@ -101,53 +149,70 @@ export function KanbanBoard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {columns.map(column => {
           // Get superbills for this column
           const columnSuperbills = filteredSuperbills.filter(bill => bill.status === column.id);
           
           return (
-            <div key={column.id} className="flex flex-col bg-white rounded-lg border shadow-sm h-full min-h-[24rem]">
-              <div className="p-4 flex justify-between items-center border-b">
+            <div 
+              key={column.id} 
+              className="flex flex-col bg-white rounded-lg border shadow-sm h-full min-h-[30rem]"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, column.id)}
+            >
+              <div className="p-4 flex justify-between items-center border-b bg-muted/30">
                 <div className="flex items-center">
-                  <StatusBadge status={column.title} variant={column.variant} />
-                  <span className="text-sm font-medium ml-2">{columnSuperbills.length}</span>
+                  <column.icon className="h-5 w-5 mr-2 text-muted-foreground" />
+                  <h3 className="font-medium">{column.title}</h3>
+                  <StatusBadge status={column.title} variant={column.variant} className="ml-2" />
+                  <span className="text-sm font-medium ml-1">{columnSuperbills.length}</span>
                 </div>
               </div>
               
-              <div className="p-3 flex flex-col gap-3 flex-grow overflow-y-auto max-h-[calc(100vh-240px)]">
+              <div className="p-4 flex flex-col gap-4 flex-grow overflow-y-auto max-h-[calc(100vh-240px)]">
                 {columnSuperbills.length > 0 ? (
                   columnSuperbills.map(superbill => (
-                    <div key={superbill.id} className="pb-0">
-                      <SuperbillCard
-                        superbill={superbill}
-                        onDelete={onDelete}
-                        onClick={() => navigate(`/view/${superbill.id}`)}
-                      />
+                    <div 
+                      key={superbill.id} 
+                      className="pb-0"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, superbill.id)}
+                    >
+                      <div className="cursor-grab active:cursor-grabbing">
+                        <SuperbillCard
+                          superbill={superbill}
+                          onDelete={onDelete}
+                          onClick={() => navigate(`/view/${superbill.id}`)}
+                        />
+                      </div>
                       
-                      <div className="flex justify-between mt-2 px-2">
-                        {columns.map(targetColumn => 
-                          targetColumn.id !== column.id && (
+                      <div className="flex flex-wrap mt-2 px-1 gap-1 justify-end">
+                        {columns
+                          .filter(targetColumn => targetColumn.id !== column.id)
+                          .map(targetColumn => (
                             <Button 
                               key={targetColumn.id}
                               variant="ghost" 
                               size="sm"
                               onClick={() => moveSuperbill(superbill.id, targetColumn.id)}
-                              className="text-xs"
+                              className="text-xs py-0 h-7 hover:bg-muted"
                             >
                               <targetColumn.icon className="h-3 w-3 mr-1" />
                               Move to {targetColumn.title}
                             </Button>
-                          )
-                        )}
+                          ))
+                        }
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center p-4 text-gray-500 flex flex-col items-center justify-center h-full">
-                    <column.icon className="h-10 w-10 text-gray-400 mb-2" />
+                  <div className="text-center p-8 text-gray-500 flex flex-col items-center justify-center h-full">
+                    <column.icon className="h-12 w-12 text-gray-300 mb-3" />
                     <p>No superbills in {column.title}</p>
-                    <p className="text-xs text-gray-400">{column.description}</p>
+                    <p className="text-xs text-gray-400 mt-1">{column.description}</p>
+                    <p className="text-sm text-primary mt-6">Drag superbills here</p>
                   </div>
                 )}
               </div>

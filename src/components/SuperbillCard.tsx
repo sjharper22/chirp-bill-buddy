@@ -4,7 +4,7 @@ import { formatDate, formatCurrency, calculateTotalFee } from "@/lib/utils/super
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Edit, Eye, Trash2 } from "lucide-react";
+import { Edit, Eye, Trash2, GripHorizontal } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 
 interface SuperbillCardProps {
@@ -58,10 +58,16 @@ export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardPro
   };
   
   return (
-    <Card className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
+    <Card 
+      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`} 
+      onClick={onClick}
+    >
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="font-semibold text-lg truncate">{superbill.patientName}</h3>
+          <div className="flex items-center">
+            <GripHorizontal className="h-4 w-4 mr-2 text-muted-foreground drag-handle" />
+            <h3 className="font-semibold text-lg truncate max-w-[180px]">{superbill.patientName}</h3>
+          </div>
           <div className="text-sm bg-primary/10 text-primary font-medium px-2 py-0.5 rounded">
             {formatDate(superbill.issueDate)}
           </div>
@@ -82,7 +88,7 @@ export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardPro
             </p>
           )}
           {complaintsDisplay && (
-            <p className="mt-1 font-medium text-foreground">
+            <p className="mt-1 font-medium text-foreground line-clamp-1">
               Primary Complaints: {complaintsDisplay}
             </p>
           )}
