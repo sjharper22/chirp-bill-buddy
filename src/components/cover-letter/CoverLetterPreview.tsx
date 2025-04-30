@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Superbill } from "@/types/superbill";
 import { LetterTemplate } from "@/types/template";
@@ -48,22 +47,22 @@ Below is a simple set of steps to help guide you through the process:
 
 ---
 
-**1. Access Your Claim Form**  
+1. Access Your Claim Form  
 Log in to your insurance provider's member portal or contact them directly to obtain their standard out-of-network reimbursement form.
 
-**2. Fill Out the Required Fields**  
+2. Fill Out the Required Fields  
 Complete all necessary sections of the form, including your personal information and the dates of care.
 
-**3. Attach Supporting Documents**  
+3. Attach Supporting Documents  
 Include the following with your submission:  
 - The superbill we've provided  
 - The attached invoices  
 - Your completed claim form
 
-**4. Submit to Your Insurance Provider**  
+4. Submit to Your Insurance Provider  
 Most providers accept claims by mail, fax, or through a member portal. Be sure to keep a copy for your records.
 
-**5. Track Your Claim**  
+5. Track Your Claim  
 After processing, your provider will issue an Explanation of Benefits (EOB) and, if approved, send your reimbursement.
 
 ---
@@ -73,7 +72,7 @@ If your provider requests additional documentation, they're welcome to contact o
 Thank you again for choosing Collective Family Chiropractic. We're honored to be part of your wellness journey.
 
 Warmly,  
-**The Collective Family Chiropractic Team**`
+The Collective Family Chiropractic Team`
         },
         category: 'cover_letter',
         created_by: 'system',
@@ -156,19 +155,16 @@ ${superbill.clinicEmail}`;
     );
   }
   
-  // Process markdown-like formatting
-  const processMarkdown = (text: string) => {
-    // Process bold text (**text**)
-    let processed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Process formatting with clean visual output
+  const processFormattedText = (text: string) => {
+    // Convert section numbers to bold instead of using markdown
+    let processed = text.replace(/^(\d+)\.\s+(.*?)$/gm, '<strong>$1. $2</strong>');
     
-    // Process italic text (*text*)
-    processed = processed.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    // Handle horizontal rules (---)
+    processed = processed.replace(/^---$/gm, '<hr className="my-4 border-t border-gray-300" />');
     
-    // Process horizontal rules (---)
-    processed = processed.replace(/^---$/gm, '<hr />');
-    
-    // Process bullet points
-    processed = processed.replace(/- (.*?)$/gm, '<li>$1</li>');
+    // Handle bullet points while keeping them clean
+    processed = processed.replace(/^- (.*?)$/gm, '<span className="flex"><span className="mr-2">•</span><span>$1</span></span>');
     
     return processed;
   };
@@ -181,10 +177,16 @@ ${superbill.clinicEmail}`;
             return <div key={index} className="h-4"></div>;
           }
           
-          const processedLine = processMarkdown(line);
+          const processedLine = processFormattedText(line);
+          
+          // Special handling for lines containing horizontal rules
+          if (processedLine.includes('<hr')) {
+            return <hr key={index} className="my-4 border-t border-gray-300" />;
+          }
+          
           return (
             <div 
-              key={index} 
+              key={index}
               dangerouslySetInnerHTML={{ __html: processedLine }}
               className={line.startsWith('-') ? 'pl-4' : ''}
             />
