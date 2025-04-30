@@ -28,11 +28,14 @@ import {
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin, isEditor } = useAuth();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
   
   // Define menu items with role-based conditional rendering
   const dashboardItems = [
@@ -54,10 +57,10 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <PracticeLogo />
-          <SidebarTrigger className="ml-2" />
+      <div className={`p-4 ${isCollapsed ? "flex justify-center" : ""}`}>
+        <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"}`}>
+          {!isCollapsed && <PracticeLogo />}
+          <SidebarTrigger className={isCollapsed ? "" : "ml-2"} />
         </div>
       </div>
       <SidebarContent>

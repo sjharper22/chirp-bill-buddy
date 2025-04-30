@@ -14,11 +14,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   const isMobile = useIsMobile();
   
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full bg-gray-50">
         <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <header className="h-16 border-b bg-white flex items-center justify-between px-6 z-10">
+        <SidebarInset className="bg-white">
+          <header className="h-16 border-b flex items-center justify-between px-6 z-10">
             <div className="flex items-center">
               <h1 className="text-xl font-semibold text-gray-800">Superbill Generator</h1>
             </div>
@@ -28,7 +28,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             {children}
           </main>
           <MobileNavigation />
-        </div>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );
