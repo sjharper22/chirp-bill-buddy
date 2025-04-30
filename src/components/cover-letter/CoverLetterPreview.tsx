@@ -78,12 +78,20 @@ Sincerely,
     if (selectedTemplate?.content?.text) {
       const context = createContextFromSuperbill(superbill);
       const processed = processTemplate(selectedTemplate.content.text, context);
+      console.log("Processed template with context:", context);
       setProcessedContent(processed);
     } else {
       // Fallback content if no template is available
-      const today = new Date().toLocaleDateString();
-      const totalFee = superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0).toFixed(2);
-      const fallbackContent = `${today}
+      setProcessedContent(generateFallbackContent(superbill));
+    }
+  }, [templates, superbill, selectedTemplateId]);
+  
+  // Helper function to generate fallback content
+  const generateFallbackContent = (superbill: Superbill) => {
+    const today = new Date().toLocaleDateString();
+    const totalFee = superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0).toFixed(2);
+    
+    return `${today}
 
 To Whom It May Concern:
 
@@ -99,31 +107,13 @@ ${superbill.providerName}
 ${superbill.clinicName}
 ${superbill.clinicPhone}
 ${superbill.clinicEmail}`;
-      
-      setProcessedContent(fallbackContent);
-    }
-  }, [templates, superbill, selectedTemplateId]);
+  };
   
   if (!processedContent) {
-    // Fallback content if no processed content is available
-    const today = new Date().toLocaleDateString();
-    const totalFee = superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0).toFixed(2);
-    const fallbackContent = `${today}
-
-To Whom It May Concern:
-
-Please find enclosed a superbill for services rendered to ${superbill.patientName}. The total charge for these services is $${totalFee}.
-
-Thank you for your assistance.
-
-Sincerely,
-${superbill.providerName}
-${superbill.clinicName}`;
-
     return (
       <Card className="p-6 mb-6 cover-letter-preview">
         <div className="whitespace-pre-wrap">
-          {fallbackContent.split('\n').map((line, index) => (
+          {generateFallbackContent(superbill).split('\n').map((line, index) => (
             <div key={index} className={line.trim() === "" ? "h-4" : ""}>
               {line}
             </div>

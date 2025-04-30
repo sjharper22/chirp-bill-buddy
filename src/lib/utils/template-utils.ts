@@ -71,11 +71,10 @@ export function processTemplate(template: string, context: VariableContext): str
     }
 
     // Format special values
-    if (pathParts[0] === 'dates' && pathParts[1] === 'today' && value instanceof Date) {
-      return format(value, 'MMMM d, yyyy');
-    }
-    
     if (value instanceof Date) {
+      if (pathParts[0] === 'dates' && pathParts[1] === 'today') {
+        return format(value, 'MMMM d, yyyy');
+      }
       return format(value, 'MM/dd/yyyy');
     }
     
@@ -108,12 +107,17 @@ export function createContextFromSuperbill(superbill: Superbill): VariableContex
     ? new Date(Math.max(...visitDates))
     : new Date();
 
+  // Split the patient name into first and last names
+  const nameParts = superbill.patientName.split(' ');
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
   return {
     patient: {
       name: superbill.patientName,
-      firstName: superbill.patientName.split(' ')[0],
-      lastName: superbill.patientName.split(' ').slice(1).join(' '),
-      salutation_name: superbill.patientName.split(' ')[0],
+      firstName: firstName,
+      lastName: lastName,
+      salutation_name: firstName,
       dob: superbill.patientDob,
     },
     superbill: {

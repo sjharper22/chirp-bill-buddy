@@ -7,6 +7,8 @@ import { Preview } from "@/components/preview/Preview";
 import { ActionButtons } from "@/components/preview/ActionButtons";
 import { CoverLetterSelector } from "@/components/cover-letter/CoverLetterSelector";
 import { LetterTemplate } from "@/types/template";
+import { createContextFromSuperbill } from "@/lib/utils/template-utils";
+import { format } from "date-fns";
 
 interface SuperbillPreviewProps {
   superbill: Superbill;
@@ -18,6 +20,8 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
   const [processedContent, setProcessedContent] = useState<string>("");
   
   const handleTemplateSelected = (template: LetterTemplate, content: string) => {
+    console.log("Template selected:", template.title);
+    console.log("Processed content:", content);
     setSelectedTemplate(template);
     setProcessedContent(content);
   };
@@ -25,7 +29,8 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
   // Generate a default cover letter if none is selected
   useEffect(() => {
     if (!processedContent && dialogOpen) {
-      const defaultContent = `${new Date().toLocaleDateString()}
+      const context = createContextFromSuperbill(superbill);
+      const defaultContent = `${format(new Date(), 'MMMM d, yyyy')}
 
 To Whom It May Concern:
 
