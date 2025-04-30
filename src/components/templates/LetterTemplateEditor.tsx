@@ -77,6 +77,8 @@ export function LetterTemplateEditor({
   const [title, setTitle] = React.useState("Out-of-Network Insurance Guide");
   const [category, setCategory] = React.useState<"cover_letter" | "appeal_letter" | "general">("cover_letter");
   const [content, setContent] = React.useState(DEFAULT_TEMPLATE);
+  // Initialize the totalCharges variable
+  const [totalCharges, setTotalCharges] = React.useState("0.00");
 
   const handleSaveTemplate = async () => {
     try {
