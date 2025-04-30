@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Superbill } from "@/types/superbill";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Preview } from "@/components/preview/Preview";
 import { ActionButtons } from "@/components/preview/ActionButtons";
@@ -21,6 +21,27 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
     setSelectedTemplate(template);
     setProcessedContent(content);
   };
+
+  // Generate a default cover letter if none is selected
+  useEffect(() => {
+    if (!processedContent && dialogOpen) {
+      const defaultContent = `${new Date().toLocaleDateString()}
+
+To Whom It May Concern:
+
+Please find enclosed a superbill for services rendered to ${superbill.patientName}. 
+The total charge for these services is $${superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0).toFixed(2)}.
+
+Thank you for your assistance.
+
+Sincerely,
+${superbill.providerName}
+${superbill.clinicName}
+${superbill.clinicPhone}`;
+
+      setProcessedContent(defaultContent);
+    }
+  }, [dialogOpen, processedContent, superbill]);
   
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -32,6 +53,9 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Superbill Preview</DialogTitle>
+          <DialogDescription>
+            Preview and download superbill with optional cover letter
+          </DialogDescription>
         </DialogHeader>
         
         <CoverLetterSelector 
@@ -44,6 +68,7 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
           selectedTemplateId={selectedTemplate?.id}
           showCoverLetter={true}
         />
+        
         <ActionButtons 
           superbill={superbill} 
           coverLetterContent={processedContent}

@@ -44,6 +44,38 @@ export function CoverLetterSelector({ superbill, onTemplateSelected }: CoverLett
         });
         throw error;
       }
+      
+      // If no templates found, create a default template
+      if (!data || data.length === 0) {
+        const defaultTemplate = {
+          id: 'default-cover-letter',
+          title: 'Default Cover Letter',
+          content: {
+            text: `{{dates.today}}
+
+To Whom It May Concern:
+
+Please find enclosed a superbill for services rendered to {{patient.name}} between {{superbill.earliestDate}} and {{superbill.latestDate}}. The total charge for these services is {{superbill.totalFee}}.
+
+I would appreciate your prompt attention to this claim. If you have any questions or require additional information, please contact our office.
+
+Thank you for your assistance.
+
+Sincerely,
+
+{{clinic.provider}}
+{{clinic.name}}
+{{clinic.phone}}
+{{clinic.email}}`
+          },
+          category: 'cover_letter' as const,
+          created_by: 'system',
+          is_default: true
+        };
+        
+        return [defaultTemplate] as LetterTemplate[];
+      }
+      
       return data as LetterTemplate[];
     },
   });
@@ -71,6 +103,42 @@ export function CoverLetterSelector({ superbill, onTemplateSelected }: CoverLett
       setSelectedTemplateId(defaultTemplate.id);
     }
   }, [templates, selectedTemplateId]);
+  
+  // If there are no templates, create a fallback content string
+  useEffect(() => {
+    if ((!templates || templates.length === 0) && !isLoading) {
+      const context = createContextFromSuperbill(superbill);
+      const fallbackContent = `${new Date().toLocaleDateString()}
+
+To Whom It May Concern:
+
+Please find enclosed a superbill for services rendered to ${superbill.patientName}. The total charge for these services is $${superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0).toFixed(2)}.
+
+I would appreciate your prompt attention to this claim. If you have any questions or require additional information, please contact our office.
+
+Thank you for your assistance.
+
+Sincerely,
+
+${superbill.providerName}
+${superbill.clinicName}
+${superbill.clinicPhone}
+${superbill.clinicEmail}`;
+      
+      setProcessedContent(fallbackContent);
+      
+      if (onTemplateSelected) {
+        onTemplateSelected({
+          id: 'fallback',
+          title: 'Default Cover Letter',
+          content: { text: fallbackContent },
+          category: 'cover_letter',
+          created_by: 'system',
+          is_default: true
+        }, fallbackContent);
+      }
+    }
+  }, [templates, isLoading, superbill, onTemplateSelected]);
   
   return (
     <div className="space-y-4">
@@ -105,10 +173,9 @@ export function CoverLetterSelector({ superbill, onTemplateSelected }: CoverLett
               size="sm"
               onClick={() => {
                 // Navigate to templates page would be implemented here
-                // For now, just show a toast
                 toast({
-                  title: "No templates",
-                  description: "Please create a template first",
+                  title: "Using default template",
+                  description: "No custom templates available.",
                 });
               }}
             >
@@ -118,7 +185,7 @@ export function CoverLetterSelector({ superbill, onTemplateSelected }: CoverLett
         </div>
       </div>
       
-      {selectedTemplate && (
+      {processedContent && (
         <Card className="p-4">
           <div className="prose prose-sm max-w-none">
             <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: processedContent.replace(/\n/g, '<br />') }} />

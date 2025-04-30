@@ -87,7 +87,7 @@ export function processTemplate(template: string, context: VariableContext): str
           path.toLowerCase().includes('cost')) {
         return `$${value.toFixed(2)}`;
       }
-      return value.toString();
+      return String(value);
     }
 
     // Return the value if it exists, otherwise return the original placeholder
@@ -99,6 +99,15 @@ export function processTemplate(template: string, context: VariableContext): str
  * Creates a context object from a superbill for template processing
  */
 export function createContextFromSuperbill(superbill: Superbill): VariableContext {
+  // Get the earliest and latest visit dates
+  const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
+  const earliestDate = visitDates.length > 0 
+    ? new Date(Math.min(...visitDates))
+    : new Date();
+  const latestDate = visitDates.length > 0 
+    ? new Date(Math.max(...visitDates))
+    : new Date();
+
   return {
     patient: {
       name: superbill.patientName,
@@ -112,12 +121,8 @@ export function createContextFromSuperbill(superbill: Superbill): VariableContex
       visits: superbill.visits,
       totalFee: superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0),
       visitDates: superbill.visits.map(visit => visit.date),
-      earliestDate: superbill.visits.length > 0 
-        ? new Date(Math.min(...superbill.visits.map(v => new Date(v.date).getTime())))
-        : null,
-      latestDate: superbill.visits.length > 0 
-        ? new Date(Math.max(...superbill.visits.map(v => new Date(v.date).getTime())))
-        : null,
+      earliestDate: earliestDate,
+      latestDate: latestDate,
     },
     clinic: {
       name: superbill.clinicName,
