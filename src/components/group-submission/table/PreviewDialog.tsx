@@ -34,7 +34,7 @@ export function PreviewDialog({
         </DialogHeader>
         
         {contentType === 'superbill' && (
-          <Preview superbill={content as Superbill} />
+          <Preview superbill={content as Superbill} showCoverLetter={true} />
         )}
         
         {contentType === 'patient' && (

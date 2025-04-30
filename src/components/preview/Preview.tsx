@@ -13,10 +13,11 @@ import { Label } from "@/components/ui/label";
 interface PreviewProps {
   superbill: Superbill;
   selectedTemplateId?: string;
+  showCoverLetter?: boolean;
 }
 
-export function Preview({ superbill, selectedTemplateId }: PreviewProps) {
-  const [showCoverLetter, setShowCoverLetter] = useState(true);
+export function Preview({ superbill, selectedTemplateId, showCoverLetter = true }: PreviewProps) {
+  const [displayCoverLetter, setDisplayCoverLetter] = useState(showCoverLetter);
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
@@ -27,14 +28,14 @@ export function Preview({ superbill, selectedTemplateId }: PreviewProps) {
         <div className="flex items-center space-x-2">
           <Switch
             id="cover-letter"
-            checked={showCoverLetter}
-            onCheckedChange={setShowCoverLetter}
+            checked={displayCoverLetter}
+            onCheckedChange={setDisplayCoverLetter}
           />
           <Label htmlFor="cover-letter">Show Cover Letter</Label>
         </div>
       </div>
       
-      {showCoverLetter && (
+      {displayCoverLetter && (
         <CoverLetterPreview 
           superbill={superbill} 
           selectedTemplateId={selectedTemplateId} 

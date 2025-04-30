@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Superbill } from "@/types/superbill";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,7 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
         <Preview 
           superbill={superbill} 
           selectedTemplateId={selectedTemplate?.id}
+          showCoverLetter={true}
         />
         <ActionButtons 
           superbill={superbill} 
