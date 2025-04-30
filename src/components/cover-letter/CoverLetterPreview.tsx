@@ -25,36 +25,68 @@ export function CoverLetterPreview({ superbill, selectedTemplateId }: CoverLette
 
       if (error) throw error;
       
-      // If no templates found, return a default template
+      // Create a custom template for the patient reimbursement guide
+      const customTemplate: LetterTemplate = {
+        id: 'custom-patient-reimbursement',
+        title: 'Patient Reimbursement Guide',
+        content: {
+          text: `Collective Family Chiropractic  
+700 Churchill Court, Suite 130  
+Woodstock, GA 30188  
+(678) 540-8850  
+info@collectivefamilychiro.com  
+
+{{dates.today}}
+
+RE: Request for Reimbursement — Chiropractic Services for {{patient.name}}
+
+Dear {{patient.salutation_name}},  
+
+Enclosed with this letter, you will find a superbill summarizing the chiropractic care you received at our office, along with individual invoices for your records. These documents are provided to assist you in submitting a reimbursement claim to your insurance provider for out-of-network services.
+
+Below is a simple set of steps to help guide you through the process:
+
+---
+
+**1. Access Your Claim Form**  
+Log in to your insurance provider's member portal or contact them directly to obtain their standard out-of-network reimbursement form.
+
+**2. Fill Out the Required Fields**  
+Complete all necessary sections of the form, including your personal information and the dates of care.
+
+**3. Attach Supporting Documents**  
+Include the following with your submission:  
+- The superbill we've provided  
+- The attached invoices  
+- Your completed claim form
+
+**4. Submit to Your Insurance Provider**  
+Most providers accept claims by mail, fax, or through a member portal. Be sure to keep a copy for your records.
+
+**5. Track Your Claim**  
+After processing, your provider will issue an Explanation of Benefits (EOB) and, if approved, send your reimbursement.
+
+---
+
+If your provider requests additional documentation, they're welcome to contact our clinic directly. We're happy to assist if needed.
+
+Thank you again for choosing Collective Family Chiropractic. We're honored to be part of your wellness journey.
+
+Warmly,  
+**The Collective Family Chiropractic Team**`
+        },
+        category: 'cover_letter',
+        created_by: 'system',
+        is_default: true
+      };
+      
+      // If no data or empty array, return the custom template
       if (!data || data.length === 0) {
-        return [{
-          id: 'default-cover-letter',
-          title: 'Default Cover Letter',
-          content: {
-            text: `{{dates.today}}
-
-To Whom It May Concern:
-
-Please find enclosed a superbill for services rendered to {{patient.name}} between {{superbill.earliestDate}} and {{superbill.latestDate}}. The total charge for these services is {{superbill.totalFee}}.
-
-I would appreciate your prompt attention to this claim. If you have any questions or require additional information, please contact our office.
-
-Thank you for your assistance.
-
-Sincerely,
-
-{{clinic.provider}}
-{{clinic.name}}
-{{clinic.phone}}
-{{clinic.email}}`
-          },
-          category: 'cover_letter',
-          created_by: 'system',
-          is_default: true
-        }] as LetterTemplate[];
+        return [customTemplate] as LetterTemplate[];
       }
       
-      return data as LetterTemplate[];
+      // Add the custom template to the beginning of the array
+      return [customTemplate, ...data] as LetterTemplate[];
     },
   });
   
@@ -64,14 +96,15 @@ Sincerely,
     
     let selectedTemplate;
     
+    // Try to find the specified template by ID
     if (selectedTemplateId) {
       selectedTemplate = templates.find(t => t.id === selectedTemplateId);
     }
     
-    // If no template is selected or found, use the default one
+    // If no template was found or specified, prioritize the custom template, then default, then first
     if (!selectedTemplate) {
-      selectedTemplate = templates.find(t => t.is_default && t.category === 'cover_letter') || 
-                         templates.find(t => t.category === 'cover_letter') ||
+      selectedTemplate = templates.find(t => t.id === 'custom-patient-reimbursement') || 
+                         templates.find(t => t.is_default && t.category === 'cover_letter') || 
                          templates[0];
     }
     
@@ -123,14 +156,40 @@ ${superbill.clinicEmail}`;
     );
   }
   
+  // Process markdown-like formatting
+  const processMarkdown = (text: string) => {
+    // Process bold text (**text**)
+    let processed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Process italic text (*text*)
+    processed = processed.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Process horizontal rules (---)
+    processed = processed.replace(/^---$/gm, '<hr />');
+    
+    // Process bullet points
+    processed = processed.replace(/- (.*?)$/gm, '<li>$1</li>');
+    
+    return processed;
+  };
+  
   return (
     <Card className="p-6 mb-6 cover-letter-preview">
       <div className="whitespace-pre-wrap">
-        {processedContent.split('\n').map((line, index) => (
-          <div key={index} className={line.trim() === "" ? "h-4" : ""}>
-            {line}
-          </div>
-        ))}
+        {processedContent.split('\n').map((line, index) => {
+          if (line.trim() === "") {
+            return <div key={index} className="h-4"></div>;
+          }
+          
+          const processedLine = processMarkdown(line);
+          return (
+            <div 
+              key={index} 
+              dangerouslySetInnerHTML={{ __html: processedLine }}
+              className={line.startsWith('-') ? 'pl-4' : ''}
+            />
+          );
+        })}
       </div>
     </Card>
   );

@@ -45,7 +45,7 @@ export function Preview({ superbill, selectedTemplateId, showCoverLetter = true 
       {displayCoverLetter && (
         <CoverLetterPreview 
           superbill={superbill} 
-          selectedTemplateId={selectedTemplateId} 
+          selectedTemplateId={selectedTemplateId || 'custom-patient-reimbursement'} 
         />
       )}
       

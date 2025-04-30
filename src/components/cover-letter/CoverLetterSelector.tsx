@@ -20,15 +20,24 @@ import { processTemplate, createContextFromSuperbill } from "@/lib/utils/templat
 interface CoverLetterSelectorProps {
   superbill: Superbill;
   onTemplateSelected?: (template: LetterTemplate, processedContent: string) => void;
+  defaultTemplate?: LetterTemplate | null;
 }
 
-export function CoverLetterSelector({ superbill, onTemplateSelected }: CoverLetterSelectorProps) {
+export function CoverLetterSelector({ superbill, onTemplateSelected, defaultTemplate }: CoverLetterSelectorProps) {
   const { toast } = useToast();
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(defaultTemplate?.id || null);
   const [processedContent, setProcessedContent] = useState<string>("");
+  const [customTemplates, setCustomTemplates] = useState<LetterTemplate[]>([]);
+  
+  // Add the default custom template if provided
+  useEffect(() => {
+    if (defaultTemplate && !customTemplates.some(t => t.id === defaultTemplate.id)) {
+      setCustomTemplates(prev => [defaultTemplate, ...prev]);
+    }
+  }, [defaultTemplate, customTemplates]);
   
   // Query to fetch available letter templates
-  const { data: templates, isLoading } = useQuery({
+  const { data: fetchedTemplates, isLoading } = useQuery({
     queryKey: ['letter_templates'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,40 +54,25 @@ export function CoverLetterSelector({ superbill, onTemplateSelected }: CoverLett
         throw error;
       }
       
-      // If no templates found, create a default template
-      if (!data || data.length === 0) {
-        const defaultTemplate = {
-          id: 'default-cover-letter',
-          title: 'Default Cover Letter',
-          content: {
-            text: `{{dates.today}}
-
-To Whom It May Concern:
-
-Please find enclosed a superbill for services rendered to {{patient.name}} between {{superbill.earliestDate}} and {{superbill.latestDate}}. The total charge for these services is {{superbill.totalFee}}.
-
-I would appreciate your prompt attention to this claim. If you have any questions or require additional information, please contact our office.
-
-Thank you for your assistance.
-
-Sincerely,
-
-{{clinic.provider}}
-{{clinic.name}}
-{{clinic.phone}}
-{{clinic.email}}`
-          },
-          category: 'cover_letter' as const,
-          created_by: 'system',
-          is_default: true
-        };
-        
-        return [defaultTemplate] as LetterTemplate[];
-      }
-      
       return data as LetterTemplate[];
     },
   });
+  
+  // Combine fetched templates with custom templates
+  const templates = React.useMemo(() => {
+    if (!fetchedTemplates) return customTemplates;
+    
+    // Filter out duplicates based on ID
+    const combinedTemplates = [...customTemplates];
+    
+    fetchedTemplates.forEach(template => {
+      if (!combinedTemplates.some(t => t.id === template.id)) {
+        combinedTemplates.push(template);
+      }
+    });
+    
+    return combinedTemplates;
+  }, [fetchedTemplates, customTemplates]);
 
   // Find the selected template
   const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
@@ -96,46 +90,85 @@ Sincerely,
     }
   }, [selectedTemplate, superbill, onTemplateSelected]);
   
-  // Select the first template by default when templates load
+  // Select the default template or first template when templates load
   useEffect(() => {
     if (templates?.length && !selectedTemplateId) {
-      const defaultTemplate = templates.find(t => t.is_default) || templates[0];
-      setSelectedTemplateId(defaultTemplate.id);
+      if (defaultTemplate) {
+        setSelectedTemplateId(defaultTemplate.id);
+      } else {
+        const template = templates.find(t => t.is_default) || templates[0];
+        setSelectedTemplateId(template.id);
+      }
     }
-  }, [templates, selectedTemplateId]);
+  }, [templates, selectedTemplateId, defaultTemplate]);
   
-  // If there are no templates, create a fallback content string
+  // Create the patient reimbursement guide template if not already in the list
   useEffect(() => {
     if ((!templates || templates.length === 0) && !isLoading) {
-      const context = createContextFromSuperbill(superbill);
-      const fallbackContent = `${new Date().toLocaleDateString()}
+      // Create and process the custom template
+      const customTemplateText = `Collective Family Chiropractic  
+700 Churchill Court, Suite 130  
+Woodstock, GA 30188  
+(678) 540-8850  
+info@collectivefamilychiro.com  
 
-To Whom It May Concern:
+{{dates.today}}
 
-Please find enclosed a superbill for services rendered to ${superbill.patientName}. The total charge for these services is $${superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0).toFixed(2)}.
+RE: Request for Reimbursement — Chiropractic Services for {{patient.name}}
 
-I would appreciate your prompt attention to this claim. If you have any questions or require additional information, please contact our office.
+Dear {{patient.salutation_name}},  
 
-Thank you for your assistance.
+Enclosed with this letter, you will find a superbill summarizing the chiropractic care you received at our office, along with individual invoices for your records. These documents are provided to assist you in submitting a reimbursement claim to your insurance provider for out-of-network services.
 
-Sincerely,
+Below is a simple set of steps to help guide you through the process:
 
-${superbill.providerName}
-${superbill.clinicName}
-${superbill.clinicPhone}
-${superbill.clinicEmail}`;
+---
+
+**1. Access Your Claim Form**  
+Log in to your insurance provider's member portal or contact them directly to obtain their standard out-of-network reimbursement form.
+
+**2. Fill Out the Required Fields**  
+Complete all necessary sections of the form, including your personal information and the dates of care.
+
+**3. Attach Supporting Documents**  
+Include the following with your submission:  
+- The superbill we've provided  
+- The attached invoices  
+- Your completed claim form
+
+**4. Submit to Your Insurance Provider**  
+Most providers accept claims by mail, fax, or through a member portal. Be sure to keep a copy for your records.
+
+**5. Track Your Claim**  
+After processing, your provider will issue an Explanation of Benefits (EOB) and, if approved, send your reimbursement.
+
+---
+
+If your provider requests additional documentation, they're welcome to contact our clinic directly. We're happy to assist if needed.
+
+Thank you again for choosing Collective Family Chiropractic. We're honored to be part of your wellness journey.
+
+Warmly,  
+**The Collective Family Chiropractic Team**`;
       
-      setProcessedContent(fallbackContent);
+      const context = createContextFromSuperbill(superbill);
+      const processed = processTemplate(customTemplateText, context);
+      
+      const customTemplate: LetterTemplate = {
+        id: 'custom-patient-reimbursement',
+        title: 'Patient Reimbursement Guide',
+        content: { text: customTemplateText },
+        category: 'cover_letter',
+        created_by: 'system',
+        is_default: true
+      };
+      
+      setCustomTemplates([customTemplate]);
+      setSelectedTemplateId(customTemplate.id);
+      setProcessedContent(processed);
       
       if (onTemplateSelected) {
-        onTemplateSelected({
-          id: 'fallback',
-          title: 'Default Cover Letter',
-          content: { text: fallbackContent },
-          category: 'cover_letter',
-          created_by: 'system',
-          is_default: true
-        }, fallbackContent);
+        onTemplateSelected(customTemplate, processed);
       }
     }
   }, [templates, isLoading, superbill, onTemplateSelected]);

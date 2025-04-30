@@ -34,7 +34,11 @@ export function PreviewDialog({
         </DialogHeader>
         
         {contentType === 'superbill' && (
-          <Preview superbill={content as Superbill} showCoverLetter={true} />
+          <Preview 
+            superbill={content as Superbill} 
+            showCoverLetter={true}
+            selectedTemplateId="custom-patient-reimbursement"
+          />
         )}
         
         {contentType === 'patient' && (
