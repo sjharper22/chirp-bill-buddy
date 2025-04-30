@@ -192,3 +192,19 @@ export const commonCPTCodes = [
   { value: "72040", label: "72040 - X-ray of spine, cervical, 2-3 views" },
   { value: "72100", label: "72100 - X-ray of spine, lumbosacral, 2-3 views" },
 ];
+
+// Added for SuperbillCard component
+export const formatStatus = (status: string): string => {
+  return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+};
+
+// Added for SuperbillCard component
+export const getStatusVariant = (status: string): 'default' | 'success' | 'warning' | 'info' | 'error' => {
+  switch (status) {
+    case 'draft': return 'info';
+    case 'in_progress': return 'warning';
+    case 'in_review': return 'info';
+    case 'completed': return 'success';
+    default: return 'default';
+  }
+};

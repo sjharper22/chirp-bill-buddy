@@ -1,10 +1,11 @@
 
-import { FileText, Plus, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SuperbillCard } from "@/components/SuperbillCard";
-import { Superbill } from "@/types/superbill";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Superbill } from "@/types/superbill";
+import { Button } from "@/components/ui/button";
+import { Search, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
 
 interface RecentSuperbillsProps {
   filteredSuperbills: Superbill[];
@@ -14,27 +15,41 @@ interface RecentSuperbillsProps {
   totalSuperbills: number;
 }
 
-export function RecentSuperbills({ 
-  filteredSuperbills, 
-  searchTerm, 
+export function RecentSuperbills({
+  filteredSuperbills,
+  searchTerm,
   onSearchChange,
   onDelete,
-  totalSuperbills 
+  totalSuperbills
 }: RecentSuperbillsProps) {
   const navigate = useNavigate();
-
+  const [expandSearch, setExpandSearch] = useState(false);
+  
   return (
-    <div className="mb-8">
-      <div className="flex justify-between items-center mb-4">
+    <div className="mb-10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h2 className="text-xl font-semibold">Recent Superbills</h2>
-        <div className="max-w-xs relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search superbills..."
-            value={searchTerm}
-            onChange={e => onSearchChange(e.target.value)}
-            className="pl-10"
-          />
+        
+        <div className="flex items-center gap-4 mt-4 sm:mt-0 w-full sm:w-auto">
+          <div className={`relative transition-all ${expandSearch ? 'w-full sm:w-64' : 'w-10'}`}>
+            <Search 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer z-10" 
+              onClick={() => setExpandSearch(true)}
+            />
+            <Input
+              placeholder="Search superbills..."
+              value={searchTerm}
+              onChange={e => onSearchChange(e.target.value)}
+              onFocus={() => setExpandSearch(true)}
+              onBlur={() => searchTerm === '' && setExpandSearch(false)}
+              className={`transition-all pl-10 ${expandSearch ? 'opacity-100 w-full' : 'opacity-0 w-0 p-0 -ml-10 sm:ml-0'}`}
+            />
+          </div>
+          
+          <Button onClick={() => navigate("/new")} className="whitespace-nowrap">
+            <Plus className="mr-2 h-4 w-4" />
+            New Superbill
+          </Button>
         </div>
       </div>
       
@@ -49,27 +64,24 @@ export function RecentSuperbills({
             />
           ))
         ) : (
-          <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-16 bg-white border rounded-lg shadow-sm">
-            <div className="max-w-md mx-auto">
-              <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900">No superbills found</h3>
-              <p className="mt-1 text-gray-500">
-                {searchTerm ? "Try adjusting your search terms" : "Create your first superbill to get started"}
-              </p>
-              {!searchTerm && (
-                <Button onClick={() => navigate("/new")} className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create First Superbill
-                </Button>
-              )}
-            </div>
+          <div className="col-span-full flex flex-col items-center justify-center py-10 border rounded-lg bg-white">
+            <p className="text-xl font-medium text-gray-500 mb-2">No superbills found</p>
+            <p className="text-gray-400 mb-6">Let's create your first superbill</p>
+            <Button onClick={() => navigate("/new")}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Superbill
+            </Button>
           </div>
         )}
       </div>
       
-      {filteredSuperbills.length > 0 && totalSuperbills > 6 && (
+      {filteredSuperbills.length > 0 && totalSuperbills > filteredSuperbills.length && (
         <div className="flex justify-center mt-6">
-          <Button variant="outline" onClick={() => navigate("/superbills")}>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/grouped-submission")}
+            className="mx-auto"
+          >
             View All Superbills
           </Button>
         </div>

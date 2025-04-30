@@ -1,8 +1,8 @@
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { SuperbillCard } from "@/components/SuperbillCard";
 import { KanbanCardProps } from "./types";
+import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
 
 export function KanbanCard({ 
   superbill, 

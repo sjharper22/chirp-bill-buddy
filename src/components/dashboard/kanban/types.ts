@@ -1,11 +1,11 @@
 
 import { Superbill, SuperbillStatus } from "@/types/superbill";
-import { IconType } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 export interface KanbanColumn {
   id: SuperbillStatus;
   title: string;
-  icon: IconType;
+  icon: LucideIcon;
   description: string;
   variant?: 'default' | 'success' | 'warning' | 'info' | 'error';
 }
