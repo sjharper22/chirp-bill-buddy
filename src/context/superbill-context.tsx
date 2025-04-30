@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Superbill, ClinicDefaults } from "@/types/superbill";
+import { Superbill, ClinicDefaults, SuperbillStatus } from "@/types/superbill";
 
 // Default clinic information from the provided image
 const DEFAULT_CLINIC_INFO: ClinicDefaults = {
@@ -25,6 +25,7 @@ interface SuperbillContextType {
   deleteSuperbill: (id: string) => void;
   getSuperbill: (id: string) => Superbill | undefined;
   updateClinicDefaults: (defaults: Partial<ClinicDefaults>) => void;
+  updateSuperbillStatus: (id: string, status: SuperbillStatus) => void;
 }
 
 const SuperbillContext = createContext<SuperbillContextType | undefined>(undefined);
@@ -48,7 +49,14 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
           }
           return value;
         });
-        setSuperbills(parsed);
+        
+        // Ensure all superbills have a status
+        const parsedWithStatus = parsed.map((bill: any) => ({
+          ...bill,
+          status: bill.status || 'draft',
+        }));
+        
+        setSuperbills(parsedWithStatus);
       } catch (error) {
         console.error("Failed to parse saved superbills:", error);
       }
@@ -74,7 +82,12 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
   }, [clinicDefaults]);
 
   const addSuperbill = (superbill: Superbill) => {
-    setSuperbills(prev => [...prev, superbill]);
+    // Ensure new superbills have a status
+    const newSuperbill = {
+      ...superbill,
+      status: superbill.status || 'draft'
+    };
+    setSuperbills(prev => [...prev, newSuperbill]);
   };
 
   const updateSuperbill = (id: string, updatedSuperbill: Superbill) => {
@@ -93,6 +106,14 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
     setClinicDefaults(prev => ({ ...prev, ...defaults }));
   };
 
+  const updateSuperbillStatus = (id: string, status: SuperbillStatus) => {
+    setSuperbills(prev => 
+      prev.map(bill => 
+        bill.id === id ? { ...bill, status } : bill
+      )
+    );
+  };
+
   return (
     <SuperbillContext.Provider 
       value={{ 
@@ -102,7 +123,8 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
         updateSuperbill, 
         deleteSuperbill, 
         getSuperbill,
-        updateClinicDefaults 
+        updateClinicDefaults,
+        updateSuperbillStatus 
       }}
     >
       {children}

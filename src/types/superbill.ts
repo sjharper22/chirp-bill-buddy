@@ -9,6 +9,8 @@ export interface Visit {
   mainComplaints: string[]; // Changed from mainComplaint (string) to mainComplaints (string[])
 }
 
+export type SuperbillStatus = 'draft' | 'in_progress' | 'in_review' | 'completed';
+
 export interface Superbill {
   id: string;
   patientName: string;
@@ -28,9 +30,10 @@ export interface Superbill {
   visits: Visit[];
   createdAt: Date;
   updatedAt: Date;
+  status: SuperbillStatus;
 }
 
-export type SuperbillFormData = Omit<Superbill, "id" | "createdAt" | "updatedAt">;
+export type SuperbillFormData = Omit<Superbill, "id" | "createdAt" | "updatedAt" | "status">;
 
 export interface ClinicDefaults {
   clinicName: string;

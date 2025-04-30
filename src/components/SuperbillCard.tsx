@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Edit, Eye, Trash2 } from "lucide-react";
+import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 
 interface SuperbillCardProps {
   superbill: Superbill;
@@ -39,6 +40,22 @@ export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardPro
         ? `${allComplaints.slice(0, 2).join(", ")} and ${allComplaints.length - 2} more`
         : allComplaints.join(", "))
     : null;
+    
+  // Map status to variant for StatusBadge
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'draft': return 'info';
+      case 'in_progress': return 'warning';
+      case 'in_review': return 'info';
+      case 'completed': return 'success';
+      default: return 'default';
+    }
+  };
+
+  // Format status for display
+  const formatStatus = (status: string) => {
+    return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
   
   return (
     <Card className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
@@ -48,6 +65,13 @@ export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardPro
           <div className="text-sm bg-primary/10 text-primary font-medium px-2 py-0.5 rounded">
             {formatDate(superbill.issueDate)}
           </div>
+        </div>
+        
+        <div className="flex items-center mb-2">
+          <StatusBadge 
+            status={formatStatus(superbill.status)} 
+            variant={getStatusVariant(superbill.status)}
+          />
         </div>
         
         <div className="text-sm text-muted-foreground mb-4">

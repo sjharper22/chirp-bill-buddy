@@ -9,18 +9,22 @@ import { toast } from "@/components/ui/use-toast";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { RecentSuperbills } from "@/components/dashboard/RecentSuperbills";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { KanbanBoard } from "@/components/dashboard/KanbanBoard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SuperbillStatus } from "@/types/superbill";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { superbills, deleteSuperbill } = useSuperbill();
+  const { superbills, deleteSuperbill, updateSuperbillStatus } = useSuperbill();
   const { patients } = usePatient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("list");
   
   // Filter superbills based on search term
   const filteredSuperbills = superbills.filter(bill => 
     bill.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     bill.id.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 6); // Show only the most recent 6 superbills
+  ).slice(0, 6); // Show only the most recent 6 superbills in list view
   
   // Calculate total visits across all superbills
   const totalVisits = superbills.reduce((total, bill) => total + bill.visits.length, 0);
@@ -39,6 +43,10 @@ export default function Dashboard() {
       title: "Superbill deleted",
       description: "The superbill has been deleted successfully.",
     });
+  };
+
+  const handleStatusChange = (id: string, newStatus: SuperbillStatus) => {
+    updateSuperbillStatus(id, newStatus);
   };
   
   return (
@@ -64,13 +72,30 @@ export default function Dashboard() {
         averageFee={averageFee}
       />
       
-      <RecentSuperbills 
-        filteredSuperbills={filteredSuperbills}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onDelete={handleDeleteSuperbill}
-        totalSuperbills={superbills.length}
-      />
+      <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="list">List View</TabsTrigger>
+          <TabsTrigger value="board">Board View</TabsTrigger>
+        </TabsList>
+        <TabsContent value="list" className="mt-6">
+          <RecentSuperbills 
+            filteredSuperbills={filteredSuperbills}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onDelete={handleDeleteSuperbill}
+            totalSuperbills={superbills.length}
+          />
+        </TabsContent>
+        <TabsContent value="board" className="mt-6">
+          <KanbanBoard
+            superbills={superbills}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onDelete={handleDeleteSuperbill}
+            onStatusChange={handleStatusChange}
+          />
+        </TabsContent>
+      </Tabs>
       
       <QuickActions />
     </div>
