@@ -18,13 +18,13 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="min-h-screen flex w-full bg-gray-50">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-16 border-b bg-white flex items-center justify-between px-6">
+          <header className="h-16 border-b bg-white flex items-center justify-between px-6 z-10">
             <div className="flex items-center">
               <h1 className="text-xl font-semibold text-gray-800">Superbill Generator</h1>
             </div>
             <UserMenu />
           </header>
-          <main className="flex-1 p-8 overflow-auto pb-24 md:pb-8">
+          <main className="flex-1 p-4 md:p-8 overflow-auto pb-20 md:pb-8">
             {children}
           </main>
           <MobileNavigation />

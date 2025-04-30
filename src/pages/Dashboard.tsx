@@ -96,15 +96,13 @@ export default function Dashboard() {
         </TabsContent>
         
         <TabsContent value="board" className="mt-6">
-          <div className="mb-6">
-            <KanbanBoard
-              superbills={superbills}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              onDelete={handleDeleteSuperbill}
-              onStatusChange={handleStatusChange}
-            />
-          </div>
+          <KanbanBoard
+            superbills={superbills}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onDelete={handleDeleteSuperbill}
+            onStatusChange={handleStatusChange}
+          />
         </TabsContent>
       </Tabs>
     </div>

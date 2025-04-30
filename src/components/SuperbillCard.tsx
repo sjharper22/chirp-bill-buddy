@@ -73,7 +73,7 @@ export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardPro
           </div>
         </div>
         
-        <div className="flex items-center mb-2">
+        <div className="mb-2">
           <StatusBadge 
             status={formatStatus(superbill.status)} 
             variant={getStatusVariant(superbill.status)}

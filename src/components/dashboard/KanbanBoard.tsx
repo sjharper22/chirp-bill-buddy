@@ -166,8 +166,10 @@ export function KanbanBoard({
                 <div className="flex items-center">
                   <column.icon className="h-5 w-5 mr-2 text-muted-foreground" />
                   <h3 className="font-medium">{column.title}</h3>
-                  <StatusBadge status={column.title} variant={column.variant} className="ml-2" />
-                  <span className="text-sm font-medium ml-1">{columnSuperbills.length}</span>
+                  <div className="ml-2 flex items-center">
+                    <StatusBadge status={column.title} variant={column.variant} className="mr-1" />
+                    <span className="text-sm font-medium">{columnSuperbills.length}</span>
+                  </div>
                 </div>
               </div>
               
@@ -176,7 +178,7 @@ export function KanbanBoard({
                   columnSuperbills.map(superbill => (
                     <div 
                       key={superbill.id} 
-                      className="pb-0"
+                      className="relative"
                       draggable
                       onDragStart={(e) => handleDragStart(e, superbill.id)}
                     >
@@ -188,7 +190,8 @@ export function KanbanBoard({
                         />
                       </div>
                       
-                      <div className="flex flex-wrap mt-2 px-1 gap-1 justify-end">
+                      {/* Move actions - positioned below the card with spacing */}
+                      <div className="mt-2 flex flex-wrap gap-1 justify-end">
                         {columns
                           .filter(targetColumn => targetColumn.id !== column.id)
                           .map(targetColumn => (
