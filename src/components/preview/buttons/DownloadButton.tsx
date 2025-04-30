@@ -7,12 +7,14 @@ import { useState } from "react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { formatDate } from "@/lib/utils/superbill-utils";
+import { generatePrintableHTML } from "@/lib/utils/html-generator";
 
 interface DownloadButtonProps {
   superbill: Superbill;
+  coverLetterContent?: string;
 }
 
-export function DownloadButton({ superbill }: DownloadButtonProps) {
+export function DownloadButton({ superbill, coverLetterContent }: DownloadButtonProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -24,22 +26,24 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
     });
     
     try {
-      // Get the preview element
-      const previewElement = document.querySelector(".superbill-preview-content");
-      
-      if (!previewElement) {
-        throw new Error("Preview element not found");
-      }
+      // Create a temporary container for HTML content
+      const tempContainer = document.createElement("div");
+      tempContainer.style.position = "absolute";
+      tempContainer.style.left = "-9999px";
+      tempContainer.style.top = "-9999px";
+      // Generate HTML with cover letter if available
+      tempContainer.innerHTML = generatePrintableHTML(superbill, coverLetterContent);
+      document.body.appendChild(tempContainer);
       
       // Use html2canvas to capture the preview as an image
-      const canvas = await html2canvas(previewElement as HTMLElement, {
+      const canvas = await html2canvas(tempContainer, {
         scale: 2, // Higher scale for better quality
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff"
       });
       
-      // Create PDF with appropriate page size (A4)
+      // Create PDF with appropriate page size
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -74,6 +78,9 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
       
       // Save the PDF
       pdf.save(fileName);
+      
+      // Clean up
+      document.body.removeChild(tempContainer);
       
       toast({
         title: "PDF Downloaded",

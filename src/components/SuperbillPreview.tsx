@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Preview } from "@/components/preview/Preview";
 import { ActionButtons } from "@/components/preview/ActionButtons";
+import { CoverLetterSelector } from "@/components/cover-letter/CoverLetterSelector";
+import { LetterTemplate } from "@/types/template";
 
 interface SuperbillPreviewProps {
   superbill: Superbill;
@@ -12,6 +14,13 @@ interface SuperbillPreviewProps {
 
 export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<LetterTemplate | null>(null);
+  const [processedContent, setProcessedContent] = useState<string>("");
+  
+  const handleTemplateSelected = (template: LetterTemplate, content: string) => {
+    setSelectedTemplate(template);
+    setProcessedContent(content);
+  };
   
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -25,8 +34,19 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
           <DialogTitle>Superbill Preview</DialogTitle>
         </DialogHeader>
         
-        <Preview superbill={superbill} />
-        <ActionButtons superbill={superbill} />
+        <CoverLetterSelector 
+          superbill={superbill}
+          onTemplateSelected={handleTemplateSelected}
+        />
+        
+        <Preview 
+          superbill={superbill} 
+          selectedTemplateId={selectedTemplate?.id}
+        />
+        <ActionButtons 
+          superbill={superbill} 
+          coverLetterContent={processedContent}
+        />
       </DialogContent>
     </Dialog>
   );

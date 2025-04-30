@@ -2,10 +2,19 @@
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "./superbill-utils";
 
-export function generatePrintableHTML(superbill: Superbill): string {
+export function generatePrintableHTML(superbill: Superbill, coverLetterContent?: string): string {
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
+  
+  let coverLetterHTML = '';
+  if (coverLetterContent) {
+    coverLetterHTML = `
+      <div class="cover-letter" style="margin-bottom: 30px; page-break-after: always;">
+        <div style="white-space: pre-wrap;">${coverLetterContent.replace(/\n/g, '<br />')}</div>
+      </div>
+    `;
+  }
   
   return `
     <!DOCTYPE html>
@@ -71,15 +80,23 @@ export function generatePrintableHTML(superbill: Superbill): string {
           padding-top: 10px;
           border-top: 1px solid #ddd;
         }
+        .cover-letter {
+          margin-bottom: 30px;
+          border-bottom: 1px dashed #ccc;
+          padding-bottom: 20px;
+        }
         @media print {
           body { margin: 0; }
           button { display: none; }
+          .page-break { page-break-before: always; }
         }
       </style>
     </head>
     <body>
       <div class="container">
-        <div class="header">
+        ${coverLetterHTML}
+        
+        <div class="header page-break">
           <h1>SUPERBILL</h1>
         </div>
         

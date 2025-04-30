@@ -7,9 +7,10 @@ import { generatePrintableHTML } from "@/lib/utils/html-generator";
 
 interface PrintButtonProps {
   superbill: Superbill;
+  coverLetterContent?: string;
 }
 
-export function PrintButton({ superbill }: PrintButtonProps) {
+export function PrintButton({ superbill, coverLetterContent }: PrintButtonProps) {
   const { toast } = useToast();
   
   const handlePrint = () => {
@@ -23,7 +24,7 @@ export function PrintButton({ superbill }: PrintButtonProps) {
       return;
     }
     
-    const printableContent = generatePrintableHTML(superbill);
+    const printableContent = generatePrintableHTML(superbill, coverLetterContent);
     
     printWindow.document.write(printableContent);
     printWindow.document.close();
