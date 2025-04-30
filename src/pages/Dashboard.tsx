@@ -50,7 +50,7 @@ export default function Dashboard() {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>

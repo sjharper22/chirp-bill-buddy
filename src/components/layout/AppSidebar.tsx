@@ -8,6 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { PracticeLogo } from "@/components/PracticeLogo";
 import {
@@ -52,9 +53,12 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon" variant="sidebar">
       <div className="p-4">
-        <PracticeLogo />
+        <div className="flex items-center justify-between">
+          <PracticeLogo />
+          <SidebarTrigger className="ml-2" />
+        </div>
       </div>
       <SidebarContent>
         <SidebarGroup>
@@ -66,6 +70,7 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     className={location.pathname === item.url ? "bg-accent" : ""}
                     onClick={() => navigate(item.url)}
+                    tooltip={item.title}
                   >
                     <item.icon className="w-4 h-4" />
                     <span>{item.title}</span>
@@ -85,6 +90,7 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     className={location.pathname === item.url ? "bg-accent" : ""}
                     onClick={() => navigate(item.url)}
+                    tooltip={item.title}
                   >
                     <item.icon className="w-4 h-4" />
                     <span>{item.title}</span>
@@ -104,6 +110,7 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     className={location.pathname === item.url ? "bg-accent" : ""}
                     onClick={() => navigate(item.url)}
+                    tooltip={item.title}
                   >
                     <item.icon className="w-4 h-4" />
                     <span>{item.title}</span>
