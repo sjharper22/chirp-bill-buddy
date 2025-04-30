@@ -45,7 +45,8 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
       defaultCptCodes: [...clinicDefaults.defaultCptCodes],
       defaultMainComplaints: [...(clinicDefaults.defaultMainComplaints || [])],
       defaultFee: clinicDefaults.defaultFee,
-      visits: []
+      visits: [],
+      status: 'draft' // Added the status property with default value 'draft'
     };
   });
   
