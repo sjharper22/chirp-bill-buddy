@@ -60,7 +60,7 @@ export function processTemplate(template: string, context: VariableContext): str
 
   return template.replace(variablePattern, (match, path) => {
     const pathParts = path.trim().split('.');
-    let value = context;
+    let value: any = context;
 
     // Navigate through the nested properties
     for (const part of pathParts) {
@@ -91,7 +91,7 @@ export function processTemplate(template: string, context: VariableContext): str
     }
 
     // Return the value if it exists, otherwise return the original placeholder
-    return value !== undefined && value !== null ? value.toString() : match;
+    return value !== undefined && value !== null ? String(value) : match;
   });
 }
 
