@@ -7,7 +7,6 @@ import { ActionButtons } from "@/components/preview/ActionButtons";
 import { CoverLetterSelector } from "@/components/cover-letter/CoverLetterSelector";
 import { LetterTemplate } from "@/types/template";
 import { createContextFromSuperbill, processTemplate } from "@/lib/utils/template-utils";
-import { format } from "date-fns";
 
 interface SuperbillPreviewProps {
   superbill: Superbill;
