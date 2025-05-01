@@ -6,6 +6,7 @@ import { PatientSearch } from "@/components/patient/PatientSearch";
 import { PatientEmptyState } from "@/components/patient/PatientEmptyState";
 import { PatientLoading } from "@/components/patient/PatientLoading";
 import { usePatientPage } from "@/hooks/usePatientPage";
+import { useEffect } from "react";
 
 export default function Patients() {
   const navigate = useNavigate();
@@ -19,11 +20,17 @@ export default function Patients() {
     setSearchQuery,
     loading,
     canEdit,
+    fetchPatients,
     handleAddPatient,
     togglePatientSelection,
     selectAllPatients,
     clearPatientSelection
   } = usePatientPage();
+  
+  // Force a refresh when the component mounts
+  useEffect(() => {
+    fetchPatients();
+  }, []);
   
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
@@ -64,6 +71,7 @@ export default function Patients() {
           onSelectAll={selectAllPatients}
           onClearSelection={clearPatientSelection}
           canEdit={canEdit}
+          onRefresh={fetchPatients}
         />
       )}
     </div>

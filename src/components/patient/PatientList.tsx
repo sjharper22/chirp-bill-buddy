@@ -4,6 +4,8 @@ import { useState } from "react";
 import { PatientCard } from "./PatientCard";
 import { PatientListActions } from "./PatientListActions";
 import { PatientEmptyResults } from "./PatientEmptyResults";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 interface PatientListProps {
   patients: PatientProfileType[];
@@ -25,6 +27,7 @@ export function PatientList({
   onRefresh
 }: PatientListProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Filter patients based on search term
   const filteredPatients = patients.filter(patient => 
@@ -33,17 +36,39 @@ export function PatientList({
   
   const allSelected = patients.length > 0 && selectedPatientIds.length === patients.length;
   
+  const handleRefresh = async () => {
+    if (onRefresh) {
+      setIsRefreshing(true);
+      await onRefresh();
+      setIsRefreshing(false);
+    }
+  };
+  
   return (
     <div className="space-y-4">
-      <PatientListActions 
-        patientsCount={filteredPatients.length}
-        selectedPatientIds={selectedPatientIds}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onSelectAll={onSelectAll}
-        onClearSelection={onClearSelection}
-        allSelected={allSelected}
-      />
+      <div className="flex justify-between items-center">
+        <PatientListActions 
+          patientsCount={filteredPatients.length}
+          selectedPatientIds={selectedPatientIds}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onSelectAll={onSelectAll}
+          onClearSelection={onClearSelection}
+          allSelected={allSelected}
+        />
+        
+        {onRefresh && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        )}
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredPatients.length === 0 ? (

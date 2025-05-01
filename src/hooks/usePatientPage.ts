@@ -1,27 +1,31 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { PatientProfile } from "@/types/patient";
 import { useAuth } from "@/context/auth-context";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { patientService } from "@/services/patientService";
+import { usePatient } from "@/context/patient-context";
 
 export function usePatientPage() {
   const { isAdmin, isEditor } = useAuth();
   const { toast } = useToast();
+  const { patients: localPatients, addPatient, togglePatientSelection, selectAllPatients, clearPatientSelection, selectedPatientIds } = usePatient();
   
   const [patients, setPatients] = useState<PatientProfile[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientProfile[]>([]);
-  const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   
   const canEdit = isAdmin || isEditor;
-  
-  const fetchPatients = async () => {
+
+  // Use the fetchPatients function from useCallback to prevent unnecessary recreations
+  const fetchPatients = useCallback(async () => {
     setLoading(true);
     try {
+      console.log("Fetching patients from Supabase...");
       const data = await patientService.getAll();
+      console.log("Patients fetched:", data);
       setPatients(data);
       setFilteredPatients(data);
     } catch (error) {
@@ -34,8 +38,9 @@ export function usePatientPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
   
+  // Initial fetch
   useEffect(() => {
     fetchPatients();
     
@@ -44,8 +49,9 @@ export function usePatientPage() {
     
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
-  }, []);
+  }, [fetchPatients]);
   
+  // Filter patients based on search query
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setFilteredPatients(patients);
@@ -59,7 +65,12 @@ export function usePatientPage() {
   
   const handleAddPatient = async (patientData: Omit<PatientProfile, "id">) => {
     try {
+      // First add to local state
+      const newPatient = addPatient(patientData);
+      
+      // Then save to database
       await patientService.create(patientData);
+      
       setDialogOpen(false);
       toast({
         title: "Patient Added",
@@ -74,24 +85,6 @@ export function usePatientPage() {
         variant: "destructive",
       });
     }
-  };
-  
-  const togglePatientSelection = (id: string) => {
-    setSelectedPatientIds(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(patientId => patientId !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
-  };
-  
-  const selectAllPatients = () => {
-    setSelectedPatientIds(filteredPatients.map(patient => patient.id));
-  };
-  
-  const clearPatientSelection = () => {
-    setSelectedPatientIds([]);
   };
   
   return {

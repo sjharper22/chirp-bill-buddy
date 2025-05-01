@@ -3,12 +3,13 @@ import { useState } from "react";
 import { SuperbillStatus } from "@/types/superbill";
 import { useSuperbill } from "@/context/superbill-context";
 import { usePatient } from "@/context/patient-context";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { patientService } from "@/services/patientService";
 
 export function useDashboard() {
   const { superbills, deleteSuperbill, updateSuperbillStatus } = useSuperbill();
   const { patients, addPatient, getPatient } = usePatient();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
@@ -75,37 +76,37 @@ export function useDashboard() {
         const existingPatient = getPatient(superbill.patientName);
         
         if (!existingPatient) {
-          // Extract common complaints from visits
-          const commonComplaints: string[] = [];
-          superbill.visits.forEach(visit => {
-            if (visit.mainComplaints) {
-              visit.mainComplaints.forEach(complaint => {
-                if (!commonComplaints.includes(complaint)) {
-                  commonComplaints.push(complaint);
-                }
-              });
-            }
-          });
-          
-          // Extract ICD and CPT codes
-          const commonIcdCodes: string[] = [];
-          const commonCptCodes: string[] = [];
-          
-          superbill.visits.forEach(visit => {
-            visit.icdCodes.forEach(code => {
-              if (!commonIcdCodes.includes(code)) {
-                commonIcdCodes.push(code);
+          try {
+            // Extract common complaints from visits
+            const commonComplaints: string[] = [];
+            superbill.visits.forEach(visit => {
+              if (visit.mainComplaints) {
+                visit.mainComplaints.forEach(complaint => {
+                  if (!commonComplaints.includes(complaint)) {
+                    commonComplaints.push(complaint);
+                  }
+                });
               }
             });
             
-            visit.cptCodes.forEach(code => {
-              if (!commonCptCodes.includes(code)) {
-                commonCptCodes.push(code);
-              }
+            // Extract ICD and CPT codes
+            const commonIcdCodes: string[] = [];
+            const commonCptCodes: string[] = [];
+            
+            superbill.visits.forEach(visit => {
+              visit.icdCodes.forEach(code => {
+                if (!commonIcdCodes.includes(code)) {
+                  commonIcdCodes.push(code);
+                }
+              });
+              
+              visit.cptCodes.forEach(code => {
+                if (!commonCptCodes.includes(code)) {
+                  commonCptCodes.push(code);
+                }
+              });
             });
-          });
-          
-          try {
+            
             // Create the patient data object
             const patientData = {
               name: superbill.patientName,
@@ -116,12 +117,12 @@ export function useDashboard() {
               notes: `Created from superbill ${superbill.id}`
             };
             
-            // Add to local context first to maintain UI responsiveness
-            addPatient(patientData);
+            // Create promise for database operation but execute add immediately
+            const newPatient = addPatient(patientData);
             
-            // Then save to database
             const promise = patientService.create(patientData)
               .then(() => {
+                console.log("Patient added successfully:", patientData.name);
                 addedCount++;
               })
               .catch((error) => {
@@ -135,6 +136,7 @@ export function useDashboard() {
             errorCount++;
           }
         } else {
+          console.log("Patient already exists:", superbill.patientName);
           skippedCount++;
         }
       }
