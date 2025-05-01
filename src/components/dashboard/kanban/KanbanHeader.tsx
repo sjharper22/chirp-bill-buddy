@@ -1,11 +1,18 @@
 
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, UserPlus, CheckSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { KanbanHeaderProps } from "./types";
 
-export function KanbanHeader({ searchTerm, onSearchChange }: KanbanHeaderProps) {
+export function KanbanHeader({ 
+  searchTerm, 
+  onSearchChange, 
+  selectionMode, 
+  toggleSelectionMode,
+  selectedCount,
+  onAddSelectedToPatients
+}: KanbanHeaderProps) {
   const navigate = useNavigate();
   
   return (
@@ -21,10 +28,31 @@ export function KanbanHeader({ searchTerm, onSearchChange }: KanbanHeaderProps) 
             className="pl-10 w-full sm:w-[250px]"
           />
         </div>
-        <Button onClick={() => navigate("/new")}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Superbill
-        </Button>
+        
+        {toggleSelectionMode && (
+          <Button 
+            onClick={toggleSelectionMode} 
+            variant={selectionMode ? "secondary" : "outline"}
+            className="whitespace-nowrap"
+          >
+            <CheckSquare className="mr-2 h-4 w-4" />
+            {selectionMode ? "Cancel Selection" : "Select Patients"}
+          </Button>
+        )}
+
+        {selectionMode && selectedCount && selectedCount > 0 && onAddSelectedToPatients && (
+          <Button onClick={onAddSelectedToPatients} className="whitespace-nowrap">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add {selectedCount} to Patients
+          </Button>
+        )}
+        
+        {!selectionMode && (
+          <Button onClick={() => navigate("/new")}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Superbill
+          </Button>
+        )}
       </div>
     </div>
   );

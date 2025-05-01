@@ -5,21 +5,17 @@ import { toast } from "@/components/ui/use-toast";
 import { KanbanHeader } from "./kanban/KanbanHeader";
 import { KanbanColumn } from "./kanban/KanbanColumn";
 import { kanbanColumns } from "./kanban/kanbanConstants";
-
-interface KanbanBoardProps {
-  superbills: Superbill[];
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  onDelete: (id: string) => void;
-  onStatusChange: (id: string, status: SuperbillStatus) => void;
-}
+import { KanbanBoardProps } from "./kanban/types";
 
 export function KanbanBoard({
   superbills,
   searchTerm,
   onSearchChange,
   onDelete,
-  onStatusChange
+  onStatusChange,
+  onSelectPatient,
+  selectedPatientIds,
+  selectionMode
 }: KanbanBoardProps) {
   const [draggedBillId, setDraggedBillId] = useState<string | null>(null);
 
@@ -78,6 +74,8 @@ export function KanbanBoard({
       <KanbanHeader 
         searchTerm={searchTerm}
         onSearchChange={onSearchChange}
+        selectionMode={selectionMode}
+        selectedCount={selectedPatientIds?.length}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -96,6 +94,8 @@ export function KanbanBoard({
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               handleDragStart={handleDragStart}
+              onSelectPatient={onSelectPatient}
+              selectedPatientIds={selectedPatientIds}
             />
           );
         })}
