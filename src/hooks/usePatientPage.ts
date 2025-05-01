@@ -3,13 +3,23 @@ import { useState, useEffect, useCallback } from "react";
 import { PatientProfile } from "@/types/patient";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/components/ui/use-toast";
-import { patientService } from "@/services/patientService";
 import { usePatient } from "@/context/patient-context";
 
 export function usePatientPage() {
   const { isAdmin, isEditor } = useAuth();
   const { toast } = useToast();
-  const { patients: localPatients, addPatient, togglePatientSelection, selectAllPatients, clearPatientSelection, selectedPatientIds } = usePatient();
+  const { 
+    patients: contextPatients,
+    loading: contextLoading,
+    error: contextError,
+    addPatient,
+    togglePatientSelection,
+    selectAllPatients, 
+    clearPatientSelection,
+    selectedPatientIds,
+    refreshPatients,
+    syncPatientsWithDatabase
+  } = usePatient();
   
   const [patients, setPatients] = useState<PatientProfile[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<PatientProfile[]>([]);
@@ -20,90 +30,79 @@ export function usePatientPage() {
   
   const canEdit = isAdmin || isEditor;
 
-  // Use the fetchPatients function from useCallback to prevent unnecessary recreations
-  const fetchPatients = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      console.log("Fetching patients from Supabase...");
-      const data = await patientService.getAll();
-      console.log("Patients fetched:", data);
-      
-      if (data && data.length > 0) {
-        setPatients(data);
-        setFilteredPatients(data);
-        return data; // Return data for further processing if needed
-      } else {
-        // If no data from database, use local context data
-        console.log("No patients found in database, using local context:", localPatients);
-        setPatients(localPatients);
-        setFilteredPatients(localPatients);
-        return localPatients;
-      }
-    } catch (error: any) {
-      console.error("Error fetching patients:", error);
-      // Fall back to local context if database fetch fails
-      setPatients(localPatients);
-      setFilteredPatients(localPatients);
-      setError(error.message || "Failed to load patients");
-      
-      toast({
-        title: "Error",
-        description: "Failed to load patients from database, using locally stored patients",
-        variant: "destructive",
-      });
-      
-      return localPatients;
-    } finally {
-      setLoading(false);
-    }
-  }, [toast, localPatients]);
-  
-  // Initial fetch
+  // Load patients from context and apply filtering
   useEffect(() => {
-    console.log("useEffect in usePatientPage is running");
-    fetchPatients();
+    console.log("useEffect: updating patients from context", contextPatients);
+    setPatients(contextPatients);
     
-    // Set up a refresh interval (every 15 seconds)
-    const intervalId = setInterval(() => {
-      console.log("Refreshing patients data...");
-      fetchPatients();
-    }, 15000);
-    
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [fetchPatients]);
-  
-  // Filter patients based on search query
-  useEffect(() => {
+    // Filter patients based on search query
     if (searchQuery.trim() === "") {
-      setFilteredPatients(patients);
+      setFilteredPatients(contextPatients);
     } else {
-      const filtered = patients.filter(patient => 
+      const filtered = contextPatients.filter(patient => 
         patient.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredPatients(filtered);
     }
-  }, [searchQuery, patients]);
+    
+    // Update loading and error state from context
+    setLoading(contextLoading);
+    setError(contextError);
+  }, [contextPatients, contextLoading, contextError, searchQuery]);
   
-  const handleAddPatient = async (patientData: Omit<PatientProfile, "id">) => {
+  // Initial fetch when component mounts
+  useEffect(() => {
+    console.log("useEffect in usePatientPage is running - initial fetch");
+    handleRefreshPatients();
+    
+    // Set up a refresh interval (every 30 seconds)
+    const intervalId = setInterval(() => {
+      console.log("Auto-refreshing patients data...");
+      syncPatientsWithDatabase().catch(err => {
+        console.error("Error during automatic patient sync:", err);
+      });
+    }, 30000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  // Function to manually refresh patients
+  const handleRefreshPatients = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      // First add to local state
-      const newPatient = addPatient(patientData);
+      console.log("Manually refreshing patients...");
+      await refreshPatients();
       
-      // Then save to database
-      const savedPatient = await patientService.create(patientData);
+      toast({
+        title: "Success",
+        description: "Patient list refreshed successfully",
+      });
+    } catch (error: any) {
+      console.error("Error refreshing patients:", error);
+      setError(error.message || "Failed to refresh patients");
+      
+      toast({
+        title: "Error",
+        description: "Failed to refresh patient list",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Modified to return Promise<void> to match the expected type in PatientHeader
+  const handleAddPatient = async (patientData: Omit<PatientProfile, "id">): Promise<void> => {
+    try {
+      const newPatient = await addPatient(patientData);
       
       setDialogOpen(false);
       toast({
         title: "Patient Added",
         description: `${patientData.name} has been added successfully.`,
       });
-      
-      // Refresh the patient list immediately
-      await fetchPatients();
-      
-      return savedPatient;
     } catch (error: any) {
       console.error("Error adding patient:", error);
       toast({
@@ -126,7 +125,7 @@ export function usePatientPage() {
     loading,
     error,
     canEdit,
-    fetchPatients,
+    fetchPatients: handleRefreshPatients,
     handleAddPatient,
     togglePatientSelection,
     selectAllPatients,

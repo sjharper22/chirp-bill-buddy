@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { PatientProfile as PatientProfileType } from "@/types/patient";
-import { formatDate } from "@/lib/utils/superbill-utils";
+import { formatDate } from "@/lib/utils/format-utils";
 
 interface PatientViewModeProps {
   patient: PatientProfileType;
@@ -35,7 +35,7 @@ export function PatientViewMode({ patient, onEdit }: PatientViewModeProps) {
       <div>
         <p className="text-sm text-muted-foreground">Common ICD-10 Codes</p>
         <div className="flex flex-wrap gap-1 mt-1">
-          {patient.commonIcdCodes.length > 0 ? 
+          {patient.commonIcdCodes && patient.commonIcdCodes.length > 0 ? 
             patient.commonIcdCodes.map(code => (
               <div key={code} className="bg-muted px-2 py-1 rounded text-xs">
                 {code}
@@ -50,7 +50,7 @@ export function PatientViewMode({ patient, onEdit }: PatientViewModeProps) {
       <div>
         <p className="text-sm text-muted-foreground">Common CPT Codes</p>
         <div className="flex flex-wrap gap-1 mt-1">
-          {patient.commonCptCodes.length > 0 ? 
+          {patient.commonCptCodes && patient.commonCptCodes.length > 0 ? 
             patient.commonCptCodes.map(code => (
               <div key={code} className="bg-muted px-2 py-1 rounded text-xs">
                 {code}

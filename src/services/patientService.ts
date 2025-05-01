@@ -31,7 +31,6 @@ const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
     commonIcdCodes: dbPatient.default_icd_codes || [],
     commonCptCodes: dbPatient.default_cpt_codes || [],
     notes: dbPatient.notes,
-    // Map other properties as needed
   };
 };
 
@@ -42,8 +41,8 @@ const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any => {
     dob: patient.dob,
     default_icd_codes: patient.commonIcdCodes || [],
     default_cpt_codes: patient.commonCptCodes || [],
+    last_visit_date: patient.lastSuperbillDate,
     notes: patient.notes,
-    // Map other properties as needed
   };
 };
 
@@ -95,6 +94,33 @@ export const patientService = {
     } catch (e: any) {
       console.error("Error in getById:", e);
       throw new Error(`Failed to fetch patient: ${e.message}`);
+    }
+  },
+
+  // Check if a patient exists by name
+  async getByName(name: string): Promise<PatientProfile | null> {
+    try {
+      console.log(`patientService.getByName: Looking for patient with name ${name}`);
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('name', name)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('Error searching for patient by name:', error);
+        throw new Error(`Failed to search for patient: ${error.message}`);
+      }
+      
+      if (!data) {
+        console.log(`No patient found with name ${name}`);
+        return null;
+      }
+      
+      return mapDbPatientToPatient(data);
+    } catch (e: any) {
+      console.error("Error in getByName:", e);
+      throw new Error(`Failed to search for patient: ${e.message}`);
     }
   },
   

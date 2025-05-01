@@ -5,6 +5,7 @@ import { PatientHeader } from "@/components/patient/PatientHeader";
 import { PatientSearch } from "@/components/patient/PatientSearch";
 import { PatientEmptyState } from "@/components/patient/PatientEmptyState";
 import { PatientLoading } from "@/components/patient/PatientLoading";
+import { ImportPatientsButton } from "@/components/patient/ImportPatientsButton";
 import { usePatientPage } from "@/hooks/usePatientPage";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -103,15 +104,19 @@ export default function Patients() {
           onSearchChange={setSearchQuery} 
         />
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleManualRefresh}
-          disabled={isManuallyRefreshing || loading}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isManuallyRefreshing ? 'animate-spin' : ''}`} />
-          {isManuallyRefreshing ? 'Refreshing...' : 'Refresh Patients'}
-        </Button>
+        <div className="flex gap-2">
+          <ImportPatientsButton />
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleManualRefresh}
+            disabled={isManuallyRefreshing || loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isManuallyRefreshing ? 'animate-spin' : ''}`} />
+            {isManuallyRefreshing ? 'Refreshing...' : 'Refresh Patients'}
+          </Button>
+        </div>
       </div>
       
       {error && (

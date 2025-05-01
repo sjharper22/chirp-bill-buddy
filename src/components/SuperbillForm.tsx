@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, Visit } from "@/types/superbill";
@@ -15,7 +14,6 @@ import { DefaultCodesSection } from "@/components/superbill-form/DefaultCodesSec
 import { VisitsSection } from "@/components/superbill-form/VisitsSection";
 import { commonMainComplaints } from "@/constants/superbill-constants";
 import { toast } from "@/components/ui/use-toast";
-import { patientService } from "@/services/patientService";
 
 interface SuperbillFormProps {
   existingSuperbill?: Superbill;
@@ -36,7 +34,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
     
     return {
       patientName: "",
-      patientDob: new Date(),
+      patientDob: today,
       issueDate: today,
       clinicName: clinicDefaults.clinicName,
       clinicAddress: clinicDefaults.clinicAddress,
@@ -105,18 +103,8 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
       });
       
       try {
-        // Add new patient to local state
-        const newPatient = addPatient({
-          name: superbill.patientName,
-          dob: superbill.patientDob,
-          lastSuperbillDate: now,
-          commonIcdCodes,
-          commonCptCodes,
-          notes: `Automatically added from superbill creation`
-        });
-        
-        // Also save to database
-        await patientService.create({
+        // Add new patient - this will handle both local and database storage
+        await addPatient({
           name: superbill.patientName,
           dob: superbill.patientDob,
           lastSuperbillDate: now,
@@ -133,7 +121,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
         console.error("Error adding patient:", error);
         toast({
           title: "Warning",
-          description: `Patient was added locally but there was an error saving to the database.`,
+          description: `There was an error adding the patient to your list.`,
           variant: "destructive",
         });
       }
