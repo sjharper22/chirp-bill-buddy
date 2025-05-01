@@ -48,10 +48,10 @@ export function SuperbillCard({
   
   return (
     <Card 
-      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} ${onSelectPatient && !isPatientSelected ? 'pl-8' : ''}`} 
+      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} ${onSelectPatient ? 'pl-8' : ''}`} 
       onClick={onClick}
     >
-      {onSelectPatient && !isPatientSelected && (
+      {onSelectPatient && (
         <div className="absolute top-6 left-2 z-10">
           <Checkbox 
             checked={isPatientSelected}

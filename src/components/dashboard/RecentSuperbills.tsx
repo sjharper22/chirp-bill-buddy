@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus, UserPlus, CheckSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
-import { PatientProfile } from "@/types/patient";
+import { toast } from "@/components/ui/use-toast";
 
 interface RecentSuperbillsProps {
   filteredSuperbills: Superbill[];
@@ -93,7 +93,7 @@ export function RecentSuperbills({
               onDelete={onDelete}
               onClick={!selectionMode ? () => navigate(`/view/${superbill.id}`) : undefined}
               onSelectPatient={selectionMode ? onSelectPatient : undefined}
-              isPatientSelected={selectionMode ? selectedPatientIds.includes(superbill.id) : undefined}
+              isPatientSelected={selectedPatientIds.includes(superbill.id)}
             />
           ))
         ) : (

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, Visit } from "@/types/superbill";
 import { useSuperbill } from "@/context/superbill-context";
+import { usePatient } from "@/context/patient-context";
 import { 
   generateId, 
   createEmptyVisit, 
@@ -13,6 +14,7 @@ import { ClinicInfoSection } from "@/components/superbill-form/ClinicInfoSection
 import { DefaultCodesSection } from "@/components/superbill-form/DefaultCodesSection";
 import { VisitsSection } from "@/components/superbill-form/VisitsSection";
 import { commonMainComplaints } from "@/constants/superbill-constants";
+import { toast } from "@/components/ui/use-toast";
 
 interface SuperbillFormProps {
   existingSuperbill?: Superbill;
@@ -21,6 +23,7 @@ interface SuperbillFormProps {
 export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
   const navigate = useNavigate();
   const { addSuperbill, updateSuperbill, clinicDefaults } = useSuperbill();
+  const { addPatient, getPatient } = usePatient();
   
   const today = new Date();
   
@@ -46,7 +49,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
       defaultMainComplaints: [...(clinicDefaults.defaultMainComplaints || [])],
       defaultFee: clinicDefaults.defaultFee,
       visits: [],
-      status: 'draft' // Added the status property with default value 'draft'
+      status: 'draft'
     };
   });
   
@@ -55,12 +58,71 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
     e.preventDefault();
     
     if (!superbill.patientName) {
-      alert("Please enter a patient name");
+      toast({
+        title: "Error",
+        description: "Please enter a patient name",
+        variant: "destructive"
+      });
       return;
     }
     
     const now = new Date();
     
+    // Check if patient already exists
+    const existingPatient = getPatient(superbill.patientName);
+    
+    // If patient doesn't exist in the patient list, add them automatically
+    if (!existingPatient) {
+      // Extract common complaints from visits
+      const commonComplaints: string[] = [];
+      superbill.visits.forEach(visit => {
+        if (visit.mainComplaints) {
+          visit.mainComplaints.forEach(complaint => {
+            if (!commonComplaints.includes(complaint)) {
+              commonComplaints.push(complaint);
+            }
+          });
+        }
+      });
+      
+      // Extract ICD and CPT codes
+      const commonIcdCodes: string[] = [];
+      const commonCptCodes: string[] = [];
+      
+      superbill.visits.forEach(visit => {
+        visit.icdCodes.forEach(code => {
+          if (!commonIcdCodes.includes(code)) {
+            commonIcdCodes.push(code);
+          }
+        });
+        
+        visit.cptCodes.forEach(code => {
+          if (!commonCptCodes.includes(code)) {
+            commonCptCodes.push(code);
+          }
+        });
+      });
+      
+      // Add new patient
+      const newPatient = addPatient({
+        name: superbill.patientName,
+        dob: superbill.patientDob,
+        lastSuperbillDate: now,
+        commonIcdCodes,
+        commonCptCodes,
+        notes: `Automatically added from superbill creation`
+      });
+      
+      toast({
+        title: "Patient Added",
+        description: `${superbill.patientName} was automatically added to your patient list.`,
+      });
+    } else {
+      // Update last superbill date for existing patient
+      // Note: For now we're not updating the patient record, but this could be added if needed
+    }
+    
+    // Continue with superbill creation/update
     if (existingSuperbill) {
       updateSuperbill(existingSuperbill.id, {
         ...superbill,
@@ -68,12 +130,22 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
         createdAt: existingSuperbill.createdAt,
         updatedAt: now
       });
+      
+      toast({
+        title: "Superbill Updated",
+        description: "The superbill has been updated successfully."
+      });
     } else {
       addSuperbill({
         ...superbill,
         id: generateId(),
         createdAt: now,
         updatedAt: now
+      });
+      
+      toast({
+        title: "Superbill Created",
+        description: "The superbill has been created successfully."
       });
     }
     
