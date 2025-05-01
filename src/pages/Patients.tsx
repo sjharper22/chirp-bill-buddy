@@ -11,6 +11,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { PatientProfile } from "@/types/patient"; // Added this import
 
 export default function Patients() {
   const navigate = useNavigate();
