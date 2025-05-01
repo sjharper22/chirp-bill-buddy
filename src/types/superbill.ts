@@ -7,6 +7,7 @@ export interface Visit {
   fee: number;
   notes?: string;
   mainComplaints: string[]; // Changed from mainComplaint (string) to mainComplaints (string[])
+  status?: 'draft' | 'in_progress' | 'completed'; // New status property
 }
 
 export type SuperbillStatus = 'draft' | 'in_progress' | 'in_review' | 'completed';

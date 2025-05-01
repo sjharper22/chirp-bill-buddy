@@ -44,7 +44,8 @@ export const createEmptyVisit = (
     icdCodes: [...defaultIcdCodes],
     cptCodes: [...defaultCptCodes],
     mainComplaints: [],
-    fee: defaultFee
+    fee: defaultFee,
+    status: 'draft' // Default status for new visits
   };
 };
 

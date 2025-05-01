@@ -1,6 +1,7 @@
 
 import { Visit } from "@/types/superbill";
 import { formatCurrency, formatDate, calculateTotalFee } from "@/lib/utils/superbill-utils";
+import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 
 interface ServicesTableProps {
   visits: Visit[];
@@ -8,6 +9,15 @@ interface ServicesTableProps {
 
 export function ServicesTable({ visits }: ServicesTableProps) {
   const totalFee = calculateTotalFee(visits);
+  
+  const getStatusVariant = (status?: string) => {
+    switch (status) {
+      case 'completed': return 'success';
+      case 'in_progress': return 'warning';
+      case 'draft':
+      default: return 'info';
+    }
+  };
   
   return (
     <div className="mb-6">
@@ -17,6 +27,7 @@ export function ServicesTable({ visits }: ServicesTableProps) {
           <thead className="bg-muted">
             <tr>
               <th className="py-2 px-3 text-left">Date</th>
+              <th className="py-2 px-3 text-left">Status</th>
               <th className="py-2 px-3 text-left">ICD-10 Codes</th>
               <th className="py-2 px-3 text-left">CPT Codes</th>
               <th className="py-2 px-3 text-right">Fee</th>
@@ -26,13 +37,19 @@ export function ServicesTable({ visits }: ServicesTableProps) {
             {visits.map((visit, index) => (
               <tr key={visit.id} className={index % 2 === 0 ? "bg-background" : "bg-muted/30"}>
                 <td className="py-2 px-3">{formatDate(visit.date)}</td>
+                <td className="py-2 px-3">
+                  <StatusBadge 
+                    status={visit.status || 'draft'} 
+                    variant={getStatusVariant(visit.status)}
+                  />
+                </td>
                 <td className="py-2 px-3">{visit.icdCodes.join(", ")}</td>
                 <td className="py-2 px-3">{visit.cptCodes.join(", ")}</td>
                 <td className="py-2 px-3 text-right">{formatCurrency(visit.fee)}</td>
               </tr>
             ))}
             <tr className="border-t">
-              <td colSpan={3} className="py-2 px-3 text-right font-bold">Total:</td>
+              <td colSpan={4} className="py-2 px-3 text-right font-bold">Total:</td>
               <td className="py-2 px-3 text-right font-bold">{formatCurrency(totalFee)}</td>
             </tr>
           </tbody>

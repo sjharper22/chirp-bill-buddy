@@ -12,6 +12,8 @@ import { IcdCodeSelector } from "@/components/visit/IcdCodeSelector";
 import { CptCodeSelector } from "@/components/visit/CptCodeSelector";
 import { VisitNotes } from "@/components/visit/VisitNotes";
 import { useVisitSections, VisitSection } from "@/hooks/useVisitSections";
+import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface VisitEntryProps {
   visit: Visit;
@@ -49,6 +51,22 @@ export function VisitEntry({
     e.stopPropagation();
     
     onDelete(visit.id);
+  };
+
+  const handleStatusChange = (status: string) => {
+    onVisitChange({ 
+      ...visit, 
+      status: status as 'draft' | 'in_progress' | 'completed'
+    });
+  };
+
+  const getStatusVariant = (status?: string) => {
+    switch (status) {
+      case 'completed': return 'success';
+      case 'in_progress': return 'warning';
+      case 'draft':
+      default: return 'info';
+    }
   };
 
   const renderSection = (section: VisitSection, index: number) => {
@@ -137,7 +155,7 @@ export function VisitEntry({
   return (
     <Card className="mb-4">
       <div 
-        className="flex justify-between items-center p-3 border-b cursor-pointer" 
+        className="flex justify-between items-center p-3 border-b cursor-pointer relative" 
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <div className="flex items-center gap-2">
@@ -154,6 +172,14 @@ export function VisitEntry({
               - {visit.mainComplaints.join(", ")}
             </span>
           )}
+        </div>
+        
+        {/* Status Badge in upper right corner */}
+        <div className="absolute top-3 right-24">
+          <StatusBadge 
+            status={visit.status || 'draft'} 
+            variant={getStatusVariant(visit.status)}
+          />
         </div>
         
         <div className="flex items-center gap-2">
@@ -185,6 +211,23 @@ export function VisitEntry({
       
       {!isCollapsed && (
         <CardContent className="p-4">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <Select
+              value={visit.status || 'draft'}
+              onValueChange={handleStatusChange}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
           <div className="space-y-3">
             {sectionOrder.map((section, index) => renderSection(section, index))}
           </div>
