@@ -6,6 +6,7 @@ import { PatientListActions } from "./PatientListActions";
 import { PatientEmptyResults } from "./PatientEmptyResults";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PatientListProps {
   patients: PatientProfileType[];
@@ -26,6 +27,7 @@ export function PatientList({
   canEdit = false,
   onRefresh
 }: PatientListProps) {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   
@@ -39,8 +41,22 @@ export function PatientList({
   const handleRefresh = async () => {
     if (onRefresh) {
       setIsRefreshing(true);
-      await onRefresh();
-      setIsRefreshing(false);
+      try {
+        await onRefresh();
+        toast({
+          title: "Success",
+          description: "Patient list refreshed successfully",
+        });
+      } catch (error) {
+        console.error("Error refreshing patients:", error);
+        toast({
+          title: "Error",
+          description: "Failed to refresh patient list",
+          variant: "destructive",
+        });
+      } finally {
+        setIsRefreshing(false);
+      }
     }
   };
   
@@ -59,13 +75,13 @@ export function PatientList({
         
         {onRefresh && (
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm" 
             onClick={handleRefresh}
             disabled={isRefreshing}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            {isRefreshing ? 'Refreshing...' : 'Refresh Patients'}
           </Button>
         )}
       </div>

@@ -39,8 +39,8 @@ const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any => {
   return {
     name: patient.name,
     dob: patient.dob,
-    default_icd_codes: patient.commonIcdCodes,
-    default_cpt_codes: patient.commonCptCodes,
+    default_icd_codes: patient.commonIcdCodes || [],
+    default_cpt_codes: patient.commonCptCodes || [],
     notes: patient.notes,
     // Map other properties as needed
   };
@@ -49,101 +49,135 @@ const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any => {
 export const patientService = {
   // Get all patients
   async getAll(): Promise<PatientProfile[]> {
-    const { data, error } = await supabase
-      .from('patients')
-      .select('*')
-      .order('name');
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .order('name');
+        
+      if (error) {
+        console.error('Error fetching patients:', error);
+        throw error;
+      }
       
-    if (error) {
-      console.error('Error fetching patients:', error);
-      throw error;
+      console.log("Raw patients data from Supabase:", data);
+      return Array.isArray(data) ? data.map(mapDbPatientToPatient) : [];
+    } catch (e) {
+      console.error("Error in getAll patients:", e);
+      throw e;
     }
-    
-    return data.map(mapDbPatientToPatient);
   },
   
   // Get a single patient by ID
   async getById(id: string): Promise<PatientProfile | null> {
-    const { data, error } = await supabase
-      .from('patients')
-      .select('*')
-      .eq('id', id)
-      .single();
-      
-    if (error) {
-      if (error.code === 'PGRST116') { // Record not found
-        return null;
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (error) {
+        if (error.code === 'PGRST116') { // Record not found
+          return null;
+        }
+        console.error('Error fetching patient:', error);
+        throw error;
       }
-      console.error('Error fetching patient:', error);
-      throw error;
+      
+      return mapDbPatientToPatient(data);
+    } catch (e) {
+      console.error("Error in getById:", e);
+      throw e;
     }
-    
-    return mapDbPatientToPatient(data);
   },
   
   // Create a new patient
   async create(patient: Omit<PatientProfile, "id">): Promise<PatientProfile> {
-    const dbPatient = mapPatientToDbPatient(patient);
-    
-    const { data, error } = await supabase
-      .from('patients')
-      .insert(dbPatient)
-      .select()
-      .single();
+    try {
+      const dbPatient = mapPatientToDbPatient(patient);
       
-    if (error) {
-      console.error('Error creating patient:', error);
-      throw error;
+      console.log("Creating patient in Supabase:", dbPatient);
+      
+      const { data, error } = await supabase
+        .from('patients')
+        .insert(dbPatient)
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('Error creating patient:', error);
+        throw error;
+      }
+      
+      console.log("Created patient in Supabase:", data);
+      return mapDbPatientToPatient(data);
+    } catch (e) {
+      console.error("Error in create patient:", e);
+      throw e;
     }
-    
-    return mapDbPatientToPatient(data);
   },
   
   // Update an existing patient
   async update(id: string, patient: PatientProfile): Promise<PatientProfile> {
-    const dbPatient = mapPatientToDbPatient(patient);
-    
-    const { data, error } = await supabase
-      .from('patients')
-      .update(dbPatient)
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      const dbPatient = mapPatientToDbPatient(patient);
       
-    if (error) {
-      console.error('Error updating patient:', error);
-      throw error;
+      const { data, error } = await supabase
+        .from('patients')
+        .update(dbPatient)
+        .eq('id', id)
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('Error updating patient:', error);
+        throw error;
+      }
+      
+      return mapDbPatientToPatient(data);
+    } catch (e) {
+      console.error("Error in update patient:", e);
+      throw e;
     }
-    
-    return mapDbPatientToPatient(data);
   },
   
   // Delete a patient
   async delete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('patients')
-      .delete()
-      .eq('id', id);
-      
-    if (error) {
-      console.error('Error deleting patient:', error);
-      throw error;
+    try {
+      const { error } = await supabase
+        .from('patients')
+        .delete()
+        .eq('id', id);
+        
+      if (error) {
+        console.error('Error deleting patient:', error);
+        throw error;
+      }
+    } catch (e) {
+      console.error("Error in delete patient:", e);
+      throw e;
     }
   },
   
   // Search patients
   async search(query: string): Promise<PatientProfile[]> {
-    const { data, error } = await supabase
-      .from('patients')
-      .select('*')
-      .ilike('name', `%${query}%`)
-      .order('name');
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .ilike('name', `%${query}%`)
+        .order('name');
+        
+      if (error) {
+        console.error('Error searching patients:', error);
+        throw error;
+      }
       
-    if (error) {
-      console.error('Error searching patients:', error);
-      throw error;
+      return data.map(mapDbPatientToPatient);
+    } catch (e) {
+      console.error("Error in search patients:", e);
+      throw e;
     }
-    
-    return data.map(mapDbPatientToPatient);
   }
 };

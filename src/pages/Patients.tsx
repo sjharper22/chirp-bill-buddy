@@ -7,9 +7,12 @@ import { PatientEmptyState } from "@/components/patient/PatientEmptyState";
 import { PatientLoading } from "@/components/patient/PatientLoading";
 import { usePatientPage } from "@/hooks/usePatientPage";
 import { useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Patients() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const {
     patients,
     filteredPatients,
@@ -29,8 +32,22 @@ export default function Patients() {
   
   // Force a refresh when the component mounts
   useEffect(() => {
-    fetchPatients();
-  }, []);
+    const loadPatients = async () => {
+      try {
+        await fetchPatients();
+        console.log("Patients loaded successfully");
+      } catch (error) {
+        console.error("Failed to load patients:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load patients. Please refresh the page.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    loadPatients();
+  }, [fetchPatients, toast]);
   
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">

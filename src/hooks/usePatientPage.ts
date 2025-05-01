@@ -15,7 +15,7 @@ export function usePatientPage() {
   const [filteredPatients, setFilteredPatients] = useState<PatientProfile[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const canEdit = isAdmin || isEditor;
 
@@ -26,26 +26,38 @@ export function usePatientPage() {
       console.log("Fetching patients from Supabase...");
       const data = await patientService.getAll();
       console.log("Patients fetched:", data);
-      setPatients(data);
-      setFilteredPatients(data);
+      
+      if (data && data.length > 0) {
+        setPatients(data);
+        setFilteredPatients(data);
+      } else {
+        // If no data from database, use local context data
+        console.log("No patients found in database, using local context:", localPatients);
+        setPatients(localPatients);
+        setFilteredPatients(localPatients);
+      }
     } catch (error) {
       console.error("Error fetching patients:", error);
+      // Fall back to local context if database fetch fails
+      setPatients(localPatients);
+      setFilteredPatients(localPatients);
+      
       toast({
         title: "Error",
-        description: "Failed to load patients",
+        description: "Failed to load patients from database, using locally stored patients",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, localPatients]);
   
   // Initial fetch
   useEffect(() => {
     fetchPatients();
     
-    // Set up a refresh interval (every 30 seconds)
-    const intervalId = setInterval(fetchPatients, 30000);
+    // Set up a refresh interval (every 15 seconds)
+    const intervalId = setInterval(fetchPatients, 15000);
     
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
@@ -69,14 +81,16 @@ export function usePatientPage() {
       const newPatient = addPatient(patientData);
       
       // Then save to database
-      await patientService.create(patientData);
+      const savedPatient = await patientService.create(patientData);
       
       setDialogOpen(false);
       toast({
         title: "Patient Added",
         description: `${patientData.name} has been added successfully.`,
       });
-      fetchPatients(); // Refresh the patient list immediately
+      
+      // Refresh the patient list immediately
+      fetchPatients();
     } catch (error: any) {
       console.error("Error adding patient:", error);
       toast({
