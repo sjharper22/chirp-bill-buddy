@@ -10,9 +10,7 @@ import { usePatientPage } from "@/hooks/usePatientPage";
 import { useEffect, useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PatientProfile } from "@/types/patient";
+import { AlertCircle } from "lucide-react";
 
 export default function Patients() {
   const navigate = useNavigate();
@@ -37,12 +35,9 @@ export default function Patients() {
     clearPatientSelection
   } = usePatientPage();
   
-  // We're only calling fetchPatients once at mount now
-  // This prevents multiple refreshes causing UI flickers
   useEffect(() => {
     console.log("Patients component mounted");
-    // Initial fetch is now handled in usePatientPage
-    // We don't need to call fetchPatients() again here
+    // Initial fetch is handled in usePatientPage
   }, []);
   
   const handleManualRefresh = useCallback(async () => {
@@ -67,7 +62,6 @@ export default function Patients() {
     }
   }, [fetchPatients, isManuallyRefreshing, loading, toast]);
 
-  // Wrapper function to handle the type mismatch
   const handleAddPatientWrapper = async (patientData: Omit<PatientProfile, "id">) => {
     await handleAddPatient(patientData);
   };
@@ -95,19 +89,7 @@ export default function Patients() {
           onSearchChange={setSearchQuery} 
         />
         
-        <div className="flex gap-2">
-          <ImportPatientsButton />
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleManualRefresh}
-            disabled={isManuallyRefreshing || loading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isManuallyRefreshing ? 'animate-spin' : ''}`} />
-            {isManuallyRefreshing ? 'Refreshing...' : 'Refresh Patients'}
-          </Button>
-        </div>
+        <ImportPatientsButton onRefresh={handleManualRefresh} isRefreshing={isManuallyRefreshing} />
       </div>
       
       {error && (

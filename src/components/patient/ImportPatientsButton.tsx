@@ -1,12 +1,17 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Import, Loader2 } from "lucide-react";
+import { Import, Loader2, RefreshCw } from "lucide-react";
 import { useSuperbill } from "@/context/superbill-context"; 
 import { usePatient } from "@/context/patient-context";
 import { useToast } from "@/components/ui/use-toast";
 
-export function ImportPatientsButton() {
+interface ImportPatientsButtonProps {
+  onRefresh?: () => Promise<void>;
+  isRefreshing?: boolean;
+}
+
+export function ImportPatientsButton({ onRefresh, isRefreshing }: ImportPatientsButtonProps) {
   const [importing, setImporting] = useState(false);
   const { superbills } = useSuperbill();
   const { addPatient, getPatient } = usePatient();
@@ -81,6 +86,11 @@ export function ImportPatientsButton() {
             ? `${skippedCount} patients were already in your list.` 
             : "All superbill patients have been imported.",
         });
+        
+        // Refresh the patient list after import
+        if (onRefresh) {
+          await onRefresh();
+        }
       } else if (skippedCount > 0) {
         toast({
           title: "No new patients imported",
@@ -116,23 +126,36 @@ export function ImportPatientsButton() {
   const noSuperbills = !superbills || superbills.length === 0;
 
   return (
-    <Button
-      onClick={handleImportPatients}
-      disabled={importing || noSuperbills}
-      variant="outline"
-      title={noSuperbills ? "No superbills available to import patients from" : "Import patients from existing superbills"}
-    >
-      {importing ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Importing...
-        </>
-      ) : (
-        <>
-          <Import className="mr-2 h-4 w-4" />
-          Import from Superbills
-        </>
+    <div className="flex gap-2">
+      <Button
+        onClick={handleImportPatients}
+        disabled={importing || noSuperbills}
+        variant="outline"
+        title={noSuperbills ? "No superbills available to import patients from" : "Import patients from existing superbills"}
+      >
+        {importing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Importing...
+          </>
+        ) : (
+          <>
+            <Import className="mr-2 h-4 w-4" />
+            Import from Superbills
+          </>
+        )}
+      </Button>
+      
+      {onRefresh && (
+        <Button 
+          variant="outline" 
+          onClick={onRefresh}
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh Patients'}
+        </Button>
       )}
-    </Button>
+    </div>
   );
 }

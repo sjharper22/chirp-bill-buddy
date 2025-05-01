@@ -1,12 +1,9 @@
 
 import { PatientProfile as PatientProfileType } from "@/types/patient";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { PatientCard } from "./PatientCard";
 import { PatientListActions } from "./PatientListActions";
 import { PatientEmptyResults } from "./PatientEmptyResults";
-import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
@@ -29,87 +26,23 @@ export function PatientList({
   canEdit = false,
   onRefresh
 }: PatientListProps) {
-  const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [filteredPatients, setFilteredPatients] = useState<PatientProfileType[]>(patients);
-  
-  // Handle filtering when patients or searchTerm changes
-  useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredPatients(patients);
-    } else {
-      const filtered = patients.filter(patient => 
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredPatients(filtered);
-    }
-  }, [patients, searchTerm]);
-  
   const allSelected = patients.length > 0 && selectedPatientIds.length === patients.length;
-  
-  // Use callback to prevent unnecessary re-renders
-  const handleRefresh = useCallback(async () => {
-    if (!onRefresh || isRefreshing) return;
-    
-    setIsRefreshing(true);
-    try {
-      await onRefresh();
-      toast({
-        title: "Success",
-        description: "Patient list refreshed successfully",
-      });
-    } catch (error) {
-      console.error("Error refreshing patients:", error);
-      toast({
-        title: "Error",
-        description: "Failed to refresh patient list",
-        variant: "destructive",
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [onRefresh, isRefreshing, toast]);
   
   // Debug patients data
   console.log("PatientList rendering with patients:", patients.length);
-  console.log("Filtered patients:", filteredPatients.length);
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <PatientListActions 
-          patientsCount={filteredPatients.length}
+          patientsCount={patients.length}
           selectedPatientIds={selectedPatientIds}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
           onSelectAll={onSelectAll}
           onClearSelection={onClearSelection}
           allSelected={allSelected}
         />
-        
-        {onRefresh && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh Patients'}
-          </Button>
-        )}
       </div>
       
-      {patients.length > 0 && filteredPatients.length === 0 && (
-        <Alert variant="default">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            No patients match your search criteria. Try adjusting your search or clear it to see all patients.
-          </AlertDescription>
-        </Alert>
-      )}
-
       {patients.length === 0 ? (
         <Alert variant="default">
           <AlertCircle className="h-4 w-4" />
@@ -119,18 +52,14 @@ export function PatientList({
         </Alert>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredPatients.length === 0 ? (
-            <PatientEmptyResults searchTerm={searchTerm} />
-          ) : (
-            filteredPatients.map(patient => (
-              <PatientCard
-                key={patient.id}
-                patient={patient}
-                isSelected={selectedPatientIds.includes(patient.id)}
-                onToggleSelection={() => togglePatientSelection(patient.id)}
-              />
-            ))
-          )}
+          {patients.map(patient => (
+            <PatientCard
+              key={patient.id}
+              patient={patient}
+              isSelected={selectedPatientIds.includes(patient.id)}
+              onToggleSelection={() => togglePatientSelection(patient.id)}
+            />
+          ))}
         </div>
       )}
     </div>
