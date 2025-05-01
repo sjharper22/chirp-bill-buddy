@@ -21,6 +21,9 @@ export interface KanbanBoardProps {
   onSearchChange: (value: string) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: SuperbillStatus) => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
+  selectedPatientIds?: string[];
+  selectionMode?: boolean;
 }
 
 export interface KanbanColumnProps {
@@ -33,6 +36,8 @@ export interface KanbanColumnProps {
   onDragLeave: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, status: SuperbillStatus) => void;
   handleDragStart: (e: React.DragEvent, id: string) => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
+  selectedPatientIds?: string[];
 }
 
 export interface KanbanCardProps {
@@ -42,9 +47,15 @@ export interface KanbanCardProps {
   onStatusChange: (id: string, status: SuperbillStatus) => void;
   availableStatuses: KanbanColumn[];
   currentStatus: SuperbillStatus;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
+  isPatientSelected?: boolean;
 }
 
 export interface KanbanHeaderProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
+  selectionMode?: boolean; 
+  toggleSelectionMode?: () => void;
+  selectedCount?: number;
+  onAddSelectedToPatients?: () => void;
 }

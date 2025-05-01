@@ -5,6 +5,8 @@ export interface SuperbillCardProps {
   superbill: Superbill;
   onDelete: (id: string) => void;
   onClick?: () => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
+  isPatientSelected?: boolean;
 }
 
 export interface CardHeaderProps {

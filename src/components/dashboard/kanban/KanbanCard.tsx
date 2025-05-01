@@ -1,8 +1,10 @@
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { KanbanCardProps } from "./types";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
+import { useState } from "react";
 
 export function KanbanCard({ 
   superbill, 
@@ -10,9 +12,17 @@ export function KanbanCard({
   onDragStart, 
   onStatusChange, 
   availableStatuses, 
-  currentStatus 
+  currentStatus,
+  onSelectPatient,
+  isPatientSelected
 }: KanbanCardProps) {
   const navigate = useNavigate();
+  
+  const handleSelectChange = (checked: boolean) => {
+    if (onSelectPatient) {
+      onSelectPatient(superbill.id, superbill.patientName, superbill.patientDob, checked);
+    }
+  };
   
   return (
     <div 
@@ -20,11 +30,24 @@ export function KanbanCard({
       draggable
       onDragStart={(e) => onDragStart(e, superbill.id)}
     >
+      {onSelectPatient && (
+        <div className="absolute top-2 left-2 z-10">
+          <Checkbox 
+            checked={isPatientSelected}
+            onCheckedChange={handleSelectChange}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white"
+          />
+        </div>
+      )}
+      
       <div className="cursor-grab active:cursor-grabbing">
         <SuperbillCard
           superbill={superbill}
           onDelete={onDelete}
           onClick={() => navigate(`/view/${superbill.id}`)}
+          onSelectPatient={onSelectPatient}
+          isPatientSelected={isPatientSelected}
         />
       </div>
       

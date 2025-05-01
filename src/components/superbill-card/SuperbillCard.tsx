@@ -7,8 +7,15 @@ import { CardHeader } from "./CardHeader";
 import { PatientInfo } from "./PatientInfo";
 import { CardStats } from "./CardStats";
 import { CardActions } from "./CardActions";
+import { Checkbox } from "@/components/ui/checkbox";
 
-export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardProps) {
+export function SuperbillCard({ 
+  superbill, 
+  onDelete, 
+  onClick,
+  onSelectPatient,
+  isPatientSelected 
+}: SuperbillCardProps) {
   const totalFee = calculateTotalFee(superbill.visits);
   const visitCount = superbill.visits.length;
   
@@ -33,11 +40,28 @@ export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardPro
   const displayStatus = formatStatus(superbill.status);
   const statusVariant = getStatusVariant(superbill.status);
   
+  const handleSelectChange = (checked: boolean) => {
+    if (onSelectPatient) {
+      onSelectPatient(superbill.id, superbill.patientName, superbill.patientDob, checked);
+    }
+  };
+  
   return (
     <Card 
-      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`} 
+      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} ${onSelectPatient && !isPatientSelected ? 'pl-8' : ''}`} 
       onClick={onClick}
     >
+      {onSelectPatient && !isPatientSelected && (
+        <div className="absolute top-6 left-2 z-10">
+          <Checkbox 
+            checked={isPatientSelected}
+            onCheckedChange={handleSelectChange}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white"
+          />
+        </div>
+      )}
+      
       <CardContent className="pt-6">
         <CardHeader 
           patientName={superbill.patientName}

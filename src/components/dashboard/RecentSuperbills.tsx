@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, UserPlus, CheckSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
+import { PatientProfile } from "@/types/patient";
 
 interface RecentSuperbillsProps {
   filteredSuperbills: Superbill[];
@@ -13,6 +14,11 @@ interface RecentSuperbillsProps {
   onSearchChange: (value: string) => void;
   onDelete: (id: string) => void;
   totalSuperbills: number;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
+  selectedPatientIds?: string[];
+  selectionMode?: boolean;
+  toggleSelectionMode?: () => void;
+  onAddSelectedToPatients?: () => void;
 }
 
 export function RecentSuperbills({
@@ -20,7 +26,12 @@ export function RecentSuperbills({
   searchTerm,
   onSearchChange,
   onDelete,
-  totalSuperbills
+  totalSuperbills,
+  onSelectPatient,
+  selectedPatientIds = [],
+  selectionMode = false,
+  toggleSelectionMode,
+  onAddSelectedToPatients
 }: RecentSuperbillsProps) {
   const navigate = useNavigate();
   const [expandSearch, setExpandSearch] = useState(false);
@@ -46,10 +57,30 @@ export function RecentSuperbills({
             />
           </div>
           
-          <Button onClick={() => navigate("/new")} className="whitespace-nowrap">
-            <Plus className="mr-2 h-4 w-4" />
-            New Superbill
-          </Button>
+          {toggleSelectionMode && (
+            <Button 
+              onClick={toggleSelectionMode} 
+              variant={selectionMode ? "secondary" : "outline"}
+              className="whitespace-nowrap"
+            >
+              <CheckSquare className="mr-2 h-4 w-4" />
+              {selectionMode ? "Cancel Selection" : "Select Patients"}
+            </Button>
+          )}
+
+          {selectionMode && selectedPatientIds.length > 0 && onAddSelectedToPatients && (
+            <Button onClick={onAddSelectedToPatients} className="whitespace-nowrap">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add {selectedPatientIds.length} to Patients
+            </Button>
+          )}
+          
+          {!selectionMode && (
+            <Button onClick={() => navigate("/new")} className="whitespace-nowrap">
+              <Plus className="mr-2 h-4 w-4" />
+              New Superbill
+            </Button>
+          )}
         </div>
       </div>
       
@@ -60,7 +91,9 @@ export function RecentSuperbills({
               key={superbill.id}
               superbill={superbill}
               onDelete={onDelete}
-              onClick={() => navigate(`/view/${superbill.id}`)}
+              onClick={!selectionMode ? () => navigate(`/view/${superbill.id}`) : undefined}
+              onSelectPatient={selectionMode ? onSelectPatient : undefined}
+              isPatientSelected={selectionMode ? selectedPatientIds.includes(superbill.id) : undefined}
             />
           ))
         ) : (
@@ -75,7 +108,7 @@ export function RecentSuperbills({
         )}
       </div>
       
-      {filteredSuperbills.length > 0 && totalSuperbills > filteredSuperbills.length && (
+      {filteredSuperbills.length > 0 && totalSuperbills > filteredSuperbills.length && !selectionMode && (
         <div className="flex justify-center mt-6">
           <Button 
             variant="outline" 

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSuperbill } from "@/context/superbill-context";
 import { usePatient } from "@/context/patient-context";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, UserPlus } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { RecentSuperbills } from "@/components/dashboard/RecentSuperbills";
@@ -16,9 +16,11 @@ import { SuperbillStatus } from "@/types/superbill";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { superbills, deleteSuperbill, updateSuperbillStatus } = useSuperbill();
-  const { patients } = usePatient();
+  const { patients, addPatient, getPatient } = usePatient();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("list");
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
   
   // Filter superbills based on search term
   const filteredSuperbills = superbills.filter(bill => 
@@ -48,6 +50,99 @@ export default function Dashboard() {
   const handleStatusChange = (id: string, newStatus: SuperbillStatus) => {
     updateSuperbillStatus(id, newStatus);
   };
+
+  const handleToggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
+    setSelectedPatientIds([]);
+  };
+
+  const handleSelectPatient = (id: string, name: string, dob: Date, selected: boolean) => {
+    setSelectedPatientIds(prev => {
+      if (selected) {
+        return [...prev, id];
+      } else {
+        return prev.filter(patientId => patientId !== id);
+      }
+    });
+  };
+
+  const handleAddSelectedToPatients = () => {
+    if (selectedPatientIds.length === 0) {
+      toast({
+        title: "No patients selected",
+        description: "Please select at least one patient to add to your patient list.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    selectedPatientIds.forEach(id => {
+      const superbill = superbills.find(bill => bill.id === id);
+      
+      if (superbill) {
+        const existingPatient = getPatient(superbill.patientName);
+        
+        if (!existingPatient) {
+          // Extract common complaints from visits
+          const commonComplaints: string[] = [];
+          superbill.visits.forEach(visit => {
+            if (visit.mainComplaints) {
+              visit.mainComplaints.forEach(complaint => {
+                if (!commonComplaints.includes(complaint)) {
+                  commonComplaints.push(complaint);
+                }
+              });
+            }
+          });
+          
+          // Extract ICD and CPT codes
+          const commonIcdCodes: string[] = [];
+          const commonCptCodes: string[] = [];
+          
+          superbill.visits.forEach(visit => {
+            visit.icdCodes.forEach(code => {
+              if (!commonIcdCodes.includes(code)) {
+                commonIcdCodes.push(code);
+              }
+            });
+            
+            visit.cptCodes.forEach(code => {
+              if (!commonCptCodes.includes(code)) {
+                commonCptCodes.push(code);
+              }
+            });
+          });
+          
+          // Add patient
+          addPatient({
+            name: superbill.patientName,
+            dob: superbill.patientDob,
+            lastSuperbillDate: superbill.issueDate,
+            commonIcdCodes,
+            commonCptCodes,
+            notes: `Created from superbill ${superbill.id}`
+          });
+          
+          addedCount++;
+        } else {
+          skippedCount++;
+        }
+      }
+    });
+    
+    toast({
+      title: `${addedCount} patients added to your list`,
+      description: skippedCount > 0 ? `${skippedCount} patients were already in your patient list.` : "",
+      variant: addedCount > 0 ? "default" : "destructive",
+    });
+    
+    // Exit selection mode
+    setSelectionMode(false);
+    setSelectedPatientIds([]);
+  };
   
   return (
     <div className="space-y-6 w-full max-w-full">
@@ -59,10 +154,21 @@ export default function Dashboard() {
           </p>
         </div>
         
-        <Button onClick={() => navigate("/new")} className="mt-4 sm:mt-0">
-          <Plus className="mr-2 h-4 w-4" />
-          New Superbill
-        </Button>
+        <div className="flex gap-2">
+          {selectionMode && selectedPatientIds.length > 0 && (
+            <Button onClick={handleAddSelectedToPatients}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add {selectedPatientIds.length} to Patients
+            </Button>
+          )}
+          
+          {!selectionMode && (
+            <Button onClick={() => navigate("/new")}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Superbill
+            </Button>
+          )}
+        </div>
       </div>
       
       <DashboardStats 
@@ -90,9 +196,14 @@ export default function Dashboard() {
             onSearchChange={setSearchTerm}
             onDelete={handleDeleteSuperbill}
             totalSuperbills={superbills.length}
+            onSelectPatient={handleSelectPatient}
+            selectedPatientIds={selectedPatientIds}
+            selectionMode={selectionMode}
+            toggleSelectionMode={handleToggleSelectionMode}
+            onAddSelectedToPatients={handleAddSelectedToPatients}
           />
           
-          <QuickActions />
+          {!selectionMode && <QuickActions />}
         </TabsContent>
         
         <TabsContent value="board" className="mt-6">
@@ -102,6 +213,9 @@ export default function Dashboard() {
             onSearchChange={setSearchTerm}
             onDelete={handleDeleteSuperbill}
             onStatusChange={handleStatusChange}
+            onSelectPatient={selectionMode ? handleSelectPatient : undefined}
+            selectedPatientIds={selectedPatientIds}
+            selectionMode={selectionMode}
           />
         </TabsContent>
       </Tabs>

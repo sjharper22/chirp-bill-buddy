@@ -8,7 +8,7 @@ interface PatientContextType {
   addPatient: (patient: Omit<PatientProfile, "id">) => PatientProfile;
   updatePatient: (id: string, patient: PatientProfile) => void;
   deletePatient: (id: string) => void;
-  getPatient: (id: string) => PatientProfile | undefined;
+  getPatient: (idOrName: string) => PatientProfile | undefined;
   selectedPatientIds: string[];
   togglePatientSelection: (id: string) => void;
   selectAllPatients: () => void;
@@ -61,8 +61,16 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     setSelectedPatientIds(prev => prev.filter(patientId => patientId !== id));
   };
 
-  const getPatient = (id: string) => {
-    return patients.find(patient => patient.id === id);
+  const getPatient = (idOrName: string) => {
+    // First try to find patient by ID
+    let patient = patients.find(patient => patient.id === idOrName);
+    
+    // If not found by ID, try to find by name (exact match)
+    if (!patient) {
+      patient = patients.find(patient => patient.name === idOrName);
+    }
+    
+    return patient;
   };
 
   const togglePatientSelection = (id: string) => {
