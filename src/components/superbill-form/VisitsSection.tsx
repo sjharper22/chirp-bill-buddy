@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Visit, Superbill } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { VisitEntry } from "@/components/VisitEntry";
+import { VisitEntry } from "@/components/visit-entry/VisitEntry"; // Updated import path
 import { Plus, Save } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/superbill-utils";
 import { VisitFilters } from "@/components/visit/VisitFilters";
