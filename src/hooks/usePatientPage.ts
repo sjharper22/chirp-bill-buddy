@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { PatientProfile } from "@/types/patient";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/components/ui/use-toast";
@@ -28,14 +28,14 @@ export function usePatientPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const canEdit = isAdmin || isEditor;
 
   // Load patients from context once and apply filtering
   useEffect(() => {
-    // Only update when contextPatients changes or search query changes
-    // This prevents excessive re-renders
     console.log("useEffect: updating patients from context", contextPatients);
+    // Always update local state from context patients
     setPatients(contextPatients);
     
     // Filter patients based on search query
@@ -66,19 +66,22 @@ export function usePatientPage() {
     // Initial load
     handleRefreshPatients();
     
-    // Set up a refresh interval (every 30 seconds)
-    // Using a longer interval to reduce flickering
-    const intervalId = setInterval(() => {
+    // Set up a refresh interval (every 60 seconds)
+    refreshTimerRef.current = setInterval(() => {
       console.log("Auto-refreshing patients data...");
       // We use syncPatientsWithDatabase which is more conservative
-      // than a full refresh, to avoid UI flickering
       syncPatientsWithDatabase().catch(err => {
         console.error("Error during automatic patient sync:", err);
       });
-    }, 60000); // Increased to 60 seconds to reduce flickering
+    }, 60000);
     
     // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
+    return () => {
+      if (refreshTimerRef.current) {
+        clearInterval(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+    };
   }, [isInitialized]); // Only depend on isInitialized
   
   // Function to manually refresh patients
@@ -87,12 +90,15 @@ export function usePatientPage() {
     setError(null);
     try {
       console.log("Manually refreshing patients...");
-      await refreshPatients();
+      const refreshedPatients = await refreshPatients();
+      console.log("Patients refreshed:", refreshedPatients);
       
       toast({
         title: "Success",
         description: "Patient list refreshed successfully",
       });
+      
+      return refreshedPatients;
     } catch (error: any) {
       console.error("Error refreshing patients:", error);
       setError(error.message || "Failed to refresh patients");
@@ -102,6 +108,7 @@ export function usePatientPage() {
         description: "Failed to refresh patient list",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -117,6 +124,9 @@ export function usePatientPage() {
         title: "Patient Added",
         description: `${patientData.name} has been added successfully.`,
       });
+      
+      // Ensure we refresh the patient list to include the new patient
+      await handleRefreshPatients();
     } catch (error: any) {
       console.error("Error adding patient:", error);
       toast({

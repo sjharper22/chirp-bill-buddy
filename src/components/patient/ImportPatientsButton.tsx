@@ -14,7 +14,7 @@ interface ImportPatientsButtonProps {
 export function ImportPatientsButton({ onRefresh, isRefreshing }: ImportPatientsButtonProps) {
   const [importing, setImporting] = useState(false);
   const { superbills } = useSuperbill();
-  const { addPatient, getPatient } = usePatient();
+  const { addPatient, getPatient, refreshPatients } = usePatient();
   const { toast } = useToast();
 
   const handleImportPatients = async () => {
@@ -52,6 +52,7 @@ export function ImportPatientsButton({ onRefresh, isRefreshing }: ImportPatients
       console.log("Found unique patients:", uniquePatients.size);
       
       // Process each unique patient
+      const addPromises = [];
       for (const [name, data] of uniquePatients.entries()) {
         try {
           // Check if patient already exists
@@ -59,7 +60,7 @@ export function ImportPatientsButton({ onRefresh, isRefreshing }: ImportPatients
           
           if (!existingPatient) {
             // Create patient with collected data
-            await addPatient({
+            const addPromise = addPatient({
               name: data.name,
               dob: data.dob,
               lastSuperbillDate: data.lastSuperbillDate,
@@ -68,6 +69,7 @@ export function ImportPatientsButton({ onRefresh, isRefreshing }: ImportPatients
               notes: `Imported from superbills`
             });
             
+            addPromises.push(addPromise);
             importedCount++;
           } else {
             skippedCount++;
@@ -78,6 +80,9 @@ export function ImportPatientsButton({ onRefresh, isRefreshing }: ImportPatients
         }
       }
       
+      // Wait for all patient additions to complete
+      await Promise.all(addPromises);
+      
       // Show success message
       if (importedCount > 0) {
         toast({
@@ -87,9 +92,12 @@ export function ImportPatientsButton({ onRefresh, isRefreshing }: ImportPatients
             : "All superbill patients have been imported.",
         });
         
-        // Refresh the patient list after import
+        // Make sure to wait for the refresh to complete to ensure UI consistency
         if (onRefresh) {
           await onRefresh();
+        } else {
+          // Fallback refresh if no prop provided
+          await refreshPatients();
         }
       } else if (skippedCount > 0) {
         toast({

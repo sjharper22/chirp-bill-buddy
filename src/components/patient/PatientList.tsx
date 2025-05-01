@@ -1,9 +1,8 @@
 
 import { PatientProfile as PatientProfileType } from "@/types/patient";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { PatientCard } from "./PatientCard";
 import { PatientListActions } from "./PatientListActions";
-import { PatientEmptyResults } from "./PatientEmptyResults";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
@@ -29,7 +28,15 @@ export function PatientList({
   const allSelected = patients.length > 0 && selectedPatientIds.length === patients.length;
   
   // Debug patients data
-  console.log("PatientList rendering with patients:", patients.length);
+  console.log("PatientList rendering with patients:", patients.length, patients);
+
+  // Force a refresh if patients array is empty but should have items
+  useEffect(() => {
+    if (patients.length === 0 && onRefresh) {
+      console.log("PatientList found empty patients list, triggering refresh");
+      onRefresh().catch(err => console.error("Error refreshing:", err));
+    }
+  }, [patients.length, onRefresh]);
 
   return (
     <div className="space-y-4">

@@ -62,6 +62,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
+    console.log("Saving patients to localStorage:", patients.length);
     localStorage.setItem("patients", JSON.stringify(patients));
   }, [patients]);
 
@@ -162,8 +163,16 @@ export function PatientProvider({ children }: { children: ReactNode }) {
         });
       }
       
-      // Add to local state
-      setPatients(prev => [...prev, newPatient]);
+      // Add to local state - ensure we don't cause a duplicate
+      setPatients(prev => {
+        // Check if patient with this ID already exists
+        const exists = prev.some(p => p.id === newPatient.id);
+        if (exists) {
+          return prev;
+        }
+        return [...prev, newPatient];
+      });
+      
       return newPatient;
     } catch (error: any) {
       console.error("Error in addPatient:", error);

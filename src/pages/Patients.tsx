@@ -7,16 +7,17 @@ import { PatientEmptyState } from "@/components/patient/PatientEmptyState";
 import { PatientLoading } from "@/components/patient/PatientLoading";
 import { ImportPatientsButton } from "@/components/patient/ImportPatientsButton";
 import { usePatientPage } from "@/hooks/usePatientPage";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { PatientProfile } from "@/types/patient"; // Added this import
+import { PatientProfile } from "@/types/patient";
 
 export default function Patients() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isManuallyRefreshing, setIsManuallyRefreshing] = useState(false);
+  const mountedRef = useRef(false);
   
   const {
     patients,
@@ -38,7 +39,11 @@ export default function Patients() {
   
   useEffect(() => {
     console.log("Patients component mounted");
-    // Initial fetch is handled in usePatientPage
+    mountedRef.current = true;
+    
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
   
   const handleManualRefresh = useCallback(async () => {
@@ -47,24 +52,34 @@ export default function Patients() {
     
     setIsManuallyRefreshing(true);
     try {
-      await fetchPatients();
-      toast({
-        title: "Success",
-        description: "Patient list refreshed successfully",
-      });
+      const refreshedPatients = await fetchPatients();
+      console.log("Manual refresh complete, patients:", refreshedPatients?.length);
+      
+      if (mountedRef.current) {
+        toast({
+          title: "Success",
+          description: "Patient list refreshed successfully",
+        });
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to refresh patient list",
-        variant: "destructive",
-      });
+      if (mountedRef.current) {
+        toast({
+          title: "Error",
+          description: "Failed to refresh patient list",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setIsManuallyRefreshing(false);
+      if (mountedRef.current) {
+        setIsManuallyRefreshing(false);
+      }
     }
   }, [fetchPatients, isManuallyRefreshing, loading, toast]);
 
   const handleAddPatientWrapper = async (patientData: Omit<PatientProfile, "id">) => {
     await handleAddPatient(patientData);
+    // Force refresh after adding patient
+    await handleManualRefresh();
   };
   
   console.log("Rendering Patients page with:", { 
