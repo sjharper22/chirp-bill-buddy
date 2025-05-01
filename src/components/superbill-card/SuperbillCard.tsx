@@ -48,8 +48,8 @@ export function SuperbillCard({
   
   return (
     <Card 
-      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} ${onSelectPatient ? 'pl-8' : ''}`} 
-      onClick={onClick}
+      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} relative`} 
+      onClick={onClick ? onClick : undefined}
     >
       {onSelectPatient && (
         <div className="absolute top-6 left-2 z-10">
@@ -62,7 +62,7 @@ export function SuperbillCard({
         </div>
       )}
       
-      <CardContent className="pt-6">
+      <CardContent className={`pt-6 ${onSelectPatient ? 'pl-8' : ''}`}>
         <CardHeader 
           patientName={superbill.patientName}
           issueDate={superbill.issueDate}

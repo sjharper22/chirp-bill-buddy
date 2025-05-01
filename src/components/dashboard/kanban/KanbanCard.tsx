@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { KanbanCardProps } from "./types";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
-import { useState } from "react";
 
 export function KanbanCard({ 
   superbill, 
@@ -30,22 +29,11 @@ export function KanbanCard({
       draggable
       onDragStart={(e) => onDragStart(e, superbill.id)}
     >
-      {onSelectPatient && (
-        <div className="absolute top-2 left-2 z-10">
-          <Checkbox 
-            checked={isPatientSelected}
-            onCheckedChange={handleSelectChange}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white"
-          />
-        </div>
-      )}
-      
       <div className="cursor-grab active:cursor-grabbing">
         <SuperbillCard
           superbill={superbill}
           onDelete={onDelete}
-          onClick={() => navigate(`/view/${superbill.id}`)}
+          onClick={!onSelectPatient ? () => navigate(`/view/${superbill.id}`) : undefined}
           onSelectPatient={onSelectPatient}
           isPatientSelected={isPatientSelected}
         />

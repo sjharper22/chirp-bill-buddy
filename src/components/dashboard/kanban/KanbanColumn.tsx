@@ -12,7 +12,9 @@ export function KanbanColumn({
   onDragOver,
   onDragLeave,
   onDrop,
-  handleDragStart 
+  handleDragStart,
+  onSelectPatient,
+  selectedPatientIds = []
 }: KanbanColumnProps) {
   return (
     <div 
@@ -43,6 +45,8 @@ export function KanbanColumn({
               onStatusChange={onStatusChange}
               availableStatuses={allColumns}
               currentStatus={column.id}
+              onSelectPatient={onSelectPatient}
+              isPatientSelected={selectedPatientIds.includes(superbill.id)}
             />
           ))
         ) : (
