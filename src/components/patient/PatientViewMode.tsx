@@ -9,17 +9,30 @@ interface PatientViewModeProps {
 }
 
 export function PatientViewMode({ patient, onEdit }: PatientViewModeProps) {
+  // Safely format dates - ensure they're valid dates first
+  const formatDateSafely = (date: Date | undefined) => {
+    if (!date) return "Not available";
+    
+    // Check if it's a valid date
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      return "Invalid date";
+    }
+    
+    return formatDate(dateObj);
+  };
+
   return (
     <div className="space-y-4">
       <div>
         <p className="text-sm text-muted-foreground">Date of Birth</p>
-        <p>{formatDate(patient.dob)}</p>
+        <p>{formatDateSafely(patient.dob)}</p>
       </div>
       
       {patient.lastSuperbillDate && (
         <div>
           <p className="text-sm text-muted-foreground">Last Superbill Date</p>
-          <p>{formatDate(patient.lastSuperbillDate)}</p>
+          <p>{formatDateSafely(patient.lastSuperbillDate)}</p>
         </div>
       )}
       
@@ -27,7 +40,7 @@ export function PatientViewMode({ patient, onEdit }: PatientViewModeProps) {
         <div>
           <p className="text-sm text-muted-foreground">Last Coverage Period</p>
           <p>
-            {formatDate(patient.lastSuperbillDateRange.start)} - {formatDate(patient.lastSuperbillDateRange.end)}
+            {formatDateSafely(patient.lastSuperbillDateRange.start)} - {formatDateSafely(patient.lastSuperbillDateRange.end)}
           </p>
         </div>
       )}

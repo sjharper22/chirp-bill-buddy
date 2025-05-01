@@ -27,11 +27,14 @@ export function usePatientPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   const canEdit = isAdmin || isEditor;
 
-  // Load patients from context and apply filtering
+  // Load patients from context once and apply filtering
   useEffect(() => {
+    // Only update when contextPatients changes or search query changes
+    // This prevents excessive re-renders
     console.log("useEffect: updating patients from context", contextPatients);
     setPatients(contextPatients);
     
@@ -50,25 +53,36 @@ export function usePatientPage() {
     setError(contextError);
   }, [contextPatients, contextLoading, contextError, searchQuery]);
   
-  // Initial fetch when component mounts
+  // Initial fetch when component mounts - but only once
   useEffect(() => {
+    // Skip repeated initialization
+    if (isInitialized) return;
+
     console.log("useEffect in usePatientPage is running - initial fetch");
+    
+    // Immediately set as initialized to prevent multiple calls
+    setIsInitialized(true);
+    
+    // Initial load
     handleRefreshPatients();
     
     // Set up a refresh interval (every 30 seconds)
+    // Using a longer interval to reduce flickering
     const intervalId = setInterval(() => {
       console.log("Auto-refreshing patients data...");
+      // We use syncPatientsWithDatabase which is more conservative
+      // than a full refresh, to avoid UI flickering
       syncPatientsWithDatabase().catch(err => {
         console.error("Error during automatic patient sync:", err);
       });
-    }, 30000);
+    }, 60000); // Increased to 60 seconds to reduce flickering
     
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isInitialized]); // Only depend on isInitialized
   
   // Function to manually refresh patients
-  const handleRefreshPatients = async () => {
+  const handleRefreshPatients = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -91,7 +105,7 @@ export function usePatientPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [refreshPatients, toast]);
   
   // Modified to return Promise<void> to match the expected type in PatientHeader
   const handleAddPatient = async (patientData: Omit<PatientProfile, "id">): Promise<void> => {

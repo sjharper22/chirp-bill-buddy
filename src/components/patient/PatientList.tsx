@@ -1,6 +1,6 @@
 
 import { PatientProfile as PatientProfileType } from "@/types/patient";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { PatientCard } from "./PatientCard";
 import { PatientListActions } from "./PatientListActions";
 import { PatientEmptyResults } from "./PatientEmptyResults";
@@ -17,7 +17,7 @@ interface PatientListProps {
   onSelectAll: () => void;
   onClearSelection: () => void;
   canEdit?: boolean;
-  onRefresh?: () => Promise<void>; // Updated return type
+  onRefresh?: () => Promise<void>;
 }
 
 export function PatientList({
@@ -32,39 +32,48 @@ export function PatientList({
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [filteredPatients, setFilteredPatients] = useState<PatientProfileType[]>(patients);
   
-  // Filter patients based on search term
-  const filteredPatients = patients.filter(patient => 
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Handle filtering when patients or searchTerm changes
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredPatients(patients);
+    } else {
+      const filtered = patients.filter(patient => 
+        patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredPatients(filtered);
+    }
+  }, [patients, searchTerm]);
   
   const allSelected = patients.length > 0 && selectedPatientIds.length === patients.length;
   
-  const handleRefresh = async () => {
-    if (onRefresh) {
-      setIsRefreshing(true);
-      try {
-        await onRefresh();
-        toast({
-          title: "Success",
-          description: "Patient list refreshed successfully",
-        });
-      } catch (error) {
-        console.error("Error refreshing patients:", error);
-        toast({
-          title: "Error",
-          description: "Failed to refresh patient list",
-          variant: "destructive",
-        });
-      } finally {
-        setIsRefreshing(false);
-      }
+  // Use callback to prevent unnecessary re-renders
+  const handleRefresh = useCallback(async () => {
+    if (!onRefresh || isRefreshing) return;
+    
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+      toast({
+        title: "Success",
+        description: "Patient list refreshed successfully",
+      });
+    } catch (error) {
+      console.error("Error refreshing patients:", error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh patient list",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
     }
-  };
+  }, [onRefresh, isRefreshing, toast]);
   
   // Debug patients data
-  console.log("PatientList rendering with patients:", patients);
-  console.log("Filtered patients:", filteredPatients);
+  console.log("PatientList rendering with patients:", patients.length);
+  console.log("Filtered patients:", filteredPatients.length);
 
   return (
     <div className="space-y-4">

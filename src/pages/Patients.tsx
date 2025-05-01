@@ -7,7 +7,7 @@ import { PatientEmptyState } from "@/components/patient/PatientEmptyState";
 import { PatientLoading } from "@/components/patient/PatientLoading";
 import { ImportPatientsButton } from "@/components/patient/ImportPatientsButton";
 import { usePatientPage } from "@/hooks/usePatientPage";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
@@ -37,27 +37,18 @@ export default function Patients() {
     clearPatientSelection
   } = usePatientPage();
   
-  // Force a refresh when the component mounts
+  // We're only calling fetchPatients once at mount now
+  // This prevents multiple refreshes causing UI flickers
   useEffect(() => {
-    console.log("Patients component mounted, loading patients...");
-    const loadPatients = async () => {
-      try {
-        await fetchPatients();
-        console.log("Patients loaded successfully");
-      } catch (error) {
-        console.error("Failed to load patients:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load patients. Please refresh the page.",
-          variant: "destructive",
-        });
-      }
-    };
-    
-    loadPatients();
-  }, [fetchPatients, toast]);
+    console.log("Patients component mounted");
+    // Initial fetch is now handled in usePatientPage
+    // We don't need to call fetchPatients() again here
+  }, []);
   
-  const handleManualRefresh = async () => {
+  const handleManualRefresh = useCallback(async () => {
+    // Prevent duplicate refreshes
+    if (isManuallyRefreshing || loading) return;
+    
     setIsManuallyRefreshing(true);
     try {
       await fetchPatients();
@@ -74,7 +65,7 @@ export default function Patients() {
     } finally {
       setIsManuallyRefreshing(false);
     }
-  };
+  }, [fetchPatients, isManuallyRefreshing, loading, toast]);
 
   // Wrapper function to handle the type mismatch
   const handleAddPatientWrapper = async (patientData: Omit<PatientProfile, "id">) => {

@@ -13,6 +13,7 @@ export function ImportPatientsButton() {
   const { toast } = useToast();
 
   const handleImportPatients = async () => {
+    // Prevent duplicate imports
     if (importing) return;
     
     setImporting(true);
@@ -47,11 +48,11 @@ export function ImportPatientsButton() {
       
       // Process each unique patient
       for (const [name, data] of uniquePatients.entries()) {
-        // Check if patient already exists
-        const existingPatient = getPatient(name);
-        
-        if (!existingPatient) {
-          try {
+        try {
+          // Check if patient already exists
+          const existingPatient = getPatient(name);
+          
+          if (!existingPatient) {
             // Create patient with collected data
             await addPatient({
               name: data.name,
@@ -63,12 +64,12 @@ export function ImportPatientsButton() {
             });
             
             importedCount++;
-          } catch (error) {
-            console.error(`Error importing patient ${name}:`, error);
-            errorCount++;
+          } else {
+            skippedCount++;
           }
-        } else {
-          skippedCount++;
+        } catch (error) {
+          console.error(`Error importing patient ${name}:`, error);
+          errorCount++;
         }
       }
       
@@ -111,11 +112,15 @@ export function ImportPatientsButton() {
     }
   };
 
+  // Display a disabled button if there are no superbills
+  const noSuperbills = !superbills || superbills.length === 0;
+
   return (
     <Button
       onClick={handleImportPatients}
-      disabled={importing}
+      disabled={importing || noSuperbills}
       variant="outline"
+      title={noSuperbills ? "No superbills available to import patients from" : "Import patients from existing superbills"}
     >
       {importing ? (
         <>
