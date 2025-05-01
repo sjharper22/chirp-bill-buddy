@@ -47,8 +47,8 @@ export default function Patients() {
   useEffect(() => {
     fetchPatients();
     
-    // Set up a refresh interval (every 60 seconds)
-    const intervalId = setInterval(fetchPatients, 60000);
+    // Set up a refresh interval (every 30 seconds)
+    const intervalId = setInterval(fetchPatients, 30000);
     
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
@@ -73,7 +73,7 @@ export default function Patients() {
         title: "Patient Added",
         description: `${patientData.name} has been added successfully.`,
       });
-      fetchPatients();
+      fetchPatients(); // Refresh the patient list immediately
     } catch (error: any) {
       console.error("Error adding patient:", error);
       toast({

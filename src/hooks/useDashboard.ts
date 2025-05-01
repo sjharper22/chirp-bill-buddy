@@ -3,7 +3,7 @@ import { useState } from "react";
 import { SuperbillStatus } from "@/types/superbill";
 import { useSuperbill } from "@/context/superbill-context";
 import { usePatient } from "@/context/patient-context";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { patientService } from "@/services/patientService";
 
 export function useDashboard() {
@@ -106,17 +106,7 @@ export function useDashboard() {
           });
           
           try {
-            // Create new patient in local context
-            const newPatient = addPatient({
-              name: superbill.patientName,
-              dob: superbill.patientDob,
-              lastSuperbillDate: superbill.issueDate,
-              commonIcdCodes,
-              commonCptCodes,
-              notes: `Created from superbill ${superbill.id}`
-            });
-            
-            // Also save to database with patientService
+            // Create the patient data object
             const patientData = {
               name: superbill.patientName,
               dob: superbill.patientDob,
@@ -126,7 +116,10 @@ export function useDashboard() {
               notes: `Created from superbill ${superbill.id}`
             };
             
-            // Add promise to array but don't wait for it here
+            // Add to local context first to maintain UI responsiveness
+            addPatient(patientData);
+            
+            // Then save to database
             const promise = patientService.create(patientData)
               .then(() => {
                 addedCount++;
