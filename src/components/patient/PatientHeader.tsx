@@ -10,7 +10,7 @@ interface PatientHeaderProps {
   canEdit: boolean;
   dialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
-  onAddPatient: (patient: Omit<PatientProfile, "id">) => Promise<void>;
+  onAddPatient: (patient: Omit<PatientProfile, "id">) => Promise<void>; // Updated return type
   selectedPatientIds: string[];
 }
 

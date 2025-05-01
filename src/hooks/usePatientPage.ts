@@ -101,7 +101,7 @@ export function usePatientPage() {
       });
       
       // Refresh the patient list immediately
-      fetchPatients();
+      await fetchPatients();
       
       return savedPatient;
     } catch (error: any) {

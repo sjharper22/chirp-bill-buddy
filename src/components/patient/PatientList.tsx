@@ -17,7 +17,7 @@ interface PatientListProps {
   onSelectAll: () => void;
   onClearSelection: () => void;
   canEdit?: boolean;
-  onRefresh?: () => Promise<void>;
+  onRefresh?: () => Promise<void>; // Updated return type
 }
 
 export function PatientList({

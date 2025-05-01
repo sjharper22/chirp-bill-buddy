@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PatientProfile } from "@/types/patient";
 
 export default function Patients() {
   const navigate = useNavigate();
@@ -74,6 +75,11 @@ export default function Patients() {
     }
   };
 
+  // Wrapper function to handle the type mismatch
+  const handleAddPatientWrapper = async (patientData: Omit<PatientProfile, "id">) => {
+    await handleAddPatient(patientData);
+  };
+  
   console.log("Rendering Patients page with:", { 
     patientsCount: patients.length, 
     filteredPatientsCount: filteredPatients.length,
@@ -87,7 +93,7 @@ export default function Patients() {
         canEdit={canEdit}
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
-        onAddPatient={handleAddPatient}
+        onAddPatient={handleAddPatientWrapper}
         selectedPatientIds={selectedPatientIds}
       />
       
@@ -140,7 +146,7 @@ export default function Patients() {
           onSelectAll={selectAllPatients}
           onClearSelection={clearPatientSelection}
           canEdit={canEdit}
-          onRefresh={fetchPatients}
+          onRefresh={handleManualRefresh}
         />
       )}
     </div>
