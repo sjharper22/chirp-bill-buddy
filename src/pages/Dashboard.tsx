@@ -1,175 +1,35 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSuperbill } from "@/context/superbill-context";
-import { usePatient } from "@/context/patient-context";
-import { Button } from "@/components/ui/button";
-import { Plus, UserPlus } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
-import { RecentSuperbills } from "@/components/dashboard/RecentSuperbills";
-import { QuickActions } from "@/components/dashboard/QuickActions";
-import { KanbanBoard } from "@/components/dashboard/KanbanBoard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SuperbillStatus } from "@/types/superbill";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
+import { useDashboard } from "@/hooks/useDashboard";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const { superbills, deleteSuperbill, updateSuperbillStatus } = useSuperbill();
-  const { patients, addPatient, getPatient } = usePatient();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("list");
-  const [selectionMode, setSelectionMode] = useState(false);
-  const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
-  
-  // Filter superbills based on search term
-  const filteredSuperbills = superbills.filter(bill => 
-    bill.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    bill.id.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 6); // Show only the most recent 6 superbills in list view
-  
-  // Calculate total visits across all superbills
-  const totalVisits = superbills.reduce((total, bill) => total + bill.visits.length, 0);
-  
-  // Calculate total billed amount
-  const totalBilled = superbills.reduce((total, bill) => {
-    return total + bill.visits.reduce((visitTotal, visit) => visitTotal + visit.fee, 0);
-  }, 0);
-  
-  // Calculate average fee per visit
-  const averageFee = totalVisits > 0 ? totalBilled / totalVisits : 0;
-  
-  const handleDeleteSuperbill = (id: string) => {
-    deleteSuperbill(id);
-    toast({
-      title: "Superbill deleted",
-      description: "The superbill has been deleted successfully.",
-    });
-  };
-
-  const handleStatusChange = (id: string, newStatus: SuperbillStatus) => {
-    updateSuperbillStatus(id, newStatus);
-  };
-
-  const handleToggleSelectionMode = () => {
-    setSelectionMode(!selectionMode);
-    setSelectedPatientIds([]);
-  };
-
-  const handleSelectPatient = (id: string, name: string, dob: Date, selected: boolean) => {
-    setSelectedPatientIds(prev => {
-      if (selected) {
-        return [...prev, id];
-      } else {
-        return prev.filter(patientId => patientId !== id);
-      }
-    });
-  };
-
-  const handleAddSelectedToPatients = () => {
-    if (selectedPatientIds.length === 0) {
-      toast({
-        title: "No patients selected",
-        description: "Please select at least one patient to add to your patient list.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    let addedCount = 0;
-    let skippedCount = 0;
-
-    selectedPatientIds.forEach(id => {
-      const superbill = superbills.find(bill => bill.id === id);
-      
-      if (superbill) {
-        const existingPatient = getPatient(superbill.patientName);
-        
-        if (!existingPatient) {
-          // Extract common complaints from visits
-          const commonComplaints: string[] = [];
-          superbill.visits.forEach(visit => {
-            if (visit.mainComplaints) {
-              visit.mainComplaints.forEach(complaint => {
-                if (!commonComplaints.includes(complaint)) {
-                  commonComplaints.push(complaint);
-                }
-              });
-            }
-          });
-          
-          // Extract ICD and CPT codes
-          const commonIcdCodes: string[] = [];
-          const commonCptCodes: string[] = [];
-          
-          superbill.visits.forEach(visit => {
-            visit.icdCodes.forEach(code => {
-              if (!commonIcdCodes.includes(code)) {
-                commonIcdCodes.push(code);
-              }
-            });
-            
-            visit.cptCodes.forEach(code => {
-              if (!commonCptCodes.includes(code)) {
-                commonCptCodes.push(code);
-              }
-            });
-          });
-          
-          // Add patient
-          addPatient({
-            name: superbill.patientName,
-            dob: superbill.patientDob,
-            lastSuperbillDate: superbill.issueDate,
-            commonIcdCodes,
-            commonCptCodes,
-            notes: `Created from superbill ${superbill.id}`
-          });
-          
-          addedCount++;
-        } else {
-          skippedCount++;
-        }
-      }
-    });
-    
-    toast({
-      title: `${addedCount} patients added to your list`,
-      description: skippedCount > 0 ? `${skippedCount} patients were already in your patient list.` : "",
-      variant: addedCount > 0 ? "default" : "destructive",
-    });
-    
-    // Exit selection mode
-    setSelectionMode(false);
-    setSelectedPatientIds([]);
-  };
+  const {
+    superbills,
+    patients,
+    searchTerm,
+    setSearchTerm,
+    selectionMode,
+    selectedPatientIds,
+    totalVisits,
+    totalBilled,
+    averageFee,
+    handleDeleteSuperbill,
+    handleStatusChange,
+    handleToggleSelectionMode,
+    handleSelectPatient,
+    handleAddSelectedToPatients
+  } = useDashboard();
   
   return (
     <div className="space-y-6 w-full max-w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">
-            Overview of your superbills and patient statistics
-          </p>
-        </div>
-        
-        <div className="flex gap-2">
-          {selectionMode && selectedPatientIds.length > 0 && (
-            <Button onClick={handleAddSelectedToPatients}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add {selectedPatientIds.length} to Patients
-            </Button>
-          )}
-          
-          {!selectionMode && (
-            <Button onClick={() => navigate("/new")}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Superbill
-            </Button>
-          )}
-        </div>
-      </div>
+      <DashboardHeader
+        selectionMode={selectionMode}
+        selectedPatientIds={selectedPatientIds}
+        handleToggleSelectionMode={handleToggleSelectionMode}
+        handleAddSelectedToPatients={handleAddSelectedToPatients}
+      />
       
       <DashboardStats 
         totalPatients={patients.length}
@@ -178,47 +38,18 @@ export default function Dashboard() {
         averageFee={averageFee}
       />
       
-      <Tabs 
-        defaultValue="list" 
-        value={activeTab} 
-        onValueChange={setActiveTab} 
-        className="w-full mt-8"
-      >
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="list">List View</TabsTrigger>
-          <TabsTrigger value="board">Board View</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="list" className="mt-6">
-          <RecentSuperbills 
-            filteredSuperbills={filteredSuperbills}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            onDelete={handleDeleteSuperbill}
-            totalSuperbills={superbills.length}
-            onSelectPatient={handleSelectPatient}
-            selectedPatientIds={selectedPatientIds}
-            selectionMode={selectionMode}
-            toggleSelectionMode={handleToggleSelectionMode}
-            onAddSelectedToPatients={handleAddSelectedToPatients}
-          />
-          
-          {!selectionMode && <QuickActions />}
-        </TabsContent>
-        
-        <TabsContent value="board" className="mt-6">
-          <KanbanBoard
-            superbills={superbills}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            onDelete={handleDeleteSuperbill}
-            onStatusChange={handleStatusChange}
-            onSelectPatient={selectionMode ? handleSelectPatient : undefined}
-            selectedPatientIds={selectedPatientIds}
-            selectionMode={selectionMode}
-          />
-        </TabsContent>
-      </Tabs>
+      <DashboardTabs
+        superbills={superbills}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onDelete={handleDeleteSuperbill}
+        onStatusChange={handleStatusChange}
+        selectionMode={selectionMode}
+        selectedPatientIds={selectedPatientIds}
+        handleToggleSelectionMode={handleToggleSelectionMode}
+        handleSelectPatient={handleSelectPatient}
+        handleAddSelectedToPatients={handleAddSelectedToPatients}
+      />
     </div>
   );
 }
