@@ -6,12 +6,16 @@ import { PatientSearch } from "@/components/patient/PatientSearch";
 import { PatientEmptyState } from "@/components/patient/PatientEmptyState";
 import { PatientLoading } from "@/components/patient/PatientLoading";
 import { usePatientPage } from "@/hooks/usePatientPage";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Patients() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isManuallyRefreshing, setIsManuallyRefreshing] = useState(false);
   
   const {
     patients,
@@ -22,6 +26,7 @@ export default function Patients() {
     searchQuery,
     setSearchQuery,
     loading,
+    error,
     canEdit,
     fetchPatients,
     handleAddPatient,
@@ -32,6 +37,7 @@ export default function Patients() {
   
   // Force a refresh when the component mounts
   useEffect(() => {
+    console.log("Patients component mounted, loading patients...");
     const loadPatients = async () => {
       try {
         await fetchPatients();
@@ -49,6 +55,32 @@ export default function Patients() {
     loadPatients();
   }, [fetchPatients, toast]);
   
+  const handleManualRefresh = async () => {
+    setIsManuallyRefreshing(true);
+    try {
+      await fetchPatients();
+      toast({
+        title: "Success",
+        description: "Patient list refreshed successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh patient list",
+        variant: "destructive",
+      });
+    } finally {
+      setIsManuallyRefreshing(false);
+    }
+  };
+
+  console.log("Rendering Patients page with:", { 
+    patientsCount: patients.length, 
+    filteredPatientsCount: filteredPatients.length,
+    loading,
+    error
+  });
+  
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
       <PatientHeader 
@@ -59,10 +91,30 @@ export default function Patients() {
         selectedPatientIds={selectedPatientIds}
       />
       
-      <PatientSearch 
-        searchQuery={searchQuery} 
-        onSearchChange={setSearchQuery} 
-      />
+      <div className="flex justify-between items-center mb-6">
+        <PatientSearch 
+          searchQuery={searchQuery} 
+          onSearchChange={setSearchQuery} 
+        />
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleManualRefresh}
+          disabled={isManuallyRefreshing || loading}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isManuallyRefreshing ? 'animate-spin' : ''}`} />
+          {isManuallyRefreshing ? 'Refreshing...' : 'Refresh Patients'}
+        </Button>
+      </div>
+      
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       
       {loading ? (
         <PatientLoading />

@@ -21,6 +21,7 @@ export interface Patient {
 
 // Convert database patient to frontend patient model
 const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
+  console.log("Mapping DB patient to frontend model:", dbPatient);
   return {
     id: dbPatient.id,
     name: dbPatient.name,
@@ -50,6 +51,7 @@ export const patientService = {
   // Get all patients
   async getAll(): Promise<PatientProfile[]> {
     try {
+      console.log("patientService.getAll: Fetching all patients from Supabase");
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -57,20 +59,23 @@ export const patientService = {
         
       if (error) {
         console.error('Error fetching patients:', error);
-        throw error;
+        throw new Error(`Failed to fetch patients: ${error.message}`);
       }
       
       console.log("Raw patients data from Supabase:", data);
-      return Array.isArray(data) ? data.map(mapDbPatientToPatient) : [];
-    } catch (e) {
+      const mappedData = Array.isArray(data) ? data.map(mapDbPatientToPatient) : [];
+      console.log("Mapped patient data:", mappedData);
+      return mappedData;
+    } catch (e: any) {
       console.error("Error in getAll patients:", e);
-      throw e;
+      throw new Error(`Failed to fetch patients: ${e.message}`);
     }
   },
   
   // Get a single patient by ID
   async getById(id: string): Promise<PatientProfile | null> {
     try {
+      console.log(`patientService.getById: Fetching patient with ID ${id}`);
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -79,16 +84,17 @@ export const patientService = {
         
       if (error) {
         if (error.code === 'PGRST116') { // Record not found
+          console.log(`Patient with ID ${id} not found`);
           return null;
         }
         console.error('Error fetching patient:', error);
-        throw error;
+        throw new Error(`Failed to fetch patient: ${error.message}`);
       }
       
       return mapDbPatientToPatient(data);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error in getById:", e);
-      throw e;
+      throw new Error(`Failed to fetch patient: ${e.message}`);
     }
   },
   
@@ -107,14 +113,14 @@ export const patientService = {
         
       if (error) {
         console.error('Error creating patient:', error);
-        throw error;
+        throw new Error(`Failed to create patient: ${error.message}`);
       }
       
       console.log("Created patient in Supabase:", data);
       return mapDbPatientToPatient(data);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error in create patient:", e);
-      throw e;
+      throw new Error(`Failed to create patient: ${e.message}`);
     }
   },
   
@@ -122,6 +128,8 @@ export const patientService = {
   async update(id: string, patient: PatientProfile): Promise<PatientProfile> {
     try {
       const dbPatient = mapPatientToDbPatient(patient);
+      
+      console.log(`Updating patient with ID ${id}:`, dbPatient);
       
       const { data, error } = await supabase
         .from('patients')
@@ -132,19 +140,21 @@ export const patientService = {
         
       if (error) {
         console.error('Error updating patient:', error);
-        throw error;
+        throw new Error(`Failed to update patient: ${error.message}`);
       }
       
+      console.log("Updated patient in Supabase:", data);
       return mapDbPatientToPatient(data);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error in update patient:", e);
-      throw e;
+      throw new Error(`Failed to update patient: ${e.message}`);
     }
   },
   
   // Delete a patient
   async delete(id: string): Promise<void> {
     try {
+      console.log(`Deleting patient with ID ${id}`);
       const { error } = await supabase
         .from('patients')
         .delete()
@@ -152,17 +162,20 @@ export const patientService = {
         
       if (error) {
         console.error('Error deleting patient:', error);
-        throw error;
+        throw new Error(`Failed to delete patient: ${error.message}`);
       }
-    } catch (e) {
+      
+      console.log(`Patient with ID ${id} deleted successfully`);
+    } catch (e: any) {
       console.error("Error in delete patient:", e);
-      throw e;
+      throw new Error(`Failed to delete patient: ${e.message}`);
     }
   },
   
   // Search patients
   async search(query: string): Promise<PatientProfile[]> {
     try {
+      console.log(`Searching patients with query: ${query}`);
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -171,13 +184,13 @@ export const patientService = {
         
       if (error) {
         console.error('Error searching patients:', error);
-        throw error;
+        throw new Error(`Failed to search patients: ${error.message}`);
       }
       
       return data.map(mapDbPatientToPatient);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error in search patients:", e);
-      throw e;
+      throw new Error(`Failed to search patients: ${e.message}`);
     }
   }
 };

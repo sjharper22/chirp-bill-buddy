@@ -7,6 +7,8 @@ import { PatientEmptyResults } from "./PatientEmptyResults";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface PatientListProps {
   patients: PatientProfileType[];
@@ -60,6 +62,10 @@ export function PatientList({
     }
   };
   
+  // Debug patients data
+  console.log("PatientList rendering with patients:", patients);
+  console.log("Filtered patients:", filteredPatients);
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -86,20 +92,38 @@ export function PatientList({
         )}
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredPatients.length === 0 ? (
-          <PatientEmptyResults searchTerm={searchTerm} />
-        ) : (
-          filteredPatients.map(patient => (
-            <PatientCard
-              key={patient.id}
-              patient={patient}
-              isSelected={selectedPatientIds.includes(patient.id)}
-              onToggleSelection={() => togglePatientSelection(patient.id)}
-            />
-          ))
-        )}
-      </div>
+      {patients.length > 0 && filteredPatients.length === 0 && (
+        <Alert variant="default">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            No patients match your search criteria. Try adjusting your search or clear it to see all patients.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {patients.length === 0 ? (
+        <Alert variant="default">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            No patients found. Try refreshing the list or add new patients.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredPatients.length === 0 ? (
+            <PatientEmptyResults searchTerm={searchTerm} />
+          ) : (
+            filteredPatients.map(patient => (
+              <PatientCard
+                key={patient.id}
+                patient={patient}
+                isSelected={selectedPatientIds.includes(patient.id)}
+                onToggleSelection={() => togglePatientSelection(patient.id)}
+              />
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

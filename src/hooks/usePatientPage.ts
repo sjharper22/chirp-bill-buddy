@@ -16,12 +16,14 @@ export function usePatientPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const canEdit = isAdmin || isEditor;
 
   // Use the fetchPatients function from useCallback to prevent unnecessary recreations
   const fetchPatients = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       console.log("Fetching patients from Supabase...");
       const data = await patientService.getAll();
@@ -30,23 +32,28 @@ export function usePatientPage() {
       if (data && data.length > 0) {
         setPatients(data);
         setFilteredPatients(data);
+        return data; // Return data for further processing if needed
       } else {
         // If no data from database, use local context data
         console.log("No patients found in database, using local context:", localPatients);
         setPatients(localPatients);
         setFilteredPatients(localPatients);
+        return localPatients;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching patients:", error);
       // Fall back to local context if database fetch fails
       setPatients(localPatients);
       setFilteredPatients(localPatients);
+      setError(error.message || "Failed to load patients");
       
       toast({
         title: "Error",
         description: "Failed to load patients from database, using locally stored patients",
         variant: "destructive",
       });
+      
+      return localPatients;
     } finally {
       setLoading(false);
     }
@@ -54,10 +61,14 @@ export function usePatientPage() {
   
   // Initial fetch
   useEffect(() => {
+    console.log("useEffect in usePatientPage is running");
     fetchPatients();
     
     // Set up a refresh interval (every 15 seconds)
-    const intervalId = setInterval(fetchPatients, 15000);
+    const intervalId = setInterval(() => {
+      console.log("Refreshing patients data...");
+      fetchPatients();
+    }, 15000);
     
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
@@ -91,6 +102,8 @@ export function usePatientPage() {
       
       // Refresh the patient list immediately
       fetchPatients();
+      
+      return savedPatient;
     } catch (error: any) {
       console.error("Error adding patient:", error);
       toast({
@@ -98,6 +111,7 @@ export function usePatientPage() {
         description: error.message || "Failed to add patient",
         variant: "destructive",
       });
+      throw error;
     }
   };
   
@@ -110,6 +124,7 @@ export function usePatientPage() {
     searchQuery,
     setSearchQuery,
     loading,
+    error,
     canEdit,
     fetchPatients,
     handleAddPatient,
