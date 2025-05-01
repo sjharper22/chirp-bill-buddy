@@ -15,6 +15,7 @@ import { DefaultCodesSection } from "@/components/superbill-form/DefaultCodesSec
 import { VisitsSection } from "@/components/superbill-form/VisitsSection";
 import { commonMainComplaints } from "@/constants/superbill-constants";
 import { toast } from "@/components/ui/use-toast";
+import { patientService } from "@/services/patientService";
 
 interface SuperbillFormProps {
   existingSuperbill?: Superbill;
@@ -54,7 +55,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
   });
   
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!superbill.patientName) {
@@ -103,20 +104,39 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
         });
       });
       
-      // Add new patient
-      const newPatient = addPatient({
-        name: superbill.patientName,
-        dob: superbill.patientDob,
-        lastSuperbillDate: now,
-        commonIcdCodes,
-        commonCptCodes,
-        notes: `Automatically added from superbill creation`
-      });
-      
-      toast({
-        title: "Patient Added",
-        description: `${superbill.patientName} was automatically added to your patient list.`,
-      });
+      try {
+        // Add new patient to local state
+        const newPatient = addPatient({
+          name: superbill.patientName,
+          dob: superbill.patientDob,
+          lastSuperbillDate: now,
+          commonIcdCodes,
+          commonCptCodes,
+          notes: `Automatically added from superbill creation`
+        });
+        
+        // Also save to database
+        await patientService.create({
+          name: superbill.patientName,
+          dob: superbill.patientDob,
+          lastSuperbillDate: now,
+          commonIcdCodes,
+          commonCptCodes,
+          notes: `Automatically added from superbill creation`
+        });
+        
+        toast({
+          title: "Patient Added",
+          description: `${superbill.patientName} was automatically added to your patient list.`,
+        });
+      } catch (error) {
+        console.error("Error adding patient:", error);
+        toast({
+          title: "Warning",
+          description: `Patient was added locally but there was an error saving to the database.`,
+          variant: "destructive",
+        });
+      }
     } else {
       // Update last superbill date for existing patient
       // Note: For now we're not updating the patient record, but this could be added if needed

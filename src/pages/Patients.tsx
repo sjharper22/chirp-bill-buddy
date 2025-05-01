@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -9,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Plus, User, Search, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { patientService } from "@/services/patientService";
 
 export default function Patients() {
@@ -46,6 +45,12 @@ export default function Patients() {
   
   useEffect(() => {
     fetchPatients();
+    
+    // Set up a refresh interval (every 60 seconds)
+    const intervalId = setInterval(fetchPatients, 60000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
   
   useEffect(() => {

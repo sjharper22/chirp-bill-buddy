@@ -4,6 +4,7 @@ import { SuperbillStatus } from "@/types/superbill";
 import { useSuperbill } from "@/context/superbill-context";
 import { usePatient } from "@/context/patient-context";
 import { toast } from "@/components/ui/use-toast";
+import { patientService } from "@/services/patientService";
 
 export function useDashboard() {
   const { superbills, deleteSuperbill, updateSuperbillStatus } = useSuperbill();
@@ -50,7 +51,7 @@ export function useDashboard() {
     });
   };
 
-  const handleAddSelectedToPatients = () => {
+  const handleAddSelectedToPatients = async () => {
     if (selectedPatientIds.length === 0) {
       toast({
         title: "No patients selected",
@@ -62,8 +63,12 @@ export function useDashboard() {
 
     let addedCount = 0;
     let skippedCount = 0;
+    let errorCount = 0;
 
-    selectedPatientIds.forEach(id => {
+    // Create an array to track promises
+    const promises = [];
+
+    for (const id of selectedPatientIds) {
       const superbill = superbills.find(bill => bill.id === id);
       
       if (superbill) {
@@ -100,26 +105,56 @@ export function useDashboard() {
             });
           });
           
-          // Add patient
-          addPatient({
-            name: superbill.patientName,
-            dob: superbill.patientDob,
-            lastSuperbillDate: superbill.issueDate,
-            commonIcdCodes,
-            commonCptCodes,
-            notes: `Created from superbill ${superbill.id}`
-          });
-          
-          addedCount++;
+          try {
+            // Create new patient in local context
+            const newPatient = addPatient({
+              name: superbill.patientName,
+              dob: superbill.patientDob,
+              lastSuperbillDate: superbill.issueDate,
+              commonIcdCodes,
+              commonCptCodes,
+              notes: `Created from superbill ${superbill.id}`
+            });
+            
+            // Also save to database with patientService
+            const patientData = {
+              name: superbill.patientName,
+              dob: superbill.patientDob,
+              lastSuperbillDate: superbill.issueDate,
+              commonIcdCodes,
+              commonCptCodes,
+              notes: `Created from superbill ${superbill.id}`
+            };
+            
+            // Add promise to array but don't wait for it here
+            const promise = patientService.create(patientData)
+              .then(() => {
+                addedCount++;
+              })
+              .catch((error) => {
+                console.error("Error saving patient to database:", error);
+                errorCount++;
+              });
+              
+            promises.push(promise);
+          } catch (error) {
+            console.error("Error adding patient:", error);
+            errorCount++;
+          }
         } else {
           skippedCount++;
         }
       }
-    });
+    }
+    
+    // Wait for all promises to resolve
+    await Promise.all(promises);
     
     toast({
       title: `${addedCount} patients added to your list`,
-      description: skippedCount > 0 ? `${skippedCount} patients were already in your patient list.` : "",
+      description: skippedCount > 0 
+        ? `${skippedCount} patients were already in your patient list.${errorCount > 0 ? ` ${errorCount} errors occurred.` : ''}` 
+        : errorCount > 0 ? `${errorCount} errors occurred while saving patients.` : "",
       variant: addedCount > 0 ? "default" : "destructive",
     });
     
