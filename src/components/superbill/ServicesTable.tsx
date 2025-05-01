@@ -18,6 +18,12 @@ export function ServicesTable({ visits }: ServicesTableProps) {
       default: return 'info';
     }
   };
+
+  const statusLabel = {
+    'draft': 'draft',
+    'in_progress': 'in progress',
+    'completed': 'completed'
+  };
   
   return (
     <div className="mb-6">
@@ -39,7 +45,7 @@ export function ServicesTable({ visits }: ServicesTableProps) {
                 <td className="py-2 px-3">{formatDate(visit.date)}</td>
                 <td className="py-2 px-3">
                   <StatusBadge 
-                    status={visit.status || 'draft'} 
+                    status={statusLabel[visit.status || 'draft']} 
                     variant={getStatusVariant(visit.status)}
                   />
                 </td>

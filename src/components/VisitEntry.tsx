@@ -13,7 +13,6 @@ import { CptCodeSelector } from "@/components/visit/CptCodeSelector";
 import { VisitNotes } from "@/components/visit/VisitNotes";
 import { useVisitSections, VisitSection } from "@/hooks/useVisitSections";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface VisitEntryProps {
   visit: Visit;
@@ -53,10 +52,27 @@ export function VisitEntry({
     onDelete(visit.id);
   };
 
-  const handleStatusChange = (status: string) => {
+  const toggleStatus = () => {
+    // Cycle through statuses: draft -> in_progress -> completed -> draft
+    const currentStatus = visit.status || 'draft';
+    let newStatus: 'draft' | 'in_progress' | 'completed';
+    
+    switch (currentStatus) {
+      case 'draft':
+        newStatus = 'in_progress';
+        break;
+      case 'in_progress':
+        newStatus = 'completed';
+        break;
+      case 'completed':
+      default:
+        newStatus = 'draft';
+        break;
+    }
+    
     onVisitChange({ 
       ...visit, 
-      status: status as 'draft' | 'in_progress' | 'completed'
+      status: newStatus
     });
   };
 
@@ -67,6 +83,12 @@ export function VisitEntry({
       case 'draft':
       default: return 'info';
     }
+  };
+
+  const statusLabel = {
+    'draft': 'draft',
+    'in_progress': 'in progress',
+    'completed': 'completed'
   };
 
   const renderSection = (section: VisitSection, index: number) => {
@@ -174,15 +196,23 @@ export function VisitEntry({
           )}
         </div>
         
-        {/* Status Badge in upper right corner */}
-        <div className="absolute top-3 right-24">
-          <StatusBadge 
-            status={visit.status || 'draft'} 
-            variant={getStatusVariant(visit.status)}
-          />
-        </div>
-        
         <div className="flex items-center gap-2">
+          {/* Clickable status badge */}
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleStatus();
+            }}
+            className="cursor-pointer"
+            title="Click to change status"
+          >
+            <StatusBadge 
+              status={statusLabel[visit.status || 'draft']} 
+              variant={getStatusVariant(visit.status)}
+              className="mr-2"
+            />
+          </div>
+          
           <span className="text-sm font-medium">{formatCurrency(visit.fee)}</span>
           
           <Button 
@@ -211,23 +241,6 @@ export function VisitEntry({
       
       {!isCollapsed && (
         <CardContent className="p-4">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <Select
-              value={visit.status || 'draft'}
-              onValueChange={handleStatusChange}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
           <div className="space-y-3">
             {sectionOrder.map((section, index) => renderSection(section, index))}
           </div>
