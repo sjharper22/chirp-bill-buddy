@@ -65,7 +65,7 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
     lastSuperbillDateRange: undefined,
     commonIcdCodes: icdCodes,
     commonCptCodes: cptCodes,
-    notes: dbPatient.notes || '',
+    notes: '', // Default empty string for notes that don't exist in DB
   };
   
   console.log("Mapped patient:", result);
@@ -91,7 +91,7 @@ export const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any 
     return [];
   };
   
-  // Create the DB patient object
+  // Create the DB patient object - omit notes field since it doesn't exist in DB
   const dbPatient = {
     name: patient.name || '',
     dob: formatDate(patient.dob), 
@@ -99,7 +99,7 @@ export const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any 
     default_cpt_codes: ensureArray(patient.commonCptCodes),
     last_visit_date: patient.lastSuperbillDate instanceof Date ? 
       patient.lastSuperbillDate.toISOString() : null,
-    notes: patient.notes || '',
+    // Note: we don't include notes field as it doesn't exist in the database schema
   };
   
   console.log("DB patient format:", dbPatient);

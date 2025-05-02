@@ -1,4 +1,3 @@
-
 import { PatientProfile } from "@/types/patient";
 import { patientService } from "@/services/patient";
 import { generateId } from "@/lib/utils/superbill-utils";
@@ -70,7 +69,17 @@ export const patientActions = {
       // Create in database
       console.log("Creating patient in database:", patientData);
       try {
+        // Keep track of the notes value but don't send it to the database
+        const notes = patientData.notes;
+        
+        // Create patient in database (notes field is handled in the mapper)
         const newPatient = await patientService.create(patientData);
+        
+        // Make sure notes are preserved in our local representation
+        if (notes) {
+          newPatient.notes = notes;
+        }
+        
         console.log("Patient created in database:", newPatient);
         
         toast({
@@ -115,7 +124,10 @@ export const patientActions = {
     try {
       console.log(`Updating patient: ${id}`, updatedPatient);
       
-      // Update in database first
+      // Save notes locally but don't send to database
+      const notes = updatedPatient.notes;
+      
+      // Update in database first (notes field is handled in the mapper)
       await patientService.update(id, updatedPatient);
       console.log("Patient updated in database:", updatedPatient);
       

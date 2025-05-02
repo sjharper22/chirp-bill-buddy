@@ -38,15 +38,20 @@ export const patientStorage = {
           syncCount++;
           console.log("Found local patient not in database, will be added:", patient);
           try {
-            // Try to create this patient in the database
+            // Try to create this patient in the database - note field is filtered out by mapper
             const createdPatient = await patientService.create({
               name: patient.name,
               dob: patient.dob,
               commonIcdCodes: patient.commonIcdCodes,
               commonCptCodes: patient.commonCptCodes,
-              notes: patient.notes,
               lastSuperbillDate: patient.lastSuperbillDate
+              // notes is omitted as it doesn't exist in the database
             });
+            
+            // Add back the notes to the created patient
+            if (patient.notes) {
+              createdPatient.notes = patient.notes;
+            }
             
             // Use the new database patient (with server-generated ID) in our map
             if (createdPatient && createdPatient.id) {
