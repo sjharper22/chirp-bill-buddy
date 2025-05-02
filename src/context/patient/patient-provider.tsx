@@ -37,7 +37,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     clearPatientSelection 
   } = usePatientSelection(patients);
 
-  // Set up patient CRUD operations
+  // Set up patient CRUD operations with our refactored hook
   const { 
     addPatient, 
     updatePatient, 
