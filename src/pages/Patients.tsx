@@ -20,7 +20,7 @@ export default function Patients() {
   const [isManuallyRefreshing, setIsManuallyRefreshing] = useState(false);
   const [isAddingPatient, setIsAddingPatient] = useState(false);
   const mountedRef = useRef(false);
-  const { refreshPatients: contextRefreshPatients } = usePatient();
+  const { refreshPatients: contextRefreshPatients, deletePatient } = usePatient();
   
   const {
     patients,
