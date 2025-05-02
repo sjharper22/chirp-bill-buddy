@@ -42,6 +42,8 @@ export function SuperbillCard({
   
   const handleSelectChange = (checked: boolean) => {
     if (onSelectPatient) {
+      // This is the mismatch point - SuperbillCard expects a simpler function signature
+      // than what KanbanCard is providing to it
       onSelectPatient(superbill.id, superbill.patientName, superbill.patientDob, checked);
     }
   };

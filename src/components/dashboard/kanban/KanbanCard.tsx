@@ -16,6 +16,7 @@ export function KanbanCard({
 }: KanbanCardProps) {
   const navigate = useNavigate();
   
+  // Fix the handleSelectChange function to correctly call onSelectPatient with all required parameters
   const handleSelectChange = (checked: boolean) => {
     if (onSelectPatient) {
       onSelectPatient(superbill.id, superbill.patientName, superbill.patientDob, checked);
@@ -33,7 +34,7 @@ export function KanbanCard({
           superbill={superbill}
           onDelete={onDelete}
           onClick={!onSelectPatient ? () => navigate(`/view/${superbill.id}`) : undefined}
-          onSelectPatient={onSelectPatient ? handleSelectChange : undefined}
+          onSelectPatient={handleSelectChange}
           isPatientSelected={isPatientSelected}
         />
       </div>
