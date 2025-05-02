@@ -40,10 +40,9 @@ export function SuperbillCard({
   const displayStatus = formatStatus(superbill.status);
   const statusVariant = getStatusVariant(superbill.status);
   
-  const handleSelectChange = (checked: boolean) => {
+  // Handle checkbox change - call onSelectPatient with the appropriate parameters
+  const handleCheckboxChange = (checked: boolean) => {
     if (onSelectPatient) {
-      // This is the mismatch point - SuperbillCard expects a simpler function signature
-      // than what KanbanCard is providing to it
       onSelectPatient(superbill.id, superbill.patientName, superbill.patientDob, checked);
     }
   };
@@ -57,7 +56,7 @@ export function SuperbillCard({
         <div className="absolute top-6 left-2 z-10">
           <Checkbox 
             checked={isPatientSelected}
-            onCheckedChange={handleSelectChange}
+            onCheckedChange={handleCheckboxChange}
             onClick={(e) => e.stopPropagation()}
             className="bg-white"
           />
