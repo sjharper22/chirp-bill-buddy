@@ -15,7 +15,18 @@ import { Superbill } from "@/types/superbill";
 // Helper function to determine superbill status
 const determineStatus = (superbills: Superbill[]): "Complete" | "Missing Info" | "Draft" | "No Superbill" => {
   if (superbills.length === 0) return "No Superbill";
+
+  // First, directly check if any superbill has a specific status
+  // This ensures we respect the superbill's own status field
+  const hasInProgressSuperbill = superbills.some(bill => bill.status === 'in_progress');
+  const hasInReviewSuperbill = superbills.some(bill => bill.status === 'in_review');
+  const hasDraftSuperbill = superbills.some(bill => bill.status === 'draft');
   
+  if (hasInProgressSuperbill) return "Missing Info"; // Map in_progress to Missing Info
+  if (hasInReviewSuperbill) return "Missing Info";   // Map in_review to Missing Info
+  if (hasDraftSuperbill) return "Draft";             // Map draft to Draft
+  
+  // Only if no status-based decision was made, fall back to the content-based logic
   // A complete superbill has all required info
   const hasAllInfo = superbills.every(bill => 
     bill.patientName && 

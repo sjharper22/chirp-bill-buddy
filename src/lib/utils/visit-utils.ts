@@ -1,29 +1,18 @@
 
-import { Visit } from "@/types/superbill";
+import { Visit, SuperbillStatus } from "@/types/superbill";
 import { generateId } from "./id-utils";
 
-/**
- * Creates an empty visit with default values
- */
-export const createEmptyVisit = (
-  defaultIcdCodes: string[] = [],
-  defaultCptCodes: string[] = [],
-  defaultFee: number = 0
-): Visit => {
+export const createEmptyVisit = (): Visit => {
   return {
     id: generateId(),
     date: new Date(),
-    icdCodes: [...defaultIcdCodes],
-    cptCodes: [...defaultCptCodes],
-    mainComplaints: [],
-    fee: defaultFee,
-    status: 'draft' // Default status for new visits
+    icdCodes: [],
+    cptCodes: [],
+    fee: 0,
+    mainComplaints: []
   };
 };
 
-/**
- * Duplicates a visit with a new ID
- */
 export const duplicateVisit = (visit: Visit): Visit => {
   return {
     ...visit,
@@ -31,15 +20,17 @@ export const duplicateVisit = (visit: Visit): Visit => {
   };
 };
 
-/**
- * Get status variant for styling
- */
-export const getStatusVariant = (status?: string): 'default' | 'success' | 'warning' | 'info' | 'error' => {
+export const getStatusVariant = (status: SuperbillStatus): "default" | "success" | "warning" | "info" | "error" => {
   switch (status) {
-    case 'completed': return 'success';
-    case 'in_progress': return 'warning';
-    case 'draft': return 'info';
-    case 'in_review': return 'info';
-    default: return 'default';
+    case "completed":
+      return "success";
+    case "in_progress":
+      return "warning";
+    case "in_review":
+      return "info";
+    case "draft":
+      return "default";
+    default:
+      return "default";
   }
 };

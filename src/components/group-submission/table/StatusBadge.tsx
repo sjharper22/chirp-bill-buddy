@@ -1,49 +1,61 @@
 
 import { Badge } from "@/components/ui/badge";
+import { SuperbillStatus } from "@/types/superbill";
+
+type StatusDisplayType = "Complete" | "Missing Info" | "Draft" | "No Superbill";
 
 interface StatusBadgeProps {
-  status: string;
-  variant?: 'default' | 'success' | 'warning' | 'info' | 'error';
+  status: StatusDisplayType | SuperbillStatus;
+  variant?: "default" | "success" | "warning" | "info" | "error";
   className?: string;
 }
 
-export function StatusBadge({ status, variant, className }: StatusBadgeProps) {
-  // If variant is provided, use it to determine the style
-  if (variant) {
-    switch (variant) {
-      case 'success':
-        return <Badge className={`bg-green-100 text-green-800 hover:bg-green-200 ${className || ""}`}>{status}</Badge>;
-      case 'warning':
-        return <Badge className={`bg-amber-100 text-amber-800 hover:bg-amber-200 ${className || ""}`}>{status}</Badge>;
-      case 'info':
-        return <Badge className={`bg-blue-100 text-blue-800 hover:bg-blue-200 ${className || ""}`}>{status}</Badge>;
-      case 'error':
-        return <Badge className={`bg-red-100 text-red-800 hover:bg-red-200 ${className || ""}`}>{status}</Badge>;
-      default:
-        return <Badge className={`bg-gray-100 text-gray-800 hover:bg-gray-200 ${className || ""}`}>{status}</Badge>;
-    }
-  }
-
-  // Default behavior based on status string
-  switch (status.toLowerCase()) {
-    case "complete":
+// Function to map superbill status to appropriate variant
+export function mapStatusToVariant(status: StatusDisplayType | SuperbillStatus): "default" | "success" | "warning" | "info" | "error" {
+  switch (status) {
+    case "Complete":
     case "completed":
-    case "active":
-    case "approved":
-      return <Badge className={`bg-green-100 text-green-800 hover:bg-green-200 ${className || ""}`}>{status}</Badge>;
-    case "missing info":
-    case "pending":
-    case "in review":
-    case "in progress":
-      return <Badge className={`bg-amber-100 text-amber-800 hover:bg-amber-200 ${className || ""}`}>{status}</Badge>;
+      return "success";
+    case "Missing Info":
+    case "in_progress":
+    case "in_review":
+      return "warning";
+    case "Draft":
     case "draft":
-    case "new":
-      return <Badge className={`bg-blue-100 text-blue-800 hover:bg-blue-200 ${className || ""}`}>{status}</Badge>;
-    case "no superbill":
-    case "error":
-    case "rejected":
-      return <Badge className={`bg-red-100 text-red-800 hover:bg-red-200 ${className || ""}`}>{status}</Badge>;
+      return "info";
+    case "No Superbill":
+      return "error";
     default:
-      return <Badge className={`bg-gray-100 text-gray-800 hover:bg-gray-200 ${className || ""}`}>{status}</Badge>;
+      return "default";
   }
+}
+
+// Function to map status to display string
+export function formatStatusDisplay(status: StatusDisplayType | SuperbillStatus): string {
+  switch (status) {
+    case "in_progress":
+      return "In Progress";
+    case "in_review":
+      return "In Review";
+    case "completed":
+      return "Completed";
+    case "draft":
+      return "Draft";
+    default:
+      return status.toString();
+  }
+}
+
+export function StatusBadge({ status, variant, className = "" }: StatusBadgeProps) {
+  // If variant is not provided, determine it based on status
+  const badgeVariant = variant || mapStatusToVariant(status);
+  
+  // Format the display text
+  const displayText = formatStatusDisplay(status);
+  
+  return (
+    <Badge variant={badgeVariant} className={className}>
+      {displayText}
+    </Badge>
+  );
 }

@@ -1,24 +1,40 @@
 
-import { format } from "date-fns";
+import { SuperbillStatus } from "@/types/superbill";
 
-/**
- * Formats a date for display
- */
-export const formatDate = (date: Date): string => {
-  if (!date) return '';
-  return format(new Date(date), "MM/dd/yyyy");
-};
+// Format date to MM/DD/YYYY
+export function formatDate(date: Date): string {
+  if (!date) return "N/A";
+  
+  try {
+    const d = new Date(date);
+    return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Invalid Date";
+  }
+}
 
-/**
- * Formats a currency amount for display
- */
-export const formatCurrency = (amount: number): string => {
-  return `$${amount.toFixed(2)}`;
-};
+// Format currency to USD
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  }).format(amount);
+}
 
-/**
- * Formats status for display
- */
-export const formatStatus = (status: string): string => {
-  return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-};
+// Format status string for display
+export function formatStatus(status: SuperbillStatus): string {
+  switch (status) {
+    case "in_progress":
+      return "In Progress";
+    case "in_review":
+      return "In Review";
+    case "completed":
+      return "Completed";
+    case "draft":
+      return "Draft";
+    default:
+      return status;
+  }
+}
