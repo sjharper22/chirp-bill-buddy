@@ -21,16 +21,18 @@ export function useVisitOperations(
   };
   
   const addVisit = () => {
-    const newVisit = createEmptyVisit(
-      superbill.defaultIcdCodes,
-      superbill.defaultCptCodes,
-      superbill.defaultFee
-    );
+    // Use createEmptyVisit with correct arguments
+    const newVisit = createEmptyVisit();
     
     // If there are default main complaints, use the first one
     if (superbill.defaultMainComplaints && superbill.defaultMainComplaints.length > 0) {
       newVisit.mainComplaints = [superbill.defaultMainComplaints[0]];
     }
+    
+    // Add default ICD codes, CPT codes and fee from superbill
+    newVisit.icdCodes = [...superbill.defaultIcdCodes];
+    newVisit.cptCodes = [...superbill.defaultCptCodes];
+    newVisit.fee = superbill.defaultFee;
     
     setSuperbill(prev => ({
       ...prev,

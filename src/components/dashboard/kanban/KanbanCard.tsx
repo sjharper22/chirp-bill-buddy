@@ -33,7 +33,7 @@ export function KanbanCard({
           superbill={superbill}
           onDelete={onDelete}
           onClick={!onSelectPatient ? () => navigate(`/view/${superbill.id}`) : undefined}
-          onSelectPatient={onSelectPatient}
+          onSelectPatient={onSelectPatient ? handleSelectChange : undefined}
           isPatientSelected={isPatientSelected}
         />
       </div>

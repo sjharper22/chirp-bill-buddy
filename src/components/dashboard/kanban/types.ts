@@ -8,6 +8,7 @@ export interface KanbanColumn {
   title: string;
   icon: LucideIcon;
   description?: string;
+  bgColor?: string; // Add this property to fix kanbanConstants errors
 }
 
 export interface KanbanBoardProps {
@@ -16,7 +17,7 @@ export interface KanbanBoardProps {
   onSearchChange: (term: string) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: SuperbillStatus) => void;
-  onSelectPatient?: (id: string) => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   selectedPatientIds?: string[];
   selectionMode?: boolean;
 }
@@ -31,7 +32,7 @@ export interface KanbanColumnProps {
   onDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, status: SuperbillStatus) => void;
   handleDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
-  onSelectPatient?: (id: string) => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   selectedPatientIds?: string[];
 }
 
@@ -44,6 +45,19 @@ export interface KanbanHeaderProps {
   onSortChange: (sort: "asc" | "desc") => void;
   selectionMode?: boolean;
   selectedCount?: number;
+  toggleSelectionMode?: () => void; // Add this missing property
+  onAddSelectedToPatients?: () => void; // Add this missing property
+}
+
+export interface KanbanCardProps {
+  superbill: Superbill;
+  onDelete: (id: string) => void;
+  onStatusChange: (id: string, status: SuperbillStatus) => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
+  isPatientSelected?: boolean;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  availableStatuses?: KanbanColumn[];
+  currentStatus?: SuperbillStatus;
 }
 
 export interface PatientWithSuperbills {
@@ -66,5 +80,5 @@ export interface PatientWithSuperbills {
   dateRange: {
     start: Date;
     end: Date;
-  };
+  } | null;
 }

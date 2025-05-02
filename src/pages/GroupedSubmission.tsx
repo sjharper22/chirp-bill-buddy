@@ -14,7 +14,7 @@ import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { StatusDisplayType } from "@/components/group-submission/table/StatusBadge";
 
 // Helper function to determine superbill status
-const determineStatus = (superbills: Superbill[]): StatusDisplayType => {
+const determineStatus = (superbills: Superbill[]): "Draft" | "Complete" | "Missing Info" | "No Superbill" => {
   if (superbills.length === 0) return "No Superbill";
 
   // Check if any of the superbills have an explicit status
@@ -81,7 +81,7 @@ export default function GroupedSubmission() {
   
   // Process patients and their superbills
   useEffect(() => {
-    const processed = patients.map(patient => {
+    const processed: PatientWithSuperbills[] = patients.map(patient => {
       // Find superbills for this patient
       const patientSuperbills = superbills.filter(bill => bill.patientName === patient.name);
       
@@ -111,11 +111,8 @@ export default function GroupedSubmission() {
         ? { start: earliestDate, end: latestDate }
         : null;
       
-      // Get the actual status directly from the superbill when possible
-      // This ensures we display the same status as on the dashboard
-      const status = patientSuperbills.length === 1 
-        ? patientSuperbills[0].status // Use the explicit status when there's only one superbill
-        : determineStatus(patientSuperbills); // Calculate for multiple superbills
+      // Calculate the status with our helper function that returns the correct type
+      const status = determineStatus(patientSuperbills);
       
       return {
         ...patient,

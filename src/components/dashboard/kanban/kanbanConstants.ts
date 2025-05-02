@@ -8,7 +8,6 @@ export const kanbanColumns: KanbanColumn[] = [
     title: "Draft",
     icon: FileText,
     description: "Not yet started",
-    variant: "info",
     bgColor: "bg-blue-50"
   },
   {
@@ -16,7 +15,6 @@ export const kanbanColumns: KanbanColumn[] = [
     title: "In Progress",
     icon: FileEdit,
     description: "Being worked on",
-    variant: "warning",
     bgColor: "bg-amber-50"
   },
   {
@@ -24,7 +22,6 @@ export const kanbanColumns: KanbanColumn[] = [
     title: "In Review",
     icon: ClipboardList,
     description: "Ready for review",
-    variant: "info",
     bgColor: "bg-purple-50"
   },
   {
@@ -32,7 +29,6 @@ export const kanbanColumns: KanbanColumn[] = [
     title: "Completed",
     icon: ClipboardCheck,
     description: "Ready for submission",
-    variant: "success",
     bgColor: "bg-green-50"
   }
 ];
