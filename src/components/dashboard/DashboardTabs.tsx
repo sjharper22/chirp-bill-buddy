@@ -37,7 +37,7 @@ export function DashboardTabs({
   const filteredSuperbills = superbills.filter(bill => 
     bill.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     bill.id.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 6); // Show only the most recent 6 superbills in list view
+  );
   
   return (
     <Tabs 
@@ -70,7 +70,7 @@ export function DashboardTabs({
       
       <TabsContent value="board" className="mt-6">
         <KanbanBoard
-          superbills={superbills}
+          superbills={filteredSuperbills}
           searchTerm={searchTerm}
           onSearchChange={onSearchChange}
           onDelete={onDelete}

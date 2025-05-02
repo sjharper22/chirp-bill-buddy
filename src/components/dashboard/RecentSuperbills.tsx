@@ -1,12 +1,14 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Superbill } from "@/types/superbill";
+import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, UserPlus, CheckSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
 import { toast } from "@/components/ui/use-toast";
+import { SuperbillFilters } from "./filters/SuperbillFilters";
+import { filterSuperbills, sortSuperbillsByDate } from "@/lib/utils/superbill-filter-utils";
 
 interface RecentSuperbillsProps {
   filteredSuperbills: Superbill[];
@@ -35,6 +37,18 @@ export function RecentSuperbills({
 }: RecentSuperbillsProps) {
   const navigate = useNavigate();
   const [expandSearch, setExpandSearch] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  
+  // Apply additional filtering based on status
+  const displaySuperbills = filteredSuperbills
+    .filter(bill => statusFilter === "all" ? true : bill.status === statusFilter)
+    .sort((a, b) => {
+      const dateA = a.issueDate ? new Date(a.issueDate).getTime() : 0;
+      const dateB = b.issueDate ? new Date(b.issueDate).getTime() : 0;
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    })
+    .slice(0, 6); // Show only the most recent 6 superbills based on filters
   
   return (
     <div className="mb-10">
@@ -56,6 +70,13 @@ export function RecentSuperbills({
               className={`transition-all pl-10 ${expandSearch ? 'opacity-100 w-full' : 'opacity-0 w-0 p-0 -ml-10 sm:ml-0'}`}
             />
           </div>
+          
+          <SuperbillFilters 
+            onStatusFilter={setStatusFilter}
+            onSortChange={setSortOrder}
+            currentStatus={statusFilter}
+            currentSort={sortOrder}
+          />
           
           {toggleSelectionMode && (
             <Button 
@@ -85,8 +106,8 @@ export function RecentSuperbills({
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredSuperbills.length > 0 ? (
-          filteredSuperbills.map(superbill => (
+        {displaySuperbills.length > 0 ? (
+          displaySuperbills.map(superbill => (
             <SuperbillCard
               key={superbill.id}
               superbill={superbill}
@@ -99,7 +120,11 @@ export function RecentSuperbills({
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center py-10 border rounded-lg bg-white">
             <p className="text-xl font-medium text-gray-500 mb-2">No superbills found</p>
-            <p className="text-gray-400 mb-6">Let's create your first superbill</p>
+            {statusFilter !== "all" ? (
+              <p className="text-gray-400 mb-6">No superbills with status: {statusFilter}</p>
+            ) : (
+              <p className="text-gray-400 mb-6">Let's create your first superbill</p>
+            )}
             <Button onClick={() => navigate("/new")}>
               <Plus className="mr-2 h-4 w-4" />
               Create Superbill
@@ -108,7 +133,7 @@ export function RecentSuperbills({
         )}
       </div>
       
-      {filteredSuperbills.length > 0 && totalSuperbills > filteredSuperbills.length && !selectionMode && (
+      {displaySuperbills.length > 0 && totalSuperbills > displaySuperbills.length && !selectionMode && (
         <div className="flex justify-center mt-6">
           <Button 
             variant="outline" 

@@ -1,9 +1,14 @@
 
-import { Search, Plus, UserPlus, CheckSquare } from "lucide-react";
+import { Search, Plus, UserPlus, CheckSquare, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { KanbanHeaderProps } from "./types";
+import { useState } from "react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { SuperbillStatus } from "@/types/superbill";
+import { StatusFilterSelector } from "@/components/visit/filters/StatusFilterSelector";
+import { SortOrderSelector } from "@/components/visit/filters/SortOrderSelector";
 
 export function KanbanHeader({ 
   searchTerm, 
@@ -11,9 +16,19 @@ export function KanbanHeader({
   selectionMode, 
   toggleSelectionMode,
   selectedCount,
-  onAddSelectedToPatients
-}: KanbanHeaderProps) {
+  onAddSelectedToPatients,
+  onFilterChange,
+  onSortChange,
+  currentFilter,
+  currentSort
+}: KanbanHeaderProps & {
+  onFilterChange: (status: SuperbillStatus | "all") => void;
+  onSortChange: (order: "asc" | "desc") => void;
+  currentFilter: SuperbillStatus | "all";
+  currentSort: "asc" | "desc";
+}) {
   const navigate = useNavigate();
+  const [filterOpen, setFilterOpen] = useState(false);
   
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -28,6 +43,31 @@ export function KanbanHeader({
             className="pl-10 w-full sm:w-[250px]"
           />
         </div>
+        
+        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              <span>Filters</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-4" align="end">
+            <div className="space-y-4">
+              <StatusFilterSelector 
+                selectedStatus={currentFilter} 
+                onStatusChange={onFilterChange} 
+              />
+              <SortOrderSelector 
+                sortOrder={currentSort} 
+                onSortOrderChange={onSortChange} 
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
         
         {toggleSelectionMode && (
           <Button 
