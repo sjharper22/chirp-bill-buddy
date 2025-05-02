@@ -4,7 +4,7 @@ import { PatientProfile } from "@/types/patient";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Loader2, Save } from "lucide-react";
-import { usePatientForm } from './form/usePatientForm';
+import { usePatientForm } from './form/hooks/usePatientForm';
 import { PatientNameField } from './form/PatientNameField';
 import { DateOfBirthField } from './form/DateOfBirthField';
 import { CodesField } from './form/CodesField';
