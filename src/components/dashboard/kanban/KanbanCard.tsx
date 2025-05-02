@@ -1,19 +1,18 @@
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { KanbanCardProps } from "./types";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
 
 export function KanbanCard({ 
   superbill, 
   onDelete, 
-  onDragStart, 
   onStatusChange, 
-  availableStatuses, 
-  currentStatus,
   onSelectPatient,
-  isPatientSelected
+  isPatientSelected,
+  onDragStart,
+  availableStatuses = [],
+  currentStatus
 }: KanbanCardProps) {
   const navigate = useNavigate();
   
@@ -27,7 +26,7 @@ export function KanbanCard({
     <div 
       className="relative"
       draggable
-      onDragStart={(e) => onDragStart(e, superbill.id)}
+      onDragStart={(e) => onDragStart && onDragStart(e, superbill.id)}
     >
       <div className="cursor-grab active:cursor-grabbing">
         <SuperbillCard

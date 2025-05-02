@@ -8,7 +8,7 @@ export function KanbanColumn({
   superbills,
   onDelete, 
   onStatusChange, 
-  allColumns, 
+  allColumns = [], 
   onDragOver,
   onDragLeave,
   onDrop,
@@ -21,7 +21,7 @@ export function KanbanColumn({
       className="flex flex-col bg-white rounded-lg border shadow-sm h-full min-h-[30rem]"
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
-      onDrop={(e) => onDrop(e, column.id)}
+      onDrop={(e) => onDrop && onDrop(e, column.id)}
     >
       <div className="p-4 flex justify-between items-center border-b bg-muted/30">
         <div className="flex items-center">

@@ -18,12 +18,21 @@ export function KanbanBoard({
   selectionMode
 }: KanbanBoardProps) {
   const [draggedBillId, setDraggedBillId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  // Filter superbills based on search term
-  const filteredSuperbills = superbills.filter(bill => 
-    bill.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    bill.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter superbills based on search term and status filter
+  const filteredSuperbills = superbills
+    .filter(bill => 
+      bill.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      bill.id.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(bill => statusFilter === "all" ? true : bill.status === statusFilter)
+    .sort((a, b) => {
+      const dateA = a.issueDate ? new Date(a.issueDate).getTime() : 0;
+      const dateB = b.issueDate ? new Date(b.issueDate).getTime() : 0;
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
 
   // Start dragging a superbill
   const handleDragStart = (e: React.DragEvent, id: string) => {
@@ -69,6 +78,14 @@ export function KanbanBoard({
     }
   };
 
+  const handleFilterChange = (status: SuperbillStatus | "all") => {
+    setStatusFilter(status);
+  };
+
+  const handleSortChange = (order: "asc" | "desc") => {
+    setSortOrder(order);
+  };
+
   return (
     <div className="space-y-6">
       <KanbanHeader 
@@ -76,6 +93,10 @@ export function KanbanBoard({
         onSearchChange={onSearchChange}
         selectionMode={selectionMode}
         selectedCount={selectedPatientIds?.length}
+        onFilterChange={handleFilterChange}
+        onSortChange={handleSortChange}
+        currentFilter={statusFilter}
+        currentSort={sortOrder}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

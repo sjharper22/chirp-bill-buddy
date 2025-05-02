@@ -19,14 +19,9 @@ export function KanbanHeader({
   onAddSelectedToPatients,
   onFilterChange,
   onSortChange,
-  currentFilter,
-  currentSort
-}: KanbanHeaderProps & {
-  onFilterChange: (status: SuperbillStatus | "all") => void;
-  onSortChange: (order: "asc" | "desc") => void;
-  currentFilter: SuperbillStatus | "all";
-  currentSort: "asc" | "desc";
-}) {
+  currentFilter = "all",
+  currentSort = "desc"
+}: KanbanHeaderProps) {
   const navigate = useNavigate();
   const [filterOpen, setFilterOpen] = useState(false);
   
@@ -44,30 +39,32 @@ export function KanbanHeader({
           />
         </div>
         
-        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Filter className="h-4 w-4" />
-              <span>Filters</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-4" align="end">
-            <div className="space-y-4">
-              <StatusFilterSelector 
-                selectedStatus={currentFilter} 
-                onStatusChange={onFilterChange} 
-              />
-              <SortOrderSelector 
-                sortOrder={currentSort} 
-                onSortOrderChange={onSortChange} 
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
+        {onFilterChange && onSortChange && (
+          <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                <span>Filters</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4" align="end">
+              <div className="space-y-4">
+                <StatusFilterSelector 
+                  selectedStatus={currentFilter} 
+                  onStatusChange={onFilterChange} 
+                />
+                <SortOrderSelector 
+                  sortOrder={currentSort} 
+                  onSortOrderChange={onSortChange} 
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
         
         {toggleSelectionMode && (
           <Button 
