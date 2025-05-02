@@ -10,33 +10,52 @@ import { GroupHeader } from "@/components/group-submission/GroupHeader";
 import { GroupPreview } from "@/components/group-submission/GroupPreview";
 import { generateCoverSheetHtml } from "@/lib/utils/cover-sheet-generator";
 import { generatePrintableHTML } from "@/lib/utils/html-generator";
-import { Superbill } from "@/types/superbill";
+import { Superbill, SuperbillStatus } from "@/types/superbill";
+import { StatusDisplayType } from "@/components/group-submission/table/StatusBadge";
 
 // Helper function to determine superbill status
-const determineStatus = (superbills: Superbill[]): "Complete" | "Missing Info" | "Draft" | "No Superbill" => {
+const determineStatus = (superbills: Superbill[]): StatusDisplayType => {
   if (superbills.length === 0) return "No Superbill";
 
-  // First, directly check if any superbill has a specific status
-  // This ensures we respect the superbill's own status field
-  const hasInProgressSuperbill = superbills.some(bill => bill.status === 'in_progress');
-  const hasInReviewSuperbill = superbills.some(bill => bill.status === 'in_review');
-  const hasDraftSuperbill = superbills.some(bill => bill.status === 'draft');
+  // Check if any of the superbills have an explicit status
+  // Always trust the superbill's own status field first
+  for (const bill of superbills) {
+    switch (bill.status) {
+      case 'in_progress':
+        return "Missing Info";
+      case 'in_review':
+        return "Missing Info";
+      case 'draft':
+        return "Draft";
+      case 'completed':
+        // Only mark as complete if all superbills are completed
+        if (superbills.every(sb => sb.status === 'completed')) {
+          return "Complete";
+        }
+        // Otherwise continue checking
+    }
+  }
   
-  if (hasInProgressSuperbill) return "Missing Info"; // Map in_progress to Missing Info
-  if (hasInReviewSuperbill) return "Missing Info";   // Map in_review to Missing Info
-  if (hasDraftSuperbill) return "Draft";             // Map draft to Draft
+  // If no definitive status from superbill status fields,
+  // fall back to content-based determination
   
-  // Only if no status-based decision was made, fall back to the content-based logic
-  // A complete superbill has all required info
+  // Check if all required information is present
   const hasAllInfo = superbills.every(bill => 
     bill.patientName && 
     bill.visits.length > 0 && 
     bill.visits.every(visit => visit.icdCodes.length > 0 && visit.cptCodes.length > 0)
   );
   
-  if (hasAllInfo) return "Complete";
+  if (hasAllInfo) {
+    // Double check if individual visits are all completed
+    const allVisitsCompleted = superbills.every(bill =>
+      bill.visits.every(visit => !visit.status || visit.status === 'completed')
+    );
+    
+    return allVisitsCompleted ? "Complete" : "Missing Info";
+  }
   
-  // If any visit is missing codes or fees, it's incomplete
+  // Check if any visits are missing codes or fees
   const hasMissingInfo = superbills.some(bill => 
     bill.visits.some(visit => 
       visit.icdCodes.length === 0 || 
@@ -92,12 +111,18 @@ export default function GroupedSubmission() {
         ? { start: earliestDate, end: latestDate }
         : null;
       
+      // Get the actual status directly from the superbill when possible
+      // This ensures we display the same status as on the dashboard
+      const status = patientSuperbills.length === 1 
+        ? patientSuperbills[0].status // Use the explicit status when there's only one superbill
+        : determineStatus(patientSuperbills); // Calculate for multiple superbills
+      
       return {
         ...patient,
         superbills: patientSuperbills,
         totalVisits,
         totalAmount,
-        status: determineStatus(patientSuperbills),
+        status,
         dateRange
       };
     });

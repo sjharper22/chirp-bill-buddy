@@ -24,7 +24,7 @@ export function formatCurrency(amount: number): string {
 }
 
 // Format status string for display
-export function formatStatus(status: SuperbillStatus): string {
+export function formatStatus(status: SuperbillStatus | string): string {
   switch (status) {
     case "in_progress":
       return "In Progress";

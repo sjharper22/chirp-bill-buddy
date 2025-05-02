@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Visit } from "@/types/superbill";
 import { duplicateVisit, formatCurrency } from "@/lib/utils/superbill-utils";
@@ -207,7 +206,7 @@ export function VisitEntry({
             title="Click to change status"
           >
             <StatusBadge 
-              status={statusLabel[visit.status || 'draft']} 
+              status={visit.status || 'draft'} 
               variant={getStatusVariant(visit.status)}
               className="mr-2"
             />

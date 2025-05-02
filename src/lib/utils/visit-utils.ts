@@ -9,27 +9,28 @@ export const createEmptyVisit = (): Visit => {
     icdCodes: [],
     cptCodes: [],
     fee: 0,
-    mainComplaints: []
+    mainComplaints: [],
+    status: 'draft' // Set default status
   };
 };
 
 export const duplicateVisit = (visit: Visit): Visit => {
   return {
     ...visit,
-    id: generateId()
+    id: generateId(),
+    status: 'draft' // Reset status for duplicated visits
   };
 };
 
-export const getStatusVariant = (status: SuperbillStatus): "default" | "success" | "warning" | "info" | "error" => {
+export const getStatusVariant = (status: SuperbillStatus | string): "default" | "success" | "warning" | "info" | "error" => {
   switch (status) {
     case "completed":
       return "success";
     case "in_progress":
-      return "warning";
     case "in_review":
-      return "info";
+      return "warning";
     case "draft":
-      return "default";
+      return "info";
     default:
       return "default";
   }
