@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { PatientProfile } from "@/types/patient";
 import { patientStorage } from "../patient-storage";
 import { useToast } from "@/components/ui/use-toast";
@@ -14,21 +14,28 @@ export function usePatientSync(
   const { toast } = useToast();
 
   // Effect to save patients to localStorage whenever they change
-  const saveToLocalStorage = () => {
+  const saveToLocalStorage = useCallback(() => {
     if (patients.length > 0) {
       console.log("Saving patients to localStorage:", patients.length);
       localStorage.setItem("patients", JSON.stringify(patients));
     }
-  };
+  }, [patients]);
 
   // Sync with database - fetches patients from database and merges with local
-  const syncPatientsWithDatabase = async (): Promise<PatientProfile[]> => {
+  const syncPatientsWithDatabase = useCallback(async (): Promise<PatientProfile[]> => {
     setLoading(true);
     setError(null);
     
     try {
+      console.log("Starting database sync with", patients.length, "local patients");
       const mergedPatients = await patientStorage.syncWithDatabase(patients);
       setPatients(mergedPatients);
+      
+      // Save to localStorage as backup
+      localStorage.setItem("patients", JSON.stringify(mergedPatients));
+      
+      console.log("Sync complete with", mergedPatients.length, "patients");
+      
       toast({
         title: "Sync Complete",
         description: `Successfully synced ${mergedPatients.length} patients with database.`,
@@ -46,17 +53,21 @@ export function usePatientSync(
     } finally {
       setLoading(false);
     }
-  };
+  }, [patients, setError, setLoading, setPatients, toast]);
   
   // Refresh patients - gets latest from database and replaces local
-  const refreshPatients = async (): Promise<PatientProfile[]> => {
+  const refreshPatients = useCallback(async (): Promise<PatientProfile[]> => {
     setLoading(true);
     setError(null);
     
     try {
+      console.log("Refreshing patients from database...");
       const dbPatients = await patientStorage.refreshFromDatabase();
+      
+      // Always update the state with the database patients
       setPatients(dbPatients);
       console.log("Patients refreshed from database:", dbPatients.length);
+      
       return dbPatients;
     } catch (error: any) {
       console.error("Error refreshing patients:", error);
@@ -88,7 +99,7 @@ export function usePatientSync(
     } finally {
       setLoading(false);
     }
-  };
+  }, [patients, setError, setLoading, setPatients, toast]);
 
   return { 
     isInitialized, 

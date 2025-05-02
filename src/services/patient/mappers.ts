@@ -7,56 +7,62 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
   console.log("Mapping DB patient to frontend model:", dbPatient);
   
   // Handle dates properly
-  const dobDate = dbPatient.dob ? new Date(dbPatient.dob) : new Date();
+  let dobDate: Date;
+  try {
+    dobDate = dbPatient.dob ? new Date(dbPatient.dob) : new Date();
+    // Ensure it's a valid date
+    if (isNaN(dobDate.getTime())) {
+      console.warn("Invalid DOB date, using current date instead");
+      dobDate = new Date();
+    }
+  } catch (e) {
+    console.error("Error parsing DOB:", e);
+    dobDate = new Date();
+  }
+  
   const lastVisitDate = dbPatient.last_visit_date ? new Date(dbPatient.last_visit_date) : undefined;
   
-  // Ensure arrays are properly handled - check both array and string formats
-  let defaultIcdCodes = [];
-  if (dbPatient.default_icd_codes) {
-    if (Array.isArray(dbPatient.default_icd_codes)) {
-      defaultIcdCodes = dbPatient.default_icd_codes;
-    } else if (typeof dbPatient.default_icd_codes === 'string') {
+  // Parse JSON fields safely
+  const parseJsonField = (field: any): any[] => {
+    if (!field) return [];
+    if (Array.isArray(field)) return field;
+    if (typeof field === 'string') {
       try {
-        defaultIcdCodes = JSON.parse(dbPatient.default_icd_codes);
+        return JSON.parse(field);
       } catch (e) {
-        console.error("Failed to parse ICD codes:", e);
+        console.error(`Failed to parse field:`, e);
+        return [];
       }
     }
-  }
-    
-  let defaultCptCodes = [];
-  if (dbPatient.default_cpt_codes) {
-    if (Array.isArray(dbPatient.default_cpt_codes)) {
-      defaultCptCodes = dbPatient.default_cpt_codes;
-    } else if (typeof dbPatient.default_cpt_codes === 'string') {
-      try {
-        defaultCptCodes = JSON.parse(dbPatient.default_cpt_codes);
-      } catch (e) {
-        console.error("Failed to parse CPT codes:", e);
-      }
-    }
-  }
+    return [];
+  };
+  
+  const defaultIcdCodes = parseJsonField(dbPatient.default_icd_codes);
+  const defaultCptCodes = parseJsonField(dbPatient.default_cpt_codes);
   
   return {
     id: dbPatient.id,
-    name: dbPatient.name,
+    name: dbPatient.name || '',
     dob: dobDate,
     lastSuperbillDate: lastVisitDate,
-    lastSuperbillDateRange: undefined, // Would need additional query to populate this
+    lastSuperbillDateRange: undefined,
     commonIcdCodes: defaultIcdCodes,
     commonCptCodes: defaultCptCodes,
-    notes: dbPatient.notes,
+    notes: dbPatient.notes || '',
   };
 };
 
 // Convert frontend patient to database model
 export const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any => {
+  console.log("Converting patient to DB format:", patient);
+  
+  // Ensure we have valid data to prevent database errors
   return {
     name: patient.name,
-    dob: patient.dob.toISOString().split('T')[0], // Format as YYYY-MM-DD for PostgreSQL date
-    default_icd_codes: patient.commonIcdCodes || [],
-    default_cpt_codes: patient.commonCptCodes || [],
-    last_visit_date: patient.lastSuperbillDate ? patient.lastSuperbillDate.toISOString() : null,
-    notes: patient.notes,
+    dob: patient.dob instanceof Date ? patient.dob.toISOString().split('T')[0] : null, // Format as YYYY-MM-DD for PostgreSQL date
+    default_icd_codes: Array.isArray(patient.commonIcdCodes) ? patient.commonIcdCodes : [],
+    default_cpt_codes: Array.isArray(patient.commonCptCodes) ? patient.commonCptCodes : [],
+    last_visit_date: patient.lastSuperbillDate instanceof Date ? patient.lastSuperbillDate.toISOString() : null,
+    notes: patient.notes || '',
   };
 };

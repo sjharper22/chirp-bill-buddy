@@ -57,6 +57,11 @@ export const patientService = {
   // Check if a patient exists by name
   async getByName(name: string): Promise<PatientProfile | null> {
     try {
+      if (!name || name.trim() === '') {
+        console.log("Cannot search for patient with empty name");
+        return null;
+      }
+      
       console.log(`patientService.getByName: Looking for patient with name ${name}`);
       const { data, error } = await supabase
         .from('patients')
@@ -84,6 +89,10 @@ export const patientService = {
   // Create a new patient
   async create(patient: Omit<PatientProfile, "id">): Promise<PatientProfile> {
     try {
+      if (!patient.name || patient.name.trim() === '') {
+        throw new Error("Patient name cannot be empty");
+      }
+      
       const dbPatient = mapPatientToDbPatient(patient);
       
       console.log("Creating patient in Supabase:", dbPatient);
@@ -99,6 +108,10 @@ export const patientService = {
         throw new Error(`Failed to create patient: ${error.message}`);
       }
       
+      if (!data) {
+        throw new Error("No data returned after creating patient");
+      }
+      
       console.log("Created patient in Supabase:", data);
       return mapDbPatientToPatient(data);
     } catch (e: any) {
@@ -110,6 +123,10 @@ export const patientService = {
   // Update an existing patient
   async update(id: string, patient: PatientProfile): Promise<PatientProfile> {
     try {
+      if (!id) {
+        throw new Error("Patient ID is required for updates");
+      }
+      
       const dbPatient = mapPatientToDbPatient(patient);
       
       console.log(`Updating patient with ID ${id}:`, dbPatient);

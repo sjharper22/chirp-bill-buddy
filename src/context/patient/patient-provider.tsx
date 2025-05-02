@@ -1,5 +1,5 @@
 
-import { useEffect, ReactNode } from "react";
+import { useEffect, ReactNode, useState } from "react";
 import { PatientContext } from "./patient-context";
 import { usePatientInitialization } from "./hooks/usePatientInitialization";
 import { usePatientSync } from "./hooks/usePatientSync";
@@ -14,9 +14,11 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     error, setError 
   } = usePatientInitialization();
 
+  // Sync status
+  const [isInitialized, setIsInitialized] = useState(false);
+
   // Set up database sync functionality
   const { 
-    isInitialized, setIsInitialized,
     saveToLocalStorage, 
     syncPatientsWithDatabase, 
     refreshPatients 
@@ -46,7 +48,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
   // Save data to localStorage whenever it changes
   useEffect(() => {
     saveToLocalStorage();
-  }, [patients]);
+  }, [patients, saveToLocalStorage]);
 
   // Set up initial database sync
   useEffect(() => {

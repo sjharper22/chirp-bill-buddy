@@ -1,4 +1,3 @@
-
 import { PatientProfile } from "@/types/patient";
 import { patientService } from "@/services/patient";
 
@@ -10,8 +9,9 @@ export const patientStorage = {
   async syncWithDatabase(localPatients: PatientProfile[]): Promise<PatientProfile[]> {
     console.log("Syncing patients with database...");
     try {
+      // First get all patients from the database
       const dbPatients = await patientService.getAll();
-      console.log("Database patients:", dbPatients);
+      console.log("Database patients:", dbPatients.length);
       
       // Create a map of existing patients by ID for quick lookup
       const patientsMap = new Map<string, PatientProfile>();
@@ -22,29 +22,33 @@ export const patientStorage = {
       });
       
       // Then add any local patients that don't exist in database
-      localPatients.forEach(patient => {
+      for (const patient of localPatients) {
         if (!patientsMap.has(patient.id)) {
           console.log("Found local patient not in database, will be added:", patient);
           try {
             // Try to create this patient in the database
-            patientService.create({
+            const createdPatient = await patientService.create({
               name: patient.name,
               dob: patient.dob,
               commonIcdCodes: patient.commonIcdCodes,
               commonCptCodes: patient.commonCptCodes,
               notes: patient.notes,
-            }).catch(err => console.error("Failed to sync local patient to database:", err));
+            });
+            
+            // Use the new database patient (with server-generated ID) in our map
+            patientsMap.set(createdPatient.id, createdPatient);
           } catch (error) {
-            console.error("Error syncing local patient to database:", error);
+            console.error("Failed to sync local patient to database:", error);
+            // If we couldn't create in database, still keep the local version
+            patientsMap.set(patient.id, patient);
           }
-          patientsMap.set(patient.id, patient);
         }
-      });
+      }
       
-      // Convert back to array and update state
+      // Convert back to array and return
       const mergedPatients = Array.from(patientsMap.values());
       
-      console.log("Merged patients:", mergedPatients);
+      console.log("Merged patients:", mergedPatients.length);
       return mergedPatients;
     } catch (error: any) {
       console.error("Error syncing with database:", error);
@@ -61,7 +65,11 @@ export const patientStorage = {
     console.log("Refreshing patients from database...");
     try {
       const dbPatients = await patientService.getAll();
-      console.log("Database patients:", dbPatients);
+      console.log("Database patients:", dbPatients.length);
+      
+      // Save to localStorage as backup
+      localStorage.setItem("patients", JSON.stringify(dbPatients));
+      
       return dbPatients;
     } catch (error: any) {
       console.error("Error refreshing from database:", error);

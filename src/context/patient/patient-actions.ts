@@ -22,20 +22,39 @@ export const patientActions = {
     console.log("Adding patient:", patient);
     
     try {
-      // First check if patient with same name exists in database
-      const existingPatient = await patientService.getByName(patient.name);
+      // Validate patient data
+      if (!patient.name || patient.name.trim() === '') {
+        throw new Error("Patient name is required");
+      }
       
-      if (existingPatient) {
-        console.log("Patient already exists in database:", existingPatient);
+      if (!(patient.dob instanceof Date) || isNaN(patient.dob.getTime())) {
+        throw new Error("Valid date of birth is required");
+      }
+      
+      // First check if patient with same name exists in database or locally
+      const existingDbPatient = await patientService.getByName(patient.name);
+      const existingLocalPatient = currentPatients.find(p => p.name === patient.name);
+      
+      if (existingDbPatient) {
+        console.log("Patient already exists in database:", existingDbPatient);
         toast({
           title: "Notice",
           description: `Patient "${patient.name}" already exists in the database.`,
         });
-        return existingPatient;
+        return existingDbPatient;
+      }
+      
+      if (existingLocalPatient) {
+        console.log("Patient already exists locally:", existingLocalPatient);
+        toast({
+          title: "Notice",
+          description: `Patient "${patient.name}" already exists locally.`,
+        });
+        return existingLocalPatient;
       }
       
       // Create in database to get the ID
-      let newPatient: PatientProfile = await patientService.create(patient);
+      const newPatient = await patientService.create(patient);
       console.log("Patient created in database:", newPatient);
       
       toast({
@@ -48,14 +67,14 @@ export const patientActions = {
       console.error("Database error creating patient:", dbError);
       
       // Fall back to local creation if database fails
-      const newPatient = { ...patient, id: generateId() };
+      const localPatient = { ...patient, id: generateId() };
       toast({
         title: "Warning",
-        description: "Patient saved locally but couldn't be saved to database. Some features may not work correctly.",
+        description: `Patient "${patient.name}" saved locally but couldn't be saved to database. Some features may not work correctly.`,
         variant: "destructive",
       });
       
-      return newPatient;
+      return localPatient;
     }
   },
   
@@ -80,7 +99,7 @@ export const patientActions = {
       console.error("Database error updating patient:", dbError);
       toast({
         title: "Warning",
-        description: "Patient updated locally but couldn't be updated in database.",
+        description: `Patient "${updatedPatient.name}" updated locally but couldn't be updated in database.`,
         variant: "destructive",
       });
       
@@ -93,6 +112,7 @@ export const patientActions = {
    */
   async deletePatient(
     id: string,
+    patientName: string,
     toast: ToastFn
   ): Promise<void> {
     try {
@@ -102,13 +122,13 @@ export const patientActions = {
       
       toast({
         title: "Success",
-        description: "Patient deleted successfully.",
+        description: `Patient "${patientName}" deleted successfully.`,
       });
     } catch (dbError: any) {
       console.error("Database error deleting patient:", dbError);
       toast({
         title: "Warning",
-        description: "Patient removed locally but couldn't be deleted from database.",
+        description: `Patient "${patientName}" removed locally but couldn't be deleted from database.`,
         variant: "destructive",
       });
       

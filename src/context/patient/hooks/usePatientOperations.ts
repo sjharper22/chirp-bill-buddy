@@ -42,7 +42,10 @@ export function usePatientOperations(
       // Force refresh from database to ensure we have the latest data
       if (refreshPatients) {
         try {
-          await refreshPatients();
+          console.log("Refreshing patients after adding...");
+          const refreshedPatients = await refreshPatients();
+          console.log(`Refreshed ${refreshedPatients.length} patients from database`);
+          // No need to setPatients here as refreshPatients will do that
         } catch (refreshError) {
           console.error("Could not refresh patients after adding:", refreshError);
         }
@@ -82,6 +85,7 @@ export function usePatientOperations(
       // Force refresh from database to ensure we have the latest data
       if (refreshPatients) {
         try {
+          console.log("Refreshing patients after updating...");
           await refreshPatients();
         } catch (refreshError) {
           console.error("Could not refresh patients after updating:", refreshError);
@@ -107,8 +111,12 @@ export function usePatientOperations(
    */
   const deletePatient = async (id: string): Promise<void> => {
     try {
+      // Find the patient to get the name for the toast message
+      const patientToDelete = patients.find(p => p.id === id);
+      const patientName = patientToDelete?.name || 'Unknown patient';
+      
       // Delete from database
-      await patientActions.deletePatient(id, toast);
+      await patientActions.deletePatient(id, patientName, toast);
       console.log("Patient deleted successfully:", id);
       
       // Update local state if successful
@@ -120,6 +128,7 @@ export function usePatientOperations(
       // Force refresh from database to ensure we have the latest data
       if (refreshPatients) {
         try {
+          console.log("Refreshing patients after deleting...");
           await refreshPatients();
         } catch (refreshError) {
           console.error("Could not refresh patients after deleting:", refreshError);
