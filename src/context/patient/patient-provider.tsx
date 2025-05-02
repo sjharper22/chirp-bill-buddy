@@ -36,7 +36,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     updatePatient, 
     deletePatient, 
     getPatient 
-  } = usePatientOperations(patients, setPatients, setSelectedPatientIds);
+  } = usePatientOperations(patients, setPatients, clearPatientSelection);
 
   // Save data to localStorage whenever it changes
   useEffect(() => {

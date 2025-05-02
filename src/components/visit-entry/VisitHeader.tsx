@@ -7,21 +7,45 @@ import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 
 interface VisitHeaderProps {
   visit: Visit;
+  onVisitChange: (updatedVisit: Visit) => void;
   isCollapsed: boolean;
-  toggleCollapse: () => void;
-  toggleStatus: () => void;
+  setIsCollapsed: (collapsed: boolean) => void;
   onDuplicate: (e: React.MouseEvent) => void;
   onDelete: (e: React.MouseEvent) => void;
 }
 
-export function VisitHeader({
-  visit,
+export function VisitHeader({ 
+  visit, 
+  onVisitChange,
   isCollapsed,
-  toggleCollapse,
-  toggleStatus,
+  setIsCollapsed,
   onDuplicate,
   onDelete
 }: VisitHeaderProps) {
+  const toggleStatus = () => {
+    // Cycle through statuses: draft -> in_progress -> completed -> draft
+    const currentStatus = visit.status || 'draft';
+    let newStatus: 'draft' | 'in_progress' | 'completed';
+    
+    switch (currentStatus) {
+      case 'draft':
+        newStatus = 'in_progress';
+        break;
+      case 'in_progress':
+        newStatus = 'completed';
+        break;
+      case 'completed':
+      default:
+        newStatus = 'draft';
+        break;
+    }
+    
+    onVisitChange({ 
+      ...visit, 
+      status: newStatus
+    });
+  };
+
   const getStatusVariant = (status?: string) => {
     switch (status) {
       case 'completed': return 'success';
@@ -40,7 +64,7 @@ export function VisitHeader({
   return (
     <div 
       className="flex justify-between items-center p-3 border-b cursor-pointer relative" 
-      onClick={toggleCollapse}
+      onClick={() => setIsCollapsed(!isCollapsed)}
     >
       <div className="flex items-center gap-2">
         {isCollapsed ? (

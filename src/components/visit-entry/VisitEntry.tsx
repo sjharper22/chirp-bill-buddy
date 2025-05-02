@@ -1,12 +1,14 @@
 
 import { useState } from "react";
 import { Visit } from "@/types/superbill";
-import { duplicateVisit } from "@/lib/utils/superbill-utils";
+import { formatCurrency } from "@/lib/utils/superbill-utils";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useVisitSections } from "@/hooks/useVisitSections";
-import { VisitHeader } from "./VisitHeader";
+import { Copy, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { VisitSection } from "./VisitSection";
 import { VisitSectionContent } from "./VisitSectionContent";
+import { VisitHeader } from "./VisitHeader";
+import { useVisitSections } from "@/hooks/useVisitSections";
 
 interface VisitEntryProps {
   visit: Visit;
@@ -31,7 +33,7 @@ export function VisitEntry({
     e.preventDefault();
     e.stopPropagation();
     
-    onDuplicate(duplicateVisit(visit));
+    onDuplicate(visit);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -41,39 +43,13 @@ export function VisitEntry({
     onDelete(visit.id);
   };
 
-  const toggleStatus = () => {
-    // Cycle through statuses: draft -> in_progress -> completed -> draft
-    const currentStatus = visit.status || 'draft';
-    let newStatus: 'draft' | 'in_progress' | 'completed';
-    
-    switch (currentStatus) {
-      case 'draft':
-        newStatus = 'in_progress';
-        break;
-      case 'in_progress':
-        newStatus = 'completed';
-        break;
-      case 'completed':
-      default:
-        newStatus = 'draft';
-        break;
-    }
-    
-    onVisitChange({ 
-      ...visit, 
-      status: newStatus
-    });
-  };
-
-  const toggleCollapse = () => setIsCollapsed(!isCollapsed);
-
   return (
     <Card className="mb-4">
       <VisitHeader 
-        visit={visit}
+        visit={visit} 
+        onVisitChange={onVisitChange}
         isCollapsed={isCollapsed}
-        toggleCollapse={toggleCollapse}
-        toggleStatus={toggleStatus}
+        setIsCollapsed={setIsCollapsed}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
       />
@@ -91,10 +67,10 @@ export function VisitEntry({
                 moveSection={moveSection}
               >
                 <VisitSectionContent 
-                  section={section}
-                  visit={visit}
+                  section={section} 
+                  visit={visit} 
                   onVisitChange={onVisitChange}
-                  defaultMainComplaints={defaultMainComplaints}
+                  defaultMainComplaints={defaultMainComplaints} 
                 />
               </VisitSection>
             ))}
