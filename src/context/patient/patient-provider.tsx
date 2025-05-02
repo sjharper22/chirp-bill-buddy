@@ -36,19 +36,29 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     updatePatient, 
     deletePatient, 
     getPatient 
-  } = usePatientOperations(patients, setPatients, clearPatientSelection);
+  } = usePatientOperations(
+    patients, 
+    setPatients, 
+    clearPatientSelection,
+    refreshPatients // Pass the refresh function to ensure database sync
+  );
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
     saveToLocalStorage();
   }, [patients]);
 
-  // Set up automatic refresh/sync
+  // Set up initial database sync
   useEffect(() => {
     if (isInitialized) return;
 
     console.log("Initial patient sync is running");
     setIsInitialized(true);
+    
+    // Initial refresh to get latest data from database
+    refreshPatients().catch(err => {
+      console.error("Error during initial patient refresh:", err);
+    });
     
     const refreshTimerRef = setInterval(() => {
       console.log("Auto-refreshing patients data...");
@@ -60,7 +70,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     return () => {
       clearInterval(refreshTimerRef);
     };
-  }, [isInitialized]);
+  }, [isInitialized, refreshPatients, syncPatientsWithDatabase]);
 
   return (
     <PatientContext.Provider 

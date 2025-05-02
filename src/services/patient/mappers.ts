@@ -10,14 +10,32 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
   const dobDate = dbPatient.dob ? new Date(dbPatient.dob) : new Date();
   const lastVisitDate = dbPatient.last_visit_date ? new Date(dbPatient.last_visit_date) : undefined;
   
-  // Ensure arrays are properly handled
-  const defaultIcdCodes = Array.isArray(dbPatient.default_icd_codes) 
-    ? dbPatient.default_icd_codes 
-    : [];
+  // Ensure arrays are properly handled - check both array and string formats
+  let defaultIcdCodes = [];
+  if (dbPatient.default_icd_codes) {
+    if (Array.isArray(dbPatient.default_icd_codes)) {
+      defaultIcdCodes = dbPatient.default_icd_codes;
+    } else if (typeof dbPatient.default_icd_codes === 'string') {
+      try {
+        defaultIcdCodes = JSON.parse(dbPatient.default_icd_codes);
+      } catch (e) {
+        console.error("Failed to parse ICD codes:", e);
+      }
+    }
+  }
     
-  const defaultCptCodes = Array.isArray(dbPatient.default_cpt_codes) 
-    ? dbPatient.default_cpt_codes 
-    : [];
+  let defaultCptCodes = [];
+  if (dbPatient.default_cpt_codes) {
+    if (Array.isArray(dbPatient.default_cpt_codes)) {
+      defaultCptCodes = dbPatient.default_cpt_codes;
+    } else if (typeof dbPatient.default_cpt_codes === 'string') {
+      try {
+        defaultCptCodes = JSON.parse(dbPatient.default_cpt_codes);
+      } catch (e) {
+        console.error("Failed to parse CPT codes:", e);
+      }
+    }
+  }
   
   return {
     id: dbPatient.id,

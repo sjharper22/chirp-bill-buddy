@@ -4,17 +4,19 @@ import { patientActions } from "../patient-actions";
 import { useToast } from "@/components/ui/use-toast";
 
 /**
- * Hook for patient CRUD operations with proper error handling
+ * Hook for patient CRUD operations with proper error handling and database synchronization
  * 
  * @param patients - Current list of patients
  * @param setPatients - State setter for patients
  * @param clearPatientSelection - Function to clear selected patients
+ * @param refreshPatients - Function to refresh patients from database
  * @returns Object containing CRUD operations for patients
  */
 export function usePatientOperations(
   patients: PatientProfile[],
   setPatients: React.Dispatch<React.SetStateAction<PatientProfile[]>>,
-  clearPatientSelection: () => void
+  clearPatientSelection: () => void,
+  refreshPatients?: () => Promise<PatientProfile[]>
 ) {
   const { toast } = useToast();
   
@@ -27,6 +29,7 @@ export function usePatientOperations(
     try {
       // Create the patient using the service
       const newPatient = await patientActions.addPatient(patient, patients, toast);
+      console.log("Patient added successfully:", newPatient);
       
       // Update local state if the patient was created successfully
       setPatients(prevPatients => {
@@ -35,6 +38,15 @@ export function usePatientOperations(
         if (exists) return prevPatients;
         return [...prevPatients, newPatient];
       });
+      
+      // Force refresh from database to ensure we have the latest data
+      if (refreshPatients) {
+        try {
+          await refreshPatients();
+        } catch (refreshError) {
+          console.error("Could not refresh patients after adding:", refreshError);
+        }
+      }
       
       return newPatient;
     } catch (error) {
@@ -60,11 +72,21 @@ export function usePatientOperations(
     try {
       // Update the patient in the database
       await patientActions.updatePatient(id, updatedPatient, toast);
+      console.log("Patient updated successfully:", updatedPatient);
       
       // Update local state if successful
       setPatients(prevPatients => 
         prevPatients.map(patient => patient.id === id ? updatedPatient : patient)
       );
+      
+      // Force refresh from database to ensure we have the latest data
+      if (refreshPatients) {
+        try {
+          await refreshPatients();
+        } catch (refreshError) {
+          console.error("Could not refresh patients after updating:", refreshError);
+        }
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error("Error in updatePatient:", errorMessage);
@@ -87,12 +109,22 @@ export function usePatientOperations(
     try {
       // Delete from database
       await patientActions.deletePatient(id, toast);
+      console.log("Patient deleted successfully:", id);
       
       // Update local state if successful
       setPatients(prevPatients => prevPatients.filter(patient => patient.id !== id));
       
       // Clean up selected patient IDs
       clearPatientSelection();
+      
+      // Force refresh from database to ensure we have the latest data
+      if (refreshPatients) {
+        try {
+          await refreshPatients();
+        } catch (refreshError) {
+          console.error("Could not refresh patients after deleting:", refreshError);
+        }
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error("Error in deletePatient:", errorMessage);
