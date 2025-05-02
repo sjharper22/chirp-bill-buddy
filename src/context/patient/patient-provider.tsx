@@ -1,5 +1,5 @@
 
-import { useEffect, ReactNode, useState, useCallback } from "react";
+import { useEffect, ReactNode, useState, useCallback, useRef } from "react";
 import { PatientContext } from "./patient-context";
 import { usePatientInitialization } from "./hooks/usePatientInitialization";
 import { usePatientSync } from "./hooks/usePatientSync";
@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export function PatientProvider({ children }: { children: ReactNode }) {
   // Using the useToast hook correctly
-  const { toast } = useToast();
+  const toast = useToast();
   
   // Initialize state and fetch initial data
   const { 
@@ -73,7 +73,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
         console.log("Initial patient refresh completed");
       } catch (err) {
         console.error("Error during initial patient refresh:", err);
-        toast({
+        toast.toast({
           title: "Error",
           description: "Failed to load patients. Please reload the page.",
           variant: "destructive",
