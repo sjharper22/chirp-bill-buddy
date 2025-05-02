@@ -8,6 +8,7 @@ import { usePatientOperations } from "./hooks/usePatientOperations";
 import { useToast } from "@/components/ui/use-toast";
 
 export function PatientProvider({ children }: { children: ReactNode }) {
+  // Using the useToast hook correctly
   const { toast } = useToast();
   
   // Initialize state and fetch initial data

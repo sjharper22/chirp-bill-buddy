@@ -11,6 +11,7 @@ interface MultiTagInputProps {
   onChange: (tags: string[]) => void;
   suggestions?: { value: string; label: string }[];
   preventFormSubmission?: boolean;
+  disabled?: boolean; // Added disabled prop
 }
 
 export function MultiTagInput({ 
@@ -19,7 +20,8 @@ export function MultiTagInput({
   value: propValue, 
   onChange, 
   suggestions = [],
-  preventFormSubmission = false
+  preventFormSubmission = false,
+  disabled = false // Default to false
 }: MultiTagInputProps) {
   // Use either 'value' or 'tags' prop, with 'value' taking precedence
   const tags = propValue || propTags || [];
@@ -28,6 +30,8 @@ export function MultiTagInput({
   const [filteredSuggestions, setFilteredSuggestions] = useState(suggestions);
 
   const addTag = (tag: string) => {
+    if (disabled) return; // Don't add tags if disabled
+    
     const trimmedTag = tag.trim();
     if (trimmedTag && !tags.includes(trimmedTag)) {
       onChange([...tags, trimmedTag]);
@@ -36,10 +40,14 @@ export function MultiTagInput({
   };
 
   const removeTag = (tagToRemove: string) => {
+    if (disabled) return; // Don't remove tags if disabled
+    
     onChange(tags.filter(tag => tag !== tagToRemove));
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (disabled) return; // Don't process key events if disabled
+    
     if (e.key === "Enter") {
       e.preventDefault(); // Always prevent form submission on Enter
       addTag(inputValue);
@@ -51,6 +59,8 @@ export function MultiTagInput({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return; // Don't process input changes if disabled
+    
     const value = e.target.value;
     setInputValue(value);
     
@@ -68,6 +78,8 @@ export function MultiTagInput({
   };
 
   const handleSuggestionClick = (suggestion: string, e: React.MouseEvent) => {
+    if (disabled) return; // Don't process suggestions if disabled
+    
     if (preventFormSubmission) e.preventDefault();
     addTag(suggestion);
     setShowSuggestions(false);
@@ -79,18 +91,20 @@ export function MultiTagInput({
   };
 
   return (
-    <div className="relative" onClick={handlePreventDefault}>
+    <div className={`relative ${disabled ? 'opacity-70' : ''}`} onClick={handlePreventDefault}>
       <div className="flex flex-wrap gap-2 p-2 border rounded-md focus-within:ring-1 focus-within:ring-primary bg-background">
         {tags.map((tag, index) => (
           <Badge key={index} variant="secondary" className="gap-1 pl-2">
             {tag}
-            <X 
-              className="h-3 w-3 cursor-pointer" 
-              onClick={(e) => {
-                if (preventFormSubmission) e.preventDefault();
-                removeTag(tag);
-              }}
-            />
+            {!disabled && (
+              <X 
+                className="h-3 w-3 cursor-pointer" 
+                onClick={(e) => {
+                  if (preventFormSubmission) e.preventDefault();
+                  removeTag(tag);
+                }}
+              />
+            )}
           </Badge>
         ))}
         <Input
@@ -99,15 +113,16 @@ export function MultiTagInput({
           onKeyDown={handleKeyDown}
           onFocus={(e) => {
             if (preventFormSubmission) e.preventDefault();
-            if (inputValue.trim()) setShowSuggestions(true);
+            if (!disabled && inputValue.trim()) setShowSuggestions(true);
           }}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           placeholder={tags.length === 0 ? placeholder : ""}
           className="flex-grow border-0 p-0 pl-1 focus-visible:ring-0 focus-visible:ring-offset-0"
+          disabled={disabled}
         />
       </div>
       
-      {showSuggestions && filteredSuggestions.length > 0 && (
+      {!disabled && showSuggestions && filteredSuggestions.length > 0 && (
         <div className="absolute z-10 mt-1 w-full max-h-60 overflow-auto bg-background border rounded-md shadow-md">
           {filteredSuggestions.map((suggestion, index) => (
             <div 

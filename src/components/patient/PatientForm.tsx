@@ -9,11 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MultiTagInput } from "@/components/MultiTagInput";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Save } from "lucide-react";
+import { CalendarIcon, Loader2, Save, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Alert, AlertDescription, AlertCircle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PatientFormProps {
   onSubmit: (patient: Omit<PatientProfileType, "id">) => Promise<void>;
@@ -213,7 +213,6 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
               value={patient.commonIcdCodes || []}
               onChange={(codes) => handleChange('commonIcdCodes', codes)}
               placeholder="Add ICD codes..."
-              disabled={isFormSubmitting}
             />
           </div>
           
@@ -223,7 +222,6 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
               value={patient.commonCptCodes || []}
               onChange={(codes) => handleChange('commonCptCodes', codes)}
               placeholder="Add CPT codes..."
-              disabled={isFormSubmitting}
             />
           </div>
           
