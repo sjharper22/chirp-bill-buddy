@@ -2,10 +2,14 @@
 import { PatientProfile } from "@/types/patient";
 import { patientActions } from "../patient-actions";
 import { useToast } from "@/components/ui/use-toast";
-import { ToastType } from "../types";
 
 /**
  * Hook for patient CRUD operations with proper error handling
+ * 
+ * @param patients - Current list of patients
+ * @param setPatients - State setter for patients
+ * @param clearPatientSelection - Function to clear selected patients
+ * @returns Object containing CRUD operations for patients
  */
 export function usePatientOperations(
   patients: PatientProfile[],
@@ -25,11 +29,11 @@ export function usePatientOperations(
       const newPatient = await patientActions.addPatient(patient, patients, toast);
       
       // Update local state if the patient was created successfully
-      setPatients(prev => {
+      setPatients(prevPatients => {
         // Check if patient with this ID already exists to prevent duplicates
-        const exists = prev.some(p => p.id === newPatient.id);
-        if (exists) return prev;
-        return [...prev, newPatient];
+        const exists = prevPatients.some(p => p.id === newPatient.id);
+        if (exists) return prevPatients;
+        return [...prevPatients, newPatient];
       });
       
       return newPatient;
@@ -43,7 +47,7 @@ export function usePatientOperations(
         variant: "destructive",
       });
       
-      throw error;
+      throw error; // Re-throw to allow caller to handle
     }
   };
 
@@ -58,9 +62,9 @@ export function usePatientOperations(
       await patientActions.updatePatient(id, updatedPatient, toast);
       
       // Update local state if successful
-      setPatients(prev => prev.map(patient => 
-        patient.id === id ? updatedPatient : patient
-      ));
+      setPatients(prevPatients => 
+        prevPatients.map(patient => patient.id === id ? updatedPatient : patient)
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error("Error in updatePatient:", errorMessage);
@@ -71,7 +75,7 @@ export function usePatientOperations(
         variant: "destructive",
       });
       
-      throw error;
+      throw error; // Re-throw to allow caller to handle
     }
   };
 
@@ -85,7 +89,7 @@ export function usePatientOperations(
       await patientActions.deletePatient(id, toast);
       
       // Update local state if successful
-      setPatients(prev => prev.filter(patient => patient.id !== id));
+      setPatients(prevPatients => prevPatients.filter(patient => patient.id !== id));
       
       // Clean up selected patient IDs
       clearPatientSelection();
@@ -99,7 +103,7 @@ export function usePatientOperations(
         variant: "destructive",
       });
       
-      throw error;
+      throw error; // Re-throw to allow caller to handle
     }
   };
 
