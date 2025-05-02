@@ -12,7 +12,7 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PatientViewMode } from './PatientViewMode';
 import { PatientEditMode } from './PatientEditMode';
-import { usePatient } from '@/context/patient-context';
+import { usePatient } from '@/context/patient/patient-context';
 
 interface PatientProfileProps {
   patient: PatientProfileType;

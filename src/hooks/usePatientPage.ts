@@ -1,9 +1,8 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PatientProfile } from "@/types/patient";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/components/ui/use-toast";
-import { usePatient } from "@/context/patient-context";
+import { usePatient } from "@/context/patient/patient-context";
 
 export function usePatientPage() {
   const { isAdmin, isEditor } = useAuth();

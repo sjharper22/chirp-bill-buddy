@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Import, Loader2, RefreshCw } from "lucide-react";
 import { useSuperbill } from "@/context/superbill-context"; 
-import { usePatient } from "@/context/patient-context";
+import { usePatient } from "@/context/patient/patient-context";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ImportPatientsButtonProps {
