@@ -100,26 +100,22 @@ export function KanbanBoard({
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {kanbanColumns.map(column => {
-          const columnSuperbills = filteredSuperbills.filter(bill => bill.status === column.id);
-          
-          return (
-            <KanbanColumn
-              key={column.id}
-              column={column}
-              superbills={columnSuperbills}
-              onDelete={onDelete}
-              onStatusChange={onStatusChange}
-              allColumns={kanbanColumns}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              handleDragStart={handleDragStart}
-              onSelectPatient={onSelectPatient}
-              selectedPatientIds={selectedPatientIds}
-            />
-          );
-        })}
+        {kanbanColumns.map(column => (
+          <KanbanColumn
+            key={column.id}
+            column={column}
+            superbills={filteredSuperbills.filter(bill => bill.status === column.id)}
+            onDelete={onDelete}
+            onStatusChange={onStatusChange}
+            allColumns={kanbanColumns}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            handleDragStart={handleDragStart}
+            onSelectPatient={onSelectPatient}
+            selectedPatientIds={selectedPatientIds}
+          />
+        ))}
       </div>
     </div>
   );

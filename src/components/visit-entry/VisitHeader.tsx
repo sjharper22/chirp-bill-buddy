@@ -3,7 +3,7 @@ import { Visit } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils/superbill-utils";
 import { Copy, Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
+import { VisitStatus } from "./VisitStatus";
 
 interface VisitHeaderProps {
   visit: Visit;
@@ -22,45 +22,6 @@ export function VisitHeader({
   onDuplicate,
   onDelete
 }: VisitHeaderProps) {
-  const toggleStatus = () => {
-    // Cycle through statuses: draft -> in_progress -> completed -> draft
-    const currentStatus = visit.status || 'draft';
-    let newStatus: 'draft' | 'in_progress' | 'completed';
-    
-    switch (currentStatus) {
-      case 'draft':
-        newStatus = 'in_progress';
-        break;
-      case 'in_progress':
-        newStatus = 'completed';
-        break;
-      case 'completed':
-      default:
-        newStatus = 'draft';
-        break;
-    }
-    
-    onVisitChange({ 
-      ...visit, 
-      status: newStatus
-    });
-  };
-
-  const getStatusVariant = (status?: string) => {
-    switch (status) {
-      case 'completed': return 'success';
-      case 'in_progress': return 'warning';
-      case 'draft':
-      default: return 'info';
-    }
-  };
-
-  const statusLabel = {
-    'draft': 'draft',
-    'in_progress': 'in progress',
-    'completed': 'completed'
-  };
-
   return (
     <div 
       className="flex justify-between items-center p-3 border-b cursor-pointer relative" 
@@ -83,21 +44,7 @@ export function VisitHeader({
       </div>
       
       <div className="flex items-center gap-2">
-        {/* Clickable status badge */}
-        <div 
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleStatus();
-          }}
-          className="cursor-pointer"
-          title="Click to change status"
-        >
-          <StatusBadge 
-            status={statusLabel[visit.status || 'draft']} 
-            variant={getStatusVariant(visit.status)}
-            className="mr-2"
-          />
-        </div>
+        <VisitStatus visit={visit} onVisitChange={onVisitChange} />
         
         <span className="text-sm font-medium">{formatCurrency(visit.fee)}</span>
         

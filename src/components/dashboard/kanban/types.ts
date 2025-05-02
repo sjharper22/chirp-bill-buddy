@@ -1,64 +1,70 @@
-import { Superbill, SuperbillStatus } from "@/types/superbill";
-import { LucideIcon } from "lucide-react";
 
-export type StatusVariant = "default" | "success" | "warning" | "info" | "error";
+import { LucideIcon } from "lucide-react";
+import { SuperbillStatus, Superbill } from "@/types/superbill";
+import { StatusDisplayType } from "@/components/group-submission/table/StatusBadge";
 
 export interface KanbanColumn {
   id: SuperbillStatus;
   title: string;
-  description: string;
   icon: LucideIcon;
-  variant: StatusVariant;
-  count?: number;
-  bgColor?: string;
-  superbills?: Superbill[];
-}
-
-export interface KanbanHeaderProps {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  selectionMode?: boolean;
-  toggleSelectionMode?: () => void;
-  selectedCount?: number;
-  onAddSelectedToPatients?: () => void;
-  onFilterChange?: (status: SuperbillStatus | "all") => void;
-  onSortChange?: (order: "asc" | "desc") => void;
-  currentFilter?: SuperbillStatus | "all";
-  currentSort?: "asc" | "desc";
-}
-
-export interface KanbanCardProps {
-  superbill: Superbill;
-  onDelete: (id: string) => void;
-  onStatusChange: (id: string, newStatus: SuperbillStatus) => void;
-  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
-  isPatientSelected?: boolean;
-  onDragStart?: (e: React.DragEvent, id: string) => void;
-  availableStatuses?: KanbanColumn[];
-  currentStatus?: SuperbillStatus;
-}
-
-export interface KanbanColumnProps {
-  column: KanbanColumn;
-  superbills: Superbill[];
-  onDelete: (id: string) => void;
-  onStatusChange: (id: string, newStatus: SuperbillStatus) => void;
-  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
-  selectedPatientIds?: string[];
-  allColumns?: KanbanColumn[];
-  onDragOver?: (e: React.DragEvent) => void;
-  onDragLeave?: (e: React.DragEvent) => void;
-  onDrop?: (e: React.DragEvent, newStatus: SuperbillStatus) => void;
-  handleDragStart?: (e: React.DragEvent, id: string) => void;
+  description?: string;
 }
 
 export interface KanbanBoardProps {
   superbills: Superbill[];
   searchTerm: string;
-  onSearchChange: (value: string) => void;
+  onSearchChange: (term: string) => void;
   onDelete: (id: string) => void;
-  onStatusChange: (id: string, newStatus: SuperbillStatus) => void;
-  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
+  onStatusChange: (id: string, status: SuperbillStatus) => void;
+  onSelectPatient?: (id: string) => void;
   selectedPatientIds?: string[];
   selectionMode?: boolean;
+}
+
+export interface KanbanColumnProps {
+  superbills: Superbill[];
+  column: KanbanColumn;
+  onStatusChange: (id: string, status: SuperbillStatus) => void;
+  onDelete: (id: string) => void;
+  allColumns: KanbanColumn[];
+  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, status: SuperbillStatus) => void;
+  handleDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  onSelectPatient?: (id: string) => void;
+  selectedPatientIds?: string[];
+}
+
+export interface KanbanHeaderProps {
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
+  currentFilter: SuperbillStatus | "all";
+  currentSort: "asc" | "desc";
+  onFilterChange: (filter: SuperbillStatus | "all") => void;
+  onSortChange: (sort: "asc" | "desc") => void;
+  selectionMode?: boolean;
+  selectedCount?: number;
+}
+
+export interface PatientWithSuperbills {
+  id: string;
+  name: string;
+  dateOfBirth?: Date;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  insurance?: string;
+  policyNumber?: string;
+  notes?: string;
+  superbills: Superbill[];
+  totalVisits: number;
+  totalAmount: number;
+  status: "Draft" | "Complete" | "Missing Info" | "No Superbill";
+  dateRange: {
+    start: Date;
+    end: Date;
+  };
 }

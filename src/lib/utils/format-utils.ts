@@ -34,7 +34,28 @@ export function formatStatus(status: SuperbillStatus | string): string {
       return "Completed";
     case "draft":
       return "Draft";
+    case "Complete":
+      return "Complete";
+    case "Missing Info":
+      return "Missing Info";
+    case "Draft":
+      return "Draft";
+    case "No Superbill":
+      return "No Superbill";
     default:
       return status;
   }
+}
+
+// Convert status to consistent format for comparison
+export function normalizeStatus(status: SuperbillStatus | string): string {
+  // Convert to lowercase for consistent comparison
+  const lowercaseStatus = status.toLowerCase();
+  
+  // Map similar statuses to a standard form
+  if (lowercaseStatus === 'complete') return 'completed';
+  if (lowercaseStatus === 'draft') return 'draft';
+  if (lowercaseStatus === 'missing info') return 'in_progress';
+  
+  return lowercaseStatus;
 }

@@ -12,6 +12,21 @@ export interface StatusBadgeProps {
 
 // Function to map superbill status to appropriate variant
 export function mapStatusToVariant(status: StatusDisplayType | SuperbillStatus | string): "default" | "success" | "warning" | "info" | "error" {
+  // Normalize the status by converting to lowercase for comparison
+  const normalizedStatus = status.toLowerCase();
+  
+  // Check for status patterns
+  if (normalizedStatus.includes('complet') || normalizedStatus === 'complete') {
+    return "success";
+  } else if (normalizedStatus.includes('progress') || normalizedStatus.includes('review') || normalizedStatus === 'missing info') {
+    return "warning";
+  } else if (normalizedStatus.includes('draft')) {
+    return "info";
+  } else if (normalizedStatus.includes('no')) {
+    return "error";
+  }
+  
+  // Default fallback based on exact status values
   switch (status) {
     case "Complete":
     case "completed":
@@ -30,8 +45,9 @@ export function mapStatusToVariant(status: StatusDisplayType | SuperbillStatus |
   }
 }
 
-// Function to map status to display string
+// Function to map status to consistent display string
 export function formatStatusDisplay(status: StatusDisplayType | SuperbillStatus | string): string {
+  // Check for exact matches with case sensitivity preserved for display
   switch (status) {
     case "in_progress":
       return "In Progress";
@@ -41,6 +57,14 @@ export function formatStatusDisplay(status: StatusDisplayType | SuperbillStatus 
       return "Completed";
     case "draft":
       return "Draft";
+    case "Complete":
+      return "Complete";
+    case "Missing Info":
+      return "Missing Info";
+    case "Draft":
+      return "Draft";
+    case "No Superbill":
+      return "No Superbill";
     default:
       return status.toString();
   }

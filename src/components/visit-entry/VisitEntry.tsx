@@ -2,9 +2,7 @@
 import { useState } from "react";
 import { Visit } from "@/types/superbill";
 import { formatCurrency } from "@/lib/utils/superbill-utils";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Copy, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { VisitSection } from "./VisitSection";
 import { VisitSectionContent } from "./VisitSectionContent";
 import { VisitHeader } from "./VisitHeader";
