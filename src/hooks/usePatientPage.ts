@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PatientProfile } from "@/types/patient";
 import { useAuth } from "@/context/auth-context";
@@ -31,7 +32,7 @@ export function usePatientPage() {
   
   const canEdit = isAdmin || isEditor;
 
-  // Load patients from context once and apply filtering
+  // Load patients from context and apply filtering
   useEffect(() => {
     console.log("useEffect: updating patients from context", contextPatients);
     // Always update local state from context patients
@@ -62,8 +63,10 @@ export function usePatientPage() {
     // Immediately set as initialized to prevent multiple calls
     setIsInitialized(true);
     
-    // Initial load
-    handleRefreshPatients();
+    // Initial load - force refresh from database
+    refreshPatients().catch(err => {
+      console.error("Error during initial patient fetch:", err);
+    });
     
     // Set up a refresh interval (every 60 seconds)
     refreshTimerRef.current = setInterval(() => {
@@ -81,7 +84,7 @@ export function usePatientPage() {
         refreshTimerRef.current = null;
       }
     };
-  }, [isInitialized]); // Only depend on isInitialized
+  }, [isInitialized, refreshPatients, syncPatientsWithDatabase]);
   
   // Function to manually refresh patients
   const handleRefreshPatients = useCallback(async () => {
@@ -113,7 +116,6 @@ export function usePatientPage() {
     }
   }, [refreshPatients, toast]);
   
-  // Modified to return Promise<void> to match the expected type in PatientHeader
   const handleAddPatient = async (patientData: Omit<PatientProfile, "id">): Promise<void> => {
     try {
       const newPatient = await addPatient(patientData);

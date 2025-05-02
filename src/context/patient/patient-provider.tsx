@@ -9,44 +9,60 @@ import { patientStorage } from "./patient-storage";
 export function PatientProvider({ children }: { children: ReactNode }) {
   const [patients, setPatients] = useState<PatientProfile[]>([]);
   const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Load data from localStorage on initial render
+  // Initial data fetch from database
   useEffect(() => {
-    const savedPatients = localStorage.getItem("patients");
-
-    if (savedPatients) {
+    const initializeData = async () => {
+      setLoading(true);
       try {
-        // Convert string dates back to Date objects
-        const parsed = JSON.parse(savedPatients, (key, value) => {
-          if (key === "dob" || key === "lastSuperbillDate" || key === "start" || key === "end") {
-            return value ? new Date(value) : value;
-          }
-          return value;
-        });
-        setPatients(parsed);
+        // First attempt to fetch from database
+        const dbPatients = await patientStorage.refreshFromDatabase();
+        setPatients(dbPatients);
         
-        // Fetch from database after loading local storage
-        syncPatientsWithDatabase().catch(err => {
-          console.error("Error syncing patients with database on init:", err);
-        });
-      } catch (error) {
-        console.error("Failed to parse saved patients:", error);
+        // Then save to localStorage as backup
+        localStorage.setItem("patients", JSON.stringify(dbPatients));
+      } catch (error: any) {
+        console.error("Error initializing patients data:", error);
+        setError(error.message || "Failed to load patients");
+        
+        // Try to load from localStorage as fallback
+        const savedPatients = localStorage.getItem("patients");
+        if (savedPatients) {
+          try {
+            // Convert string dates back to Date objects
+            const parsed = JSON.parse(savedPatients, (key, value) => {
+              if (key === "dob" || key === "lastSuperbillDate" || key === "start" || key === "end") {
+                return value ? new Date(value) : value;
+              }
+              return value;
+            });
+            setPatients(parsed);
+            toast({
+              title: "Warning",
+              description: "Using cached patient data. Some information may be outdated.",
+              variant: "destructive",
+            });
+          } catch (parseError) {
+            console.error("Failed to parse saved patients:", parseError);
+          }
+        }
+      } finally {
+        setLoading(false);
       }
-    } else {
-      // If no local storage data, try to fetch from database
-      syncPatientsWithDatabase().catch(err => {
-        console.error("Error syncing patients with database on init:", err);
-      });
-    }
-  }, []);
+    };
+    
+    initializeData();
+  }, [toast]);
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
-    console.log("Saving patients to localStorage:", patients.length);
-    localStorage.setItem("patients", JSON.stringify(patients));
+    if (patients.length > 0) {
+      console.log("Saving patients to localStorage:", patients.length);
+      localStorage.setItem("patients", JSON.stringify(patients));
+    }
   }, [patients]);
 
   // Sync with database - fetches patients from database and merges with local

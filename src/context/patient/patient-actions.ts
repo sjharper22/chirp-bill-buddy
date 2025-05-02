@@ -11,31 +11,32 @@ export const patientActions = {
   ): Promise<PatientProfile> {
     console.log("Adding patient:", patient);
     
-    // First check if patient with same name exists in database
-    const existingPatient = await patientService.getByName(patient.name);
-    
-    if (existingPatient) {
-      console.log("Patient already exists in database:", existingPatient);
-      return existingPatient;
-    }
-    
-    // Create in database first to get the ID
-    let newPatient: PatientProfile;
     try {
-      newPatient = await patientService.create(patient);
+      // First check if patient with same name exists in database
+      const existingPatient = await patientService.getByName(patient.name);
+      
+      if (existingPatient) {
+        console.log("Patient already exists in database:", existingPatient);
+        return existingPatient;
+      }
+      
+      // Create in database to get the ID
+      let newPatient: PatientProfile = await patientService.create(patient);
       console.log("Patient created in database:", newPatient);
+      return newPatient;
     } catch (dbError: any) {
       console.error("Database error creating patient:", dbError);
+      
       // Fall back to local creation if database fails
-      newPatient = { ...patient, id: generateId() };
+      const newPatient = { ...patient, id: generateId() };
       toast({
         title: "Warning",
         description: "Patient saved locally but couldn't be saved to database. Some features may not work correctly.",
         variant: "destructive",
       });
+      
+      return newPatient;
     }
-    
-    return newPatient;
   },
   
   async updatePatient(
@@ -43,8 +44,8 @@ export const patientActions = {
     updatedPatient: PatientProfile,
     toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void
   ): Promise<void> {
-    // Update in database first
     try {
+      // Update in database first
       await patientService.update(id, updatedPatient);
       console.log("Patient updated in database:", updatedPatient);
     } catch (dbError: any) {
@@ -61,8 +62,8 @@ export const patientActions = {
     id: string,
     toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void
   ): Promise<void> {
-    // Delete from database first
     try {
+      // Delete from database first
       await patientService.delete(id);
       console.log("Patient deleted from database");
     } catch (dbError: any) {
