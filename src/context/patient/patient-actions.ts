@@ -60,10 +60,17 @@ export const patientActions = {
         return existingLocalPatient;
       }
       
+      // Ensure arrays are initialized
+      const patientData = {
+        ...patient,
+        commonIcdCodes: patient.commonIcdCodes || [],
+        commonCptCodes: patient.commonCptCodes || [],
+      };
+      
       // Create in database
-      console.log("Creating patient in database:", patient);
+      console.log("Creating patient in database:", patientData);
       try {
-        const newPatient = await patientService.create(patient);
+        const newPatient = await patientService.create(patientData);
         console.log("Patient created in database:", newPatient);
         
         toast({
@@ -76,7 +83,7 @@ export const patientActions = {
         console.error("Database error creating patient:", dbError);
         
         // Fall back to local creation only as last resort
-        const localPatient = { ...patient, id: generateId() };
+        const localPatient = { ...patientData, id: generateId() };
         toast({
           title: "Warning",
           description: `Patient "${patient.name}" saved locally but couldn't be saved to database. Some features may not work correctly.`,

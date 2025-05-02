@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { PatientProfile } from "@/types/patient";
+import { usePatient } from "@/context/patient/patient-context";
 
 export default function Patients() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function Patients() {
   const [isManuallyRefreshing, setIsManuallyRefreshing] = useState(false);
   const [isAddingPatient, setIsAddingPatient] = useState(false);
   const mountedRef = useRef(false);
+  const { refreshPatients: contextRefreshPatients } = usePatient();
   
   const {
     patients,
@@ -39,7 +41,7 @@ export default function Patients() {
   } = usePatientPage();
   
   useEffect(() => {
-    console.log("Patients component mounted");
+    console.log("Patients component mounted with", patients.length, "patients");
     mountedRef.current = true;
     
     // Force a refresh when the component mounts
@@ -56,7 +58,8 @@ export default function Patients() {
     
     setIsManuallyRefreshing(true);
     try {
-      const refreshedPatients = await fetchPatients();
+      console.log("Manual refresh started");
+      const refreshedPatients = await contextRefreshPatients();
       console.log("Manual refresh complete, patients:", refreshedPatients?.length);
       
       if (mountedRef.current) {
@@ -65,11 +68,13 @@ export default function Patients() {
           description: "Patient list refreshed successfully",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error during manual refresh:", error);
+      
       if (mountedRef.current) {
         toast({
           title: "Error",
-          description: "Failed to refresh patient list",
+          description: `Failed to refresh patient list: ${error.message || "Unknown error"}`,
           variant: "destructive",
         });
       }
@@ -78,18 +83,32 @@ export default function Patients() {
         setIsManuallyRefreshing(false);
       }
     }
-  }, [fetchPatients, isManuallyRefreshing, loading, toast]);
+  }, [contextRefreshPatients, isManuallyRefreshing, loading, toast]);
 
   const handleAddPatientWrapper = async (patientData: Omit<PatientProfile, "id">) => {
     setIsAddingPatient(true);
+    
     try {
+      console.log("Adding new patient:", patientData);
       await handleAddPatient(patientData);
       setDialogOpen(false);
       
       // Force refresh after adding patient
+      console.log("Patient added, refreshing list...");
       await handleManualRefresh();
-    } catch (error) {
+      
+      toast({
+        title: "Success",
+        description: `Patient "${patientData.name}" has been added successfully.`,
+      });
+    } catch (error: any) {
       console.error("Error adding patient:", error);
+      
+      toast({
+        title: "Error",
+        description: `Failed to add patient: ${error.message || "Unknown error"}`,
+        variant: "destructive",
+      });
     } finally {
       setIsAddingPatient(false);
     }

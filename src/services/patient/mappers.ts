@@ -4,6 +4,11 @@ import { Patient } from "./types";
 
 // Convert database patient to frontend patient model
 export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
+  if (!dbPatient) {
+    console.error("Received null or undefined dbPatient");
+    throw new Error("Invalid patient data received from database");
+  }
+  
   console.log("Mapping DB patient to frontend model:", dbPatient);
   
   // Handle dates properly
@@ -20,7 +25,18 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
     dobDate = new Date();
   }
   
-  const lastVisitDate = dbPatient.last_visit_date ? new Date(dbPatient.last_visit_date) : undefined;
+  // Handle last visit date
+  let lastVisitDate: Date | undefined;
+  try {
+    lastVisitDate = dbPatient.last_visit_date ? new Date(dbPatient.last_visit_date) : undefined;
+    if (lastVisitDate && isNaN(lastVisitDate.getTime())) {
+      console.warn("Invalid last visit date, setting to undefined");
+      lastVisitDate = undefined;
+    }
+  } catch (e) {
+    console.error("Error parsing last visit date:", e);
+    lastVisitDate = undefined;
+  }
   
   // Parse JSON fields safely
   const parseJsonField = (field: any): any[] => {
@@ -37,8 +53,9 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
     return [];
   };
   
-  const defaultIcdCodes = parseJsonField(dbPatient.default_icd_codes);
-  const defaultCptCodes = parseJsonField(dbPatient.default_cpt_codes);
+  // Ensure ICD and CPT codes are arrays
+  const icdCodes = parseJsonField(dbPatient.default_icd_codes);
+  const cptCodes = parseJsonField(dbPatient.default_cpt_codes);
   
   return {
     id: dbPatient.id || '',
@@ -46,8 +63,8 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
     dob: dobDate,
     lastSuperbillDate: lastVisitDate,
     lastSuperbillDateRange: undefined,
-    commonIcdCodes: defaultIcdCodes,
-    commonCptCodes: defaultCptCodes,
+    commonIcdCodes: icdCodes,
+    commonCptCodes: cptCodes,
     notes: dbPatient.notes || '',
   };
 };
@@ -64,12 +81,18 @@ export const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any 
     return date.toISOString().split('T')[0];
   };
   
+  // Serialize arrays to JSON strings for Postgres JSONB fields
+  const serializeArray = (arr: any[]): any[] => {
+    if (!Array.isArray(arr)) return [];
+    return arr;
+  };
+  
   // Ensure we have valid data to prevent database errors
   return {
-    name: patient.name,
+    name: patient.name || '',
     dob: formatDate(patient.dob), 
-    default_icd_codes: Array.isArray(patient.commonIcdCodes) ? patient.commonIcdCodes : [],
-    default_cpt_codes: Array.isArray(patient.commonCptCodes) ? patient.commonCptCodes : [],
+    default_icd_codes: serializeArray(patient.commonIcdCodes),
+    default_cpt_codes: serializeArray(patient.commonCptCodes),
     last_visit_date: patient.lastSuperbillDate instanceof Date ? patient.lastSuperbillDate.toISOString() : null,
     notes: patient.notes || '',
   };

@@ -19,7 +19,13 @@ export const patientService = {
       }
       
       console.log("Raw patients data from Supabase:", data);
-      const mappedData = Array.isArray(data) ? data.map(mapDbPatientToPatient) : [];
+      
+      if (!data || !Array.isArray(data)) {
+        console.warn("No patients data returned or invalid format");
+        return [];
+      }
+      
+      const mappedData = data.map(mapDbPatientToPatient);
       console.log("Mapped patient data:", mappedData);
       return mappedData;
     } catch (e: any) {
@@ -94,20 +100,16 @@ export const patientService = {
         throw new Error("Patient name cannot be empty");
       }
       
-      const dbPatient = mapPatientToDbPatient(patient);
-      
-      // Add a created_by field if not present
-      if (!dbPatient.created_by) {
-        // Use authenticated user ID if available or null
-        const { data: { session } } = await supabase.auth.getSession();
-        dbPatient.created_by = session?.user?.id || null;
+      if (!(patient.dob instanceof Date) || isNaN(patient.dob.getTime())) {
+        throw new Error("Valid date of birth is required");
       }
       
-      console.log("Creating patient in Supabase:", dbPatient);
+      const dbPatient = mapPatientToDbPatient(patient);
+      console.log("Creating patient in Supabase with data:", dbPatient);
       
       const { data, error } = await supabase
         .from('patients')
-        .insert([dbPatient]) // Explicitly wrap in array to match Supabase API expectation
+        .insert(dbPatient)
         .select()
         .single();
         

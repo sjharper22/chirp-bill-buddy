@@ -1,12 +1,15 @@
 
-import { useEffect, ReactNode, useState } from "react";
+import { useEffect, ReactNode, useState, useCallback } from "react";
 import { PatientContext } from "./patient-context";
 import { usePatientInitialization } from "./hooks/usePatientInitialization";
 import { usePatientSync } from "./hooks/usePatientSync";
 import { usePatientSelection } from "./hooks/usePatientSelection";
 import { usePatientOperations } from "./hooks/usePatientOperations";
+import { useToast } from "@/components/ui/use-toast";
 
 export function PatientProvider({ children }: { children: ReactNode }) {
+  const { toast } = useToast();
+  
   // Initialize state and fetch initial data
   const { 
     patients, setPatients, 
@@ -44,7 +47,8 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     patients, 
     setPatients, 
     clearPatientSelection,
-    refreshPatients // Pass the refresh function to ensure database sync
+    refreshPatients,
+    toast
   );
 
   // Save data to localStorage whenever it changes
@@ -62,40 +66,54 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     setIsInitialized(true);
     
     // Initial refresh to get latest data from database
-    refreshPatients().catch(err => {
-      console.error("Error during initial patient refresh:", err);
-    });
+    const performInitialRefresh = async () => {
+      try {
+        await refreshPatients();
+        console.log("Initial patient refresh completed");
+      } catch (err) {
+        console.error("Error during initial patient refresh:", err);
+        toast({
+          title: "Error",
+          description: "Failed to load patients. Please reload the page.",
+          variant: "destructive",
+        });
+      }
+    };
     
+    performInitialRefresh();
+    
+    const refreshInterval = 60000; // Sync every minute
     const refreshTimerRef = setInterval(() => {
       console.log("Auto-refreshing patients data...");
       syncPatientsWithDatabase().catch(err => {
         console.error("Error during automatic patient sync:", err);
       });
-    }, 60000); // Sync every minute
+    }, refreshInterval);
     
     return () => {
       clearInterval(refreshTimerRef);
     };
-  }, [isInitialized, refreshPatients, syncPatientsWithDatabase]);
+  }, [isInitialized, refreshPatients, syncPatientsWithDatabase, toast]);
+
+  // Provide context value
+  const contextValue = {
+    patients,
+    loading,
+    error,
+    addPatient,
+    updatePatient,
+    deletePatient,
+    getPatient,
+    selectedPatientIds,
+    togglePatientSelection,
+    selectAllPatients,
+    clearPatientSelection,
+    refreshPatients,
+    syncPatientsWithDatabase
+  };
 
   return (
-    <PatientContext.Provider 
-      value={{ 
-        patients, 
-        loading,
-        error,
-        addPatient, 
-        updatePatient, 
-        deletePatient, 
-        getPatient,
-        selectedPatientIds,
-        togglePatientSelection,
-        selectAllPatients,
-        clearPatientSelection,
-        refreshPatients,
-        syncPatientsWithDatabase
-      }}
-    >
+    <PatientContext.Provider value={contextValue}>
       {children}
     </PatientContext.Provider>
   );

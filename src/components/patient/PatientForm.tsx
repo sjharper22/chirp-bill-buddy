@@ -9,11 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MultiTagInput } from "@/components/MultiTagInput";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Save, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription, AlertCircle } from "@/components/ui/alert";
 
 interface PatientFormProps {
   onSubmit: (patient: Omit<PatientProfileType, "id">) => Promise<void>;
@@ -35,6 +35,9 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
     dob?: string;
   }>({});
   
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmittingLocal, setIsSubmittingLocal] = useState(false);
+  
   const handleChange = <K extends keyof Omit<PatientProfileType, "id">>(
     field: K, 
     value: Omit<PatientProfileType, "id">[K]
@@ -44,6 +47,11 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
     // Clear validation errors when field is updated
     if (field === 'name' || field === 'dob') {
       setValidationErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+    
+    // Clear submit error when any field changes
+    if (submitError) {
+      setSubmitError(null);
     }
   };
   
@@ -80,21 +88,55 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
     }
     
     try {
-      await onSubmit(patient);
-    } catch (error) {
+      setSubmitError(null);
+      setIsSubmittingLocal(true);
+      
+      console.log("Submitting patient form with data:", patient);
+      await onSubmit({
+        ...patient,
+        commonIcdCodes: patient.commonIcdCodes || [],
+        commonCptCodes: patient.commonCptCodes || []
+      });
+      
+      // Reset form after successful submission
+      setPatient({
+        name: "",
+        dob: new Date(),
+        commonIcdCodes: [],
+        commonCptCodes: [],
+      });
+      
+    } catch (error: any) {
       console.error("Error submitting patient form:", error);
-      // Error is handled by the parent component
+      setSubmitError(error.message || "Failed to save patient");
+      
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save patient",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingLocal(false);
     }
   };
   
+  const isFormSubmitting = isSubmitting || isSubmittingLocal;
+  
   return (
     <form onSubmit={handleSubmit}>
-      <Card>
-        <CardHeader>
+      <Card className="border-0 shadow-none">
+        <CardHeader className="px-0 pt-0">
           <CardTitle>New Patient Profile</CardTitle>
         </CardHeader>
         
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 px-0">
+          {submitError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{submitError}</AlertDescription>
+            </Alert>
+          )}
+          
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name" className={validationErrors.name ? "text-destructive" : ""}>
@@ -106,6 +148,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
                 onChange={e => handleChange('name', e.target.value)}
                 className={validationErrors.name ? "border-destructive" : ""}
                 placeholder="Enter patient name"
+                disabled={isFormSubmitting}
               />
               {validationErrors.name && (
                 <p className="text-destructive text-sm">{validationErrors.name}</p>
@@ -131,6 +174,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
                     "flex-1",
                     validationErrors.dob ? "border-destructive" : ""
                   )}
+                  disabled={isFormSubmitting}
                 />
                 <Popover>
                   <PopoverTrigger asChild>
@@ -138,6 +182,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
                       variant="outline"
                       size="icon"
                       type="button"
+                      disabled={isFormSubmitting}
                     >
                       <CalendarIcon className="h-4 w-4" />
                     </Button>
@@ -151,6 +196,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
                       className={cn("p-3 pointer-events-auto")}
                       fromYear={1900}
                       toYear={new Date().getFullYear()}
+                      disabled={isFormSubmitting}
                     />
                   </PopoverContent>
                 </Popover>
@@ -164,18 +210,20 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
           <div className="space-y-2">
             <Label>Common ICD-10 Codes</Label>
             <MultiTagInput
-              value={patient.commonIcdCodes}
+              value={patient.commonIcdCodes || []}
               onChange={(codes) => handleChange('commonIcdCodes', codes)}
               placeholder="Add ICD codes..."
+              disabled={isFormSubmitting}
             />
           </div>
           
           <div className="space-y-2">
             <Label>Common CPT Codes</Label>
             <MultiTagInput
-              value={patient.commonCptCodes}
+              value={patient.commonCptCodes || []}
               onChange={(codes) => handleChange('commonCptCodes', codes)}
               placeholder="Add CPT codes..."
+              disabled={isFormSubmitting}
             />
           </div>
           
@@ -186,18 +234,19 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
               value={patient.notes || ""}
               onChange={e => handleChange('notes', e.target.value)}
               rows={3}
+              disabled={isFormSubmitting}
             />
           </div>
         </CardContent>
         
-        <CardFooter className="flex justify-end gap-2 border-t pt-4">
+        <CardFooter className="flex justify-end gap-2 border-t pt-4 px-0">
           {onCancel && (
-            <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
+            <Button type="button" variant="ghost" onClick={onCancel} disabled={isFormSubmitting}>
               Cancel
             </Button>
           )}
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
+          <Button type="submit" disabled={isFormSubmitting}>
+            {isFormSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Saving...

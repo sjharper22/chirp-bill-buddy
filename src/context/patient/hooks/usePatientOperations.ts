@@ -6,20 +6,16 @@ import { useState } from "react";
 
 /**
  * Hook for patient CRUD operations with proper error handling and database synchronization
- * 
- * @param patients - Current list of patients
- * @param setPatients - State setter for patients
- * @param clearPatientSelection - Function to clear selected patients
- * @param refreshPatients - Function to refresh patients from database
- * @returns Object containing CRUD operations for patients
  */
 export function usePatientOperations(
   patients: PatientProfile[],
   setPatients: React.Dispatch<React.SetStateAction<PatientProfile[]>>,
   clearPatientSelection: () => void,
-  refreshPatients?: () => Promise<PatientProfile[]>
+  refreshPatients?: () => Promise<PatientProfile[]>,
+  providedToast?: ReturnType<typeof useToast>
 ) {
-  const { toast } = useToast();
+  const defaultToast = useToast();
+  const toast = providedToast || defaultToast;
   const [isProcessing, setIsProcessing] = useState(false);
   
   /**
@@ -38,7 +34,7 @@ export function usePatientOperations(
       console.log("Starting addPatient with data:", patient);
       
       // Create the patient using the service
-      const newPatient = await patientActions.addPatient(patient, patients, toast);
+      const newPatient = await patientActions.addPatient(patient, patients, toast.toast);
       console.log("Patient added successfully:", newPatient);
       
       // Update local state if the patient was created successfully
@@ -66,7 +62,7 @@ export function usePatientOperations(
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error("Error in addPatient:", errorMessage);
       
-      toast({
+      toast.toast({
         title: "Error",
         description: `Failed to add patient: ${errorMessage}`,
         variant: "destructive",
@@ -92,7 +88,7 @@ export function usePatientOperations(
     setIsProcessing(true);
     try {
       // Update the patient in the database
-      await patientActions.updatePatient(id, updatedPatient, toast);
+      await patientActions.updatePatient(id, updatedPatient, toast.toast);
       console.log("Patient updated successfully:", updatedPatient);
       
       // Update local state if successful
@@ -114,7 +110,7 @@ export function usePatientOperations(
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error("Error in updatePatient:", errorMessage);
       
-      toast({
+      toast.toast({
         title: "Error",
         description: `Failed to update patient: ${errorMessage}`,
         variant: "destructive",
@@ -147,7 +143,7 @@ export function usePatientOperations(
       const patientName = patientToDelete?.name || 'Unknown patient';
       
       // Delete from database
-      await patientActions.deletePatient(id, patientName, toast);
+      await patientActions.deletePatient(id, patientName, toast.toast);
       console.log("Patient deleted successfully:", id);
       
       // Update local state if successful
@@ -170,7 +166,7 @@ export function usePatientOperations(
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error("Error in deletePatient:", errorMessage);
       
-      toast({
+      toast.toast({
         title: "Error",
         description: `Failed to delete patient: ${errorMessage}`,
         variant: "destructive",
