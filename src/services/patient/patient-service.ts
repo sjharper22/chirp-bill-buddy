@@ -36,15 +36,16 @@ export const patientService = {
         .from('patients')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
         
       if (error) {
-        if (error.code === 'PGRST116') { // Record not found
-          console.log(`Patient with ID ${id} not found`);
-          return null;
-        }
         console.error('Error fetching patient:', error);
         throw new Error(`Failed to fetch patient: ${error.message}`);
+      }
+      
+      if (!data) {
+        console.log(`Patient with ID ${id} not found`);
+        return null;
       }
       
       return mapDbPatientToPatient(data);
@@ -95,11 +96,18 @@ export const patientService = {
       
       const dbPatient = mapPatientToDbPatient(patient);
       
+      // Add a created_by field if not present
+      if (!dbPatient.created_by) {
+        // Use authenticated user ID if available or null
+        const { data: { session } } = await supabase.auth.getSession();
+        dbPatient.created_by = session?.user?.id || null;
+      }
+      
       console.log("Creating patient in Supabase:", dbPatient);
       
       const { data, error } = await supabase
         .from('patients')
-        .insert(dbPatient)
+        .insert([dbPatient]) // Explicitly wrap in array to match Supabase API expectation
         .select()
         .single();
         
@@ -169,28 +177,6 @@ export const patientService = {
     } catch (e: any) {
       console.error("Error in delete patient:", e);
       throw new Error(`Failed to delete patient: ${e.message}`);
-    }
-  },
-  
-  // Search patients
-  async search(query: string): Promise<PatientProfile[]> {
-    try {
-      console.log(`Searching patients with query: ${query}`);
-      const { data, error } = await supabase
-        .from('patients')
-        .select('*')
-        .ilike('name', `%${query}%`)
-        .order('name');
-        
-      if (error) {
-        console.error('Error searching patients:', error);
-        throw new Error(`Failed to search patients: ${error.message}`);
-      }
-      
-      return data.map(mapDbPatientToPatient);
-    } catch (e: any) {
-      console.error("Error in search patients:", e);
-      throw new Error(`Failed to search patients: ${e.message}`);
     }
   }
 };

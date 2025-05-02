@@ -1,17 +1,19 @@
 
+// Update your PatientHeader.tsx file to include the isAddingPatient prop
+
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
-import { PatientForm } from "@/components/patient/PatientForm";
-import { PatientProfile } from "@/types/patient";
-import { useNavigate } from "react-router-dom";
+import { PatientProfile } from "@/types/patient"; 
+import { PatientForm } from "./PatientForm";
+import { UserPlus, RefreshCcw } from "lucide-react";
 
 interface PatientHeaderProps {
   canEdit: boolean;
   dialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
-  onAddPatient: (patient: Omit<PatientProfile, "id">) => Promise<void>; // Updated return type
+  onAddPatient: (patient: Omit<PatientProfile, "id">) => Promise<void>;
   selectedPatientIds: string[];
+  isAddingPatient?: boolean;
 }
 
 export function PatientHeader({
@@ -19,51 +21,38 @@ export function PatientHeader({
   dialogOpen,
   setDialogOpen,
   onAddPatient,
-  selectedPatientIds
+  selectedPatientIds,
+  isAddingPatient = false
 }: PatientHeaderProps) {
-  const navigate = useNavigate();
-  
   return (
-    <div className="flex justify-between items-center mb-8">
+    <div className="flex justify-between items-center mb-6">
       <div>
-        <h1 className="text-3xl font-bold">Patient Profiles</h1>
-        <p className="text-muted-foreground">
-          Manage patient profiles and group patients for insurance submissions
-        </p>
+        <h1 className="text-3xl font-bold">Patients</h1>
+        <p className="text-muted-foreground">Manage your patient profiles</p>
       </div>
-      
-      <div className="flex gap-2">
-        {canEdit && (
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Patient
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-xl">
-              <DialogHeader>
-                <DialogTitle>New Patient</DialogTitle>
-              </DialogHeader>
-              <PatientForm 
-                onSubmit={onAddPatient}
-                onCancel={() => setDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-        
-        {selectedPatientIds.length > 0 && (
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/grouped-submission", { 
-              state: { selectedPatientIds } 
-            })}
-          >
-            Create Group Submission ({selectedPatientIds.length})
+
+      {canEdit && (
+        <div className="flex gap-2">
+          <Button onClick={() => setDialogOpen(true)} disabled={isAddingPatient}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add Patient
           </Button>
-        )}
-      </div>
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogTitle>Add New Patient</DialogTitle>
+          <DialogDescription>
+            Create a new patient record to manage their visits and superbills.
+          </DialogDescription>
+          <PatientForm 
+            onSubmit={onAddPatient} 
+            onCancel={() => setDialogOpen(false)}
+            isSubmitting={isAddingPatient}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

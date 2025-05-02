@@ -2,6 +2,7 @@
 import { PatientProfile } from "@/types/patient";
 import { patientActions } from "../patient-actions";
 import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 /**
  * Hook for patient CRUD operations with proper error handling and database synchronization
@@ -19,6 +20,7 @@ export function usePatientOperations(
   refreshPatients?: () => Promise<PatientProfile[]>
 ) {
   const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
   
   /**
    * Creates a new patient profile
@@ -26,7 +28,15 @@ export function usePatientOperations(
    * @returns The created patient with ID
    */
   const addPatient = async (patient: Omit<PatientProfile, "id">): Promise<PatientProfile> => {
+    if (isProcessing) {
+      console.log("Operation already in progress, skipping");
+      throw new Error("An operation is already in progress");
+    }
+    
+    setIsProcessing(true);
     try {
+      console.log("Starting addPatient with data:", patient);
+      
       // Create the patient using the service
       const newPatient = await patientActions.addPatient(patient, patients, toast);
       console.log("Patient added successfully:", newPatient);
@@ -43,11 +53,11 @@ export function usePatientOperations(
       if (refreshPatients) {
         try {
           console.log("Refreshing patients after adding...");
-          const refreshedPatients = await refreshPatients();
-          console.log(`Refreshed ${refreshedPatients.length} patients from database`);
-          // No need to setPatients here as refreshPatients will do that
+          await refreshPatients();
+          console.log("Patient refresh complete");
         } catch (refreshError) {
           console.error("Could not refresh patients after adding:", refreshError);
+          // Continue with operation even if refresh fails
         }
       }
       
@@ -63,6 +73,8 @@ export function usePatientOperations(
       });
       
       throw error; // Re-throw to allow caller to handle
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -72,6 +84,12 @@ export function usePatientOperations(
    * @param updatedPatient Updated patient data
    */
   const updatePatient = async (id: string, updatedPatient: PatientProfile): Promise<void> => {
+    if (isProcessing) {
+      console.log("Operation already in progress, skipping");
+      throw new Error("An operation is already in progress");
+    }
+    
+    setIsProcessing(true);
     try {
       // Update the patient in the database
       await patientActions.updatePatient(id, updatedPatient, toast);
@@ -89,6 +107,7 @@ export function usePatientOperations(
           await refreshPatients();
         } catch (refreshError) {
           console.error("Could not refresh patients after updating:", refreshError);
+          // Continue with operation even if refresh fails
         }
       }
     } catch (error) {
@@ -102,6 +121,8 @@ export function usePatientOperations(
       });
       
       throw error; // Re-throw to allow caller to handle
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -110,9 +131,19 @@ export function usePatientOperations(
    * @param id Patient ID to delete
    */
   const deletePatient = async (id: string): Promise<void> => {
+    if (isProcessing) {
+      console.log("Operation already in progress, skipping");
+      throw new Error("An operation is already in progress");
+    }
+    
+    setIsProcessing(true);
     try {
       // Find the patient to get the name for the toast message
       const patientToDelete = patients.find(p => p.id === id);
+      if (!patientToDelete) {
+        throw new Error("Patient not found");
+      }
+      
       const patientName = patientToDelete?.name || 'Unknown patient';
       
       // Delete from database
@@ -132,6 +163,7 @@ export function usePatientOperations(
           await refreshPatients();
         } catch (refreshError) {
           console.error("Could not refresh patients after deleting:", refreshError);
+          // Continue with operation even if refresh fails
         }
       }
     } catch (error) {
@@ -145,6 +177,8 @@ export function usePatientOperations(
       });
       
       throw error; // Re-throw to allow caller to handle
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -169,6 +203,7 @@ export function usePatientOperations(
     addPatient,
     updatePatient,
     deletePatient,
-    getPatient
+    getPatient,
+    isProcessing
   };
 }

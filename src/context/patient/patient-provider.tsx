@@ -21,7 +21,8 @@ export function PatientProvider({ children }: { children: ReactNode }) {
   const { 
     saveToLocalStorage, 
     syncPatientsWithDatabase, 
-    refreshPatients 
+    refreshPatients,
+    isSyncing
   } = usePatientSync(patients, setPatients, setLoading, setError);
 
   // Set up patient selection functionality
@@ -37,7 +38,8 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     addPatient, 
     updatePatient, 
     deletePatient, 
-    getPatient 
+    getPatient,
+    isProcessing
   } = usePatientOperations(
     patients, 
     setPatients, 
@@ -47,8 +49,10 @@ export function PatientProvider({ children }: { children: ReactNode }) {
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
-    saveToLocalStorage();
-  }, [patients, saveToLocalStorage]);
+    if (patients.length > 0 && !isProcessing && !isSyncing) {
+      saveToLocalStorage();
+    }
+  }, [patients, saveToLocalStorage, isProcessing, isSyncing]);
 
   // Set up initial database sync
   useEffect(() => {
@@ -67,7 +71,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
       syncPatientsWithDatabase().catch(err => {
         console.error("Error during automatic patient sync:", err);
       });
-    }, 60000);
+    }, 60000); // Sync every minute
     
     return () => {
       clearInterval(refreshTimerRef);

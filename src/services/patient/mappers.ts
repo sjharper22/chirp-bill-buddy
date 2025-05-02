@@ -41,7 +41,7 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
   const defaultCptCodes = parseJsonField(dbPatient.default_cpt_codes);
   
   return {
-    id: dbPatient.id,
+    id: dbPatient.id || '',
     name: dbPatient.name || '',
     dob: dobDate,
     lastSuperbillDate: lastVisitDate,
@@ -56,10 +56,18 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
 export const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any => {
   console.log("Converting patient to DB format:", patient);
   
+  // Format date as YYYY-MM-DD string for PostgreSQL
+  const formatDate = (date: Date | undefined): string | null => {
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      return null;
+    }
+    return date.toISOString().split('T')[0];
+  };
+  
   // Ensure we have valid data to prevent database errors
   return {
     name: patient.name,
-    dob: patient.dob instanceof Date ? patient.dob.toISOString().split('T')[0] : null, // Format as YYYY-MM-DD for PostgreSQL date
+    dob: formatDate(patient.dob), 
     default_icd_codes: Array.isArray(patient.commonIcdCodes) ? patient.commonIcdCodes : [],
     default_cpt_codes: Array.isArray(patient.commonCptCodes) ? patient.commonCptCodes : [],
     last_visit_date: patient.lastSuperbillDate instanceof Date ? patient.lastSuperbillDate.toISOString() : null,

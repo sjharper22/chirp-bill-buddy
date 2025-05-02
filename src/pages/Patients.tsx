@@ -17,6 +17,7 @@ export default function Patients() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isManuallyRefreshing, setIsManuallyRefreshing] = useState(false);
+  const [isAddingPatient, setIsAddingPatient] = useState(false);
   const mountedRef = useRef(false);
   
   const {
@@ -40,6 +41,9 @@ export default function Patients() {
   useEffect(() => {
     console.log("Patients component mounted");
     mountedRef.current = true;
+    
+    // Force a refresh when the component mounts
+    handleManualRefresh();
     
     return () => {
       mountedRef.current = false;
@@ -77,9 +81,18 @@ export default function Patients() {
   }, [fetchPatients, isManuallyRefreshing, loading, toast]);
 
   const handleAddPatientWrapper = async (patientData: Omit<PatientProfile, "id">) => {
-    await handleAddPatient(patientData);
-    // Force refresh after adding patient
-    await handleManualRefresh();
+    setIsAddingPatient(true);
+    try {
+      await handleAddPatient(patientData);
+      setDialogOpen(false);
+      
+      // Force refresh after adding patient
+      await handleManualRefresh();
+    } catch (error) {
+      console.error("Error adding patient:", error);
+    } finally {
+      setIsAddingPatient(false);
+    }
   };
   
   console.log("Rendering Patients page with:", { 
@@ -97,6 +110,7 @@ export default function Patients() {
         setDialogOpen={setDialogOpen}
         onAddPatient={handleAddPatientWrapper}
         selectedPatientIds={selectedPatientIds}
+        isAddingPatient={isAddingPatient}
       />
       
       <div className="flex justify-between items-center mb-6">

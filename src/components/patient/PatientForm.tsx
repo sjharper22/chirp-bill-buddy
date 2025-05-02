@@ -12,32 +12,79 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Save } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PatientFormProps {
-  onSubmit: (patient: PatientProfileType) => void;
+  onSubmit: (patient: Omit<PatientProfileType, "id">) => Promise<void>;
   onCancel?: () => void;
+  isSubmitting?: boolean;
 }
 
-export function PatientForm({ onSubmit, onCancel }: PatientFormProps) {
-  const [patient, setPatient] = useState<PatientProfileType>({
-    id: crypto.randomUUID(), // Generate a unique ID
+export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: PatientFormProps) {
+  const { toast } = useToast();
+  const [patient, setPatient] = useState<Omit<PatientProfileType, "id">>({
     name: "",
     dob: new Date(),
     commonIcdCodes: [],
     commonCptCodes: [],
   });
+
+  const [validationErrors, setValidationErrors] = useState<{
+    name?: string;
+    dob?: string;
+  }>({});
   
-  const handleChange = <K extends keyof PatientProfileType>(
+  const handleChange = <K extends keyof Omit<PatientProfileType, "id">>(
     field: K, 
-    value: PatientProfileType[K]
+    value: Omit<PatientProfileType, "id">[K]
   ) => {
     setPatient(prev => ({ ...prev, [field]: value }));
+    
+    // Clear validation errors when field is updated
+    if (field === 'name' || field === 'dob') {
+      setValidationErrors(prev => ({ ...prev, [field]: undefined }));
+    }
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = (): boolean => {
+    const errors: {
+      name?: string;
+      dob?: string;
+    } = {};
+    
+    if (!patient.name || patient.name.trim() === '') {
+      errors.name = 'Patient name is required';
+    }
+    
+    if (!patient.dob) {
+      errors.dob = 'Date of birth is required';
+    } else if (!(patient.dob instanceof Date) || isNaN(patient.dob.getTime())) {
+      errors.dob = 'Valid date of birth is required';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(patient);
+    
+    if (!validateForm()) {
+      toast({
+        title: "Form Validation Error",
+        description: "Please correct the errors in the form before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      await onSubmit(patient);
+    } catch (error) {
+      console.error("Error submitting patient form:", error);
+      // Error is handled by the parent component
+    }
   };
   
   return (
@@ -50,17 +97,25 @@ export function PatientForm({ onSubmit, onCancel }: PatientFormProps) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Patient Name</Label>
+              <Label htmlFor="name" className={validationErrors.name ? "text-destructive" : ""}>
+                Patient Name
+              </Label>
               <Input
                 id="name"
                 value={patient.name}
                 onChange={e => handleChange('name', e.target.value)}
-                required
+                className={validationErrors.name ? "border-destructive" : ""}
+                placeholder="Enter patient name"
               />
+              {validationErrors.name && (
+                <p className="text-destructive text-sm">{validationErrors.name}</p>
+              )}
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="dob">Date of Birth</Label>
+              <Label htmlFor="dob" className={validationErrors.dob ? "text-destructive" : ""}>
+                Date of Birth
+              </Label>
               <div className="flex gap-2">
                 <Input
                   type="date"
@@ -72,8 +127,10 @@ export function PatientForm({ onSubmit, onCancel }: PatientFormProps) {
                       handleChange('dob', date);
                     }
                   }}
-                  className="flex-1"
-                  required
+                  className={cn(
+                    "flex-1",
+                    validationErrors.dob ? "border-destructive" : ""
+                  )}
                 />
                 <Popover>
                   <PopoverTrigger asChild>
@@ -98,6 +155,9 @@ export function PatientForm({ onSubmit, onCancel }: PatientFormProps) {
                   </PopoverContent>
                 </Popover>
               </div>
+              {validationErrors.dob && (
+                <p className="text-destructive text-sm">{validationErrors.dob}</p>
+              )}
             </div>
           </div>
           
@@ -132,13 +192,22 @@ export function PatientForm({ onSubmit, onCancel }: PatientFormProps) {
         
         <CardFooter className="flex justify-end gap-2 border-t pt-4">
           {onCancel && (
-            <Button type="button" variant="ghost" onClick={onCancel}>
+            <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
               Cancel
             </Button>
           )}
-          <Button type="submit">
-            <Save className="mr-2 h-4 w-4" />
-            Save Patient
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Patient
+              </>
+            )}
           </Button>
         </CardFooter>
       </Card>
