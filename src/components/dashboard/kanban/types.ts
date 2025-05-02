@@ -1,13 +1,14 @@
-
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { LucideIcon } from "lucide-react";
+
+export type StatusVariant = "default" | "success" | "warning" | "info" | "error";
 
 export interface KanbanColumn {
   id: SuperbillStatus;
   title: string;
   description: string;
   icon: LucideIcon;
-  variant: string;
+  variant: StatusVariant;
   count?: number;
   bgColor?: string;
   superbills?: Superbill[];

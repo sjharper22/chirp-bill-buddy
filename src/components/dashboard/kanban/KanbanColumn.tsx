@@ -28,7 +28,7 @@ export function KanbanColumn({
           <column.icon className="h-5 w-5 mr-2 text-muted-foreground" />
           <h3 className="font-medium">{column.title}</h3>
           <div className="ml-2 flex items-center">
-            <StatusBadge status={column.title} variant={column.variant} className="mr-1" />
+            <StatusBadge status={column.title} variant={column.variant as "default" | "success" | "warning" | "info" | "error"} className="mr-1" />
             <span className="text-sm font-medium">{superbills.length}</span>
           </div>
         </div>
