@@ -1,11 +1,11 @@
 
 import { PatientProfile } from "@/types/patient";
 
-export type ToastType = {
+export interface ToastType {
   title: string;
   description: string;
   variant?: "default" | "destructive";
-};
+}
 
 export interface PatientContextType {
   patients: PatientProfile[];

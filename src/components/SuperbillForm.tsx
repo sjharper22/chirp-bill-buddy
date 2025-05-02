@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, Visit } from "@/types/superbill";
@@ -15,6 +14,7 @@ import { DefaultCodesSection } from "@/components/superbill-form/DefaultCodesSec
 import { VisitsSection } from "@/components/superbill-form/VisitsSection";
 import { commonMainComplaints } from "@/constants/superbill-constants";
 import { toast } from "@/components/ui/use-toast";
+import { patientService } from "@/services/patient";
 
 interface SuperbillFormProps {
   existingSuperbill?: Superbill;

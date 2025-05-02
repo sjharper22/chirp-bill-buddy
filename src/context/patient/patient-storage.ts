@@ -1,6 +1,6 @@
 
 import { PatientProfile } from "@/types/patient";
-import { patientService } from "@/services/patientService";
+import { patientService } from "@/services/patient";
 
 export const patientStorage = {
   async syncWithDatabase(localPatients: PatientProfile[]): Promise<PatientProfile[]> {

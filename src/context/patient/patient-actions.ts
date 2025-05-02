@@ -1,14 +1,13 @@
 
 import { PatientProfile } from "@/types/patient";
-import { patientService } from "@/services/patientService";
+import { patientService } from "@/services/patient";
 import { generateId } from "@/lib/utils/superbill-utils";
-import { ToastType } from "./types";
 
 export const patientActions = {
   async addPatient(
     patient: Omit<PatientProfile, "id">, 
     currentPatients: PatientProfile[],
-    toast: ToastType
+    toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void
   ): Promise<PatientProfile> {
     console.log("Adding patient:", patient);
     
@@ -42,7 +41,7 @@ export const patientActions = {
   async updatePatient(
     id: string, 
     updatedPatient: PatientProfile,
-    toast: ToastType
+    toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void
   ): Promise<void> {
     // Update in database first
     try {
@@ -60,7 +59,7 @@ export const patientActions = {
   
   async deletePatient(
     id: string,
-    toast: ToastType
+    toast: (props: { title: string; description: string; variant?: "default" | "destructive" }) => void
   ): Promise<void> {
     // Delete from database first
     try {
