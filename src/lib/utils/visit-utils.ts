@@ -1,79 +1,44 @@
 
-import { Visit, SuperbillStatus } from "@/types/superbill";
-import { generateId } from "./id-utils";
-import { StatusDisplayType } from "@/components/group-submission/table/StatusBadge";
+import { Visit } from "@/types/superbill";
+import { SuperbillStatus } from "@/types/superbill";
 
-export const createEmptyVisit = (): Visit => {
+// Create an empty visit with default values
+export function createEmptyVisit(): Visit {
   return {
-    id: generateId(),
+    id: crypto.randomUUID(),
     date: new Date(),
     icdCodes: [],
     cptCodes: [],
-    fee: 0,
     mainComplaints: [],
-    status: 'draft' // Set default status
+    fee: 0,
+    notes: '',
+    status: 'draft'
   };
-};
+}
 
-export const duplicateVisit = (visit: Visit): Visit => {
+// Duplicate an existing visit
+export function duplicateVisit(visit: Visit): Visit {
   return {
     ...visit,
-    id: generateId(),
-    status: 'draft' // Reset status for duplicated visits
+    id: crypto.randomUUID(),
   };
-};
+}
 
-export const getStatusVariant = (status: SuperbillStatus | StatusDisplayType | string): "default" | "success" | "warning" | "info" | "error" => {
-  // Normalize the status by converting to lowercase for comparison
+// Get the visual variant for a status
+export function getStatusVariant(status: SuperbillStatus | string): "default" | "success" | "warning" | "info" | "error" {
+  // Normalize the status string
   const normalizedStatus = status.toLowerCase();
   
-  // Check for status patterns
-  if (normalizedStatus.includes('complet') || normalizedStatus === 'complete') {
-    return "success";
-  } else if (normalizedStatus.includes('progress') || normalizedStatus.includes('review') || normalizedStatus === 'missing info') {
-    return "warning";
-  } else if (normalizedStatus.includes('draft')) {
-    return "info";
-  } else if (normalizedStatus.includes('no')) {
-    return "error";
-  }
-  
-  // Default fallback for explicit status values
-  switch (status) {
-    case "completed":
-      return "success";
-    case "in_progress":
-    case "in_review":
-      return "warning";
-    case "draft":
-      return "info";
+  switch (normalizedStatus) {
+    case 'completed':
+      return 'success';
+    case 'in_progress':
+      return 'warning';
+    case 'in_review':
+      return 'info';
+    case 'draft':
+      return 'default';
     default:
-      return "default";
+      return 'default';
   }
-};
-
-// Function to determine the combined status of visits
-export const determineVisitsStatus = (visits: Visit[]): 'draft' | 'in_progress' | 'completed' => {
-  if (!visits || visits.length === 0) return 'draft';
-  
-  // Count visits by status
-  const statusCounts = {
-    draft: 0,
-    in_progress: 0,
-    completed: 0
-  };
-  
-  visits.forEach(visit => {
-    const status = visit.status || 'draft';
-    statusCounts[status]++;
-  });
-  
-  // If any visit is still draft, consider the collection as draft
-  if (statusCounts.draft > 0) return 'draft';
-  
-  // If any visit is in progress, consider the collection as in progress
-  if (statusCounts.in_progress > 0) return 'in_progress';
-  
-  // All visits must be completed
-  return 'completed';
-};
+}

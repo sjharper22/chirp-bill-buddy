@@ -57,6 +57,7 @@ export function DashboardTabs({
           searchTerm={searchTerm}
           onSearchChange={onSearchChange}
           onDelete={onDelete}
+          onStatusChange={onStatusChange}
           totalSuperbills={superbills.length}
           onSelectPatient={handleSelectPatient}
           selectedPatientIds={selectedPatientIds}

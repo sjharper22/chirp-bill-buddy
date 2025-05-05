@@ -1,5 +1,6 @@
 
-import { Superbill } from "@/types/superbill";
+import { ReactNode } from "react";
+import { Superbill, SuperbillStatus } from "@/types/superbill";
 
 export interface SuperbillCardProps {
   superbill: Superbill;
@@ -7,6 +8,7 @@ export interface SuperbillCardProps {
   onClick?: () => void;
   onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   isPatientSelected?: boolean;
+  onStatusChange?: (id: string, newStatus: SuperbillStatus) => void;
 }
 
 export interface CardHeaderProps {
@@ -14,6 +16,7 @@ export interface CardHeaderProps {
   issueDate: Date;
   status: string;
   statusVariant: 'default' | 'success' | 'warning' | 'info' | 'error';
+  onStatusChange?: ReactNode;
 }
 
 export interface PatientInfoProps {

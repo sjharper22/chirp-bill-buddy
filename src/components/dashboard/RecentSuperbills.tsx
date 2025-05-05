@@ -15,6 +15,7 @@ interface RecentSuperbillsProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onDelete: (id: string) => void;
+  onStatusChange: (id: string, newStatus: SuperbillStatus) => void;
   totalSuperbills: number;
   onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   selectedPatientIds?: string[];
@@ -28,6 +29,7 @@ export function RecentSuperbills({
   searchTerm,
   onSearchChange,
   onDelete,
+  onStatusChange,
   totalSuperbills,
   onSelectPatient,
   selectedPatientIds = [],
@@ -115,6 +117,7 @@ export function RecentSuperbills({
               onClick={!selectionMode ? () => navigate(`/view/${superbill.id}`) : undefined}
               onSelectPatient={selectionMode ? onSelectPatient : undefined}
               isPatientSelected={selectedPatientIds.includes(superbill.id)}
+              onStatusChange={onStatusChange}
             />
           ))
         ) : (

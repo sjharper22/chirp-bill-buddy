@@ -3,8 +3,15 @@ import { formatDate } from "@/lib/utils/superbill-utils";
 import { GripHorizontal } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { CardHeaderProps } from "./types";
+import { ReactNode } from "react";
 
-export function CardHeader({ patientName, issueDate, status, statusVariant }: CardHeaderProps) {
+export function CardHeader({ 
+  patientName, 
+  issueDate, 
+  status, 
+  statusVariant, 
+  onStatusChange 
+}: CardHeaderProps) {
   return (
     <>
       <div className="flex justify-between items-start mb-2">
@@ -17,11 +24,12 @@ export function CardHeader({ patientName, issueDate, status, statusVariant }: Ca
         </div>
       </div>
       
-      <div className="mb-2">
+      <div className="mb-2 flex items-center">
         <StatusBadge 
           status={status} 
           variant={statusVariant}
         />
+        {onStatusChange}
       </div>
     </>
   );

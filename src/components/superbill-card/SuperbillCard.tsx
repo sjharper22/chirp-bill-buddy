@@ -1,5 +1,5 @@
 
-import { Superbill } from "@/types/superbill";
+import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { formatStatus, getStatusVariant, calculateTotalFee } from "@/lib/utils/superbill-utils";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { SuperbillCardProps } from "./types";
@@ -8,13 +8,22 @@ import { PatientInfo } from "./PatientInfo";
 import { CardStats } from "./CardStats";
 import { CardActions } from "./CardActions";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 export function SuperbillCard({ 
   superbill, 
   onDelete, 
   onClick,
   onSelectPatient,
-  isPatientSelected 
+  isPatientSelected,
+  onStatusChange
 }: SuperbillCardProps) {
   const totalFee = calculateTotalFee(superbill.visits);
   const visitCount = superbill.visits.length;
@@ -47,6 +56,13 @@ export function SuperbillCard({
     }
   };
   
+  // Handle status change
+  const handleStatusChange = (newStatus: SuperbillStatus) => {
+    if (onStatusChange && newStatus !== superbill.status) {
+      onStatusChange(superbill.id, newStatus);
+    }
+  };
+  
   return (
     <Card 
       className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} relative`} 
@@ -69,6 +85,31 @@ export function SuperbillCard({
           issueDate={superbill.issueDate}
           status={displayStatus}
           statusVariant={statusVariant}
+          onStatusChange={onStatusChange ? 
+            (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="xs" className="h-5 px-1 ml-2">
+                    <ArrowUpDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleStatusChange('draft')}>
+                    Set to Draft
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleStatusChange('in_progress')}>
+                    Set to In Progress
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleStatusChange('in_review')}>
+                    Set to In Review
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleStatusChange('completed')}>
+                    Set to Completed
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : undefined
+          }
         />
         
         <PatientInfo 

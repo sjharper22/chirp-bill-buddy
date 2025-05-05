@@ -29,6 +29,7 @@ export function KanbanCard({
           onClick={!onSelectPatient ? () => navigate(`/view/${superbill.id}`) : undefined}
           onSelectPatient={onSelectPatient}
           isPatientSelected={isPatientSelected}
+          onStatusChange={onStatusChange}
         />
       </div>
       

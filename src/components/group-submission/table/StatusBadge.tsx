@@ -18,10 +18,12 @@ export function mapStatusToVariant(status: StatusDisplayType | SuperbillStatus |
   // Check for status patterns
   if (normalizedStatus.includes('complet') || normalizedStatus === 'complete') {
     return "success";
-  } else if (normalizedStatus.includes('progress') || normalizedStatus.includes('review') || normalizedStatus === 'missing info') {
+  } else if (normalizedStatus.includes('progress')) {
     return "warning";
-  } else if (normalizedStatus.includes('draft')) {
+  } else if (normalizedStatus.includes('review')) {
     return "info";
+  } else if (normalizedStatus.includes('draft')) {
+    return "default";
   } else if (normalizedStatus.includes('no')) {
     return "error";
   }
@@ -33,10 +35,11 @@ export function mapStatusToVariant(status: StatusDisplayType | SuperbillStatus |
       return "success";
     case "Missing Info":
     case "in_progress":
-    case "in_review":
       return "warning";
     case "Draft":
     case "draft":
+      return "default";
+    case "in_review":
       return "info";
     case "No Superbill":
       return "error";
@@ -74,17 +77,11 @@ export function StatusBadge({ status, variant, className = "" }: StatusBadgeProp
   // If variant is not provided, determine it based on status
   const badgeVariant = variant || mapStatusToVariant(status);
 
-  // Convert BadgeVariant to a type that Badge component accepts
-  const convertedVariant = badgeVariant === "success" ? "default" :
-                         badgeVariant === "warning" ? "secondary" :
-                         badgeVariant === "info" ? "outline" :
-                         badgeVariant === "error" ? "destructive" : "default";
-  
   // Format the display text
   const displayText = formatStatusDisplay(status);
   
   return (
-    <Badge variant={convertedVariant} className={`${className} ${getStatusColorClass(badgeVariant)}`}>
+    <Badge variant="outline" className={`${className} ${getStatusColorClass(badgeVariant)}`}>
       {displayText}
     </Badge>
   );
@@ -96,12 +93,12 @@ function getStatusColorClass(variant: "default" | "success" | "warning" | "info"
     case "success":
       return "bg-green-100 text-green-800 hover:bg-green-200";
     case "warning":
-      return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+      return "bg-amber-100 text-amber-800 hover:bg-amber-200";
     case "info":
+      return "bg-purple-100 text-purple-800 hover:bg-purple-200";
+    case "default":
       return "bg-blue-100 text-blue-800 hover:bg-blue-200";
     case "error":
       return "bg-red-100 text-red-800 hover:bg-red-200";
-    default:
-      return "";
   }
 }
