@@ -42,3 +42,19 @@ export function getStatusVariant(status: SuperbillStatus | string): "default" | 
       return 'default';
   }
 }
+
+// Convert a status to a display friendly format
+export function statusToDisplay(status: SuperbillStatus | string): string {
+  switch (status) {
+    case 'in_progress': 
+      return 'In Progress';
+    case 'in_review':
+      return 'In Review';
+    case 'completed':
+      return 'Completed';
+    case 'draft':
+      return 'Draft';
+    default:
+      return status;
+  }
+}

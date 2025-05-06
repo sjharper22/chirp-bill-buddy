@@ -11,7 +11,8 @@ import { GroupPreview } from "@/components/group-submission/GroupPreview";
 import { generateCoverSheetHtml } from "@/lib/utils/cover-sheet-generator";
 import { generatePrintableHTML } from "@/lib/utils/html-generator";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
-import { StatusDisplayType } from "@/components/group-submission/table/StatusBadge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CoverLetterEditor } from "@/components/cover-letter/CoverLetterEditor";
 
 // Helper function to determine superbill status
 const determineStatus = (superbills: Superbill[]): "Draft" | "Complete" | "Missing Info" | "No Superbill" => {
@@ -71,13 +72,16 @@ const determineStatus = (superbills: Superbill[]): "Draft" | "Complete" | "Missi
 export default function GroupedSubmission() {
   const navigate = useNavigate();
   const { patients } = usePatient();
-  const { superbills } = useSuperbill();
+  const { superbills, updateSuperbill } = useSuperbill();
   
   const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
   const [patientsWithSuperbills, setPatientsWithSuperbills] = useState<PatientWithSuperbills[]>([]);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCoverSheet, setShowCoverSheet] = useState(false);
+  const [showCoverLetter, setShowCoverLetter] = useState(true);
+  const [coverLetterContent, setCoverLetterContent] = useState("");
+  const [isCoverLetterDialogOpen, setIsCoverLetterDialogOpen] = useState(false);
   
   // Process patients and their superbills
   useEffect(() => {
@@ -158,6 +162,24 @@ export default function GroupedSubmission() {
   
   const selectedSuperbills = selectedPatients.flatMap(patient => patient.superbills);
   
+  // Handle status change
+  const handleStatusChange = (id: string, newStatus: SuperbillStatus) => {
+    // Find the superbill to update
+    const superbill = superbills.find(bill => bill.id === id);
+    if (!superbill) return;
+    
+    // Update the superbill status
+    updateSuperbill({
+      ...superbill,
+      status: newStatus
+    });
+  };
+  
+  // Handle preview cover letter
+  const handlePreviewCoverLetter = () => {
+    setIsCoverLetterDialogOpen(true);
+  };
+  
   // Handle print/download all
   const handleDownloadAll = () => {
     // Create a new window for printing
@@ -183,7 +205,12 @@ export default function GroupedSubmission() {
         <body>
     `;
     
-    // Add cover sheet if any superbills are selected
+    // Add cover letter if enabled
+    if (showCoverLetter && selectedSuperbills.length > 0) {
+      completeHtml += coverLetterContent + '<div class="page-break"></div>';
+    }
+    
+    // Add cover sheet if enabled
     if (showCoverSheet && selectedSuperbills.length > 0) {
       const coverSheetHtml = generateCoverSheetHtml(selectedSuperbills);
       completeHtml += coverSheetHtml + '<div class="page-break"></div>';
@@ -239,7 +266,10 @@ export default function GroupedSubmission() {
           selectedSuperbills={selectedSuperbills}
           showCoverSheet={showCoverSheet}
           setShowCoverSheet={setShowCoverSheet}
+          showCoverLetter={showCoverLetter}
+          setShowCoverLetter={setShowCoverLetter}
           handleDownloadAll={handleDownloadAll}
+          handlePreviewCoverLetter={handlePreviewCoverLetter}
           generateCoverSheetHtml={generateCoverSheetHtml}
         />
       )}
@@ -250,12 +280,30 @@ export default function GroupedSubmission() {
         togglePatientSelection={togglePatientSelection}
         clearSelection={clearSelection}
         selectAll={selectAll}
+        onStatusChange={handleStatusChange}
       />
       
       <GroupPreview 
         showCoverSheet={showCoverSheet}
+        showCoverLetter={showCoverLetter}
         selectedSuperbills={selectedSuperbills}
       />
+      
+      <Dialog open={isCoverLetterDialogOpen} onOpenChange={setIsCoverLetterDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Cover Letter</DialogTitle>
+          </DialogHeader>
+          
+          {selectedSuperbills.length > 0 && (
+            <CoverLetterEditor
+              superbill={selectedSuperbills[0]}
+              content={coverLetterContent}
+              onContentChange={setCoverLetterContent}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -3,7 +3,9 @@ import { formatDate } from "@/lib/utils/superbill-utils";
 import { GripHorizontal } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { CardHeaderProps } from "./types";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
+import { SuperbillStatus } from "@/types/superbill";
+import { StatusSelector } from "./StatusSelector";
 
 export function CardHeader({ 
   patientName, 
@@ -12,6 +14,19 @@ export function CardHeader({
   statusVariant, 
   onStatusChange 
 }: CardHeaderProps) {
+  // Enhanced color handling for status badges
+  let statusColor;
+  switch(status.toLowerCase()) {
+    case 'in_review':
+      statusColor = 'purple'; // Changed: Make In Review purple
+      break;
+    case 'in_progress':
+      statusColor = 'amber'; // Changed: Keep In Progress amber/yellow
+      break;
+    default:
+      statusColor = '';
+  }
+
   return (
     <>
       <div className="flex justify-between items-start mb-2">
@@ -24,12 +39,22 @@ export function CardHeader({
         </div>
       </div>
       
-      <div className="mb-2 flex items-center">
+      <div className="mb-2 flex items-center justify-between">
         <StatusBadge 
           status={status} 
           variant={statusVariant}
+          className={statusColor ? `bg-${statusColor}-100 text-${statusColor}-800 border-${statusColor}-200` : ''}
         />
-        {onStatusChange}
+        {onStatusChange && (
+          <StatusSelector
+            currentStatus={status as SuperbillStatus}
+            onStatusChange={(newStatus) => {
+              if (typeof onStatusChange === 'function') {
+                onStatusChange(newStatus);
+              }
+            }}
+          />
+        )}
       </div>
     </>
   );

@@ -11,7 +11,7 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
   if (coverLetterContent) {
     coverLetterHTML = `
       <div class="cover-letter" style="margin-bottom: 30px; page-break-after: always;">
-        <div style="white-space: pre-wrap;">${coverLetterContent.replace(/\n/g, '<br />')}</div>
+        ${coverLetterContent}
       </div>
     `;
   }

@@ -16,7 +16,7 @@ export interface CardHeaderProps {
   issueDate: Date;
   status: string;
   statusVariant: 'default' | 'success' | 'warning' | 'info' | 'error';
-  onStatusChange?: ReactNode;
+  onStatusChange?: (newStatus: SuperbillStatus) => void;
 }
 
 export interface PatientInfoProps {
