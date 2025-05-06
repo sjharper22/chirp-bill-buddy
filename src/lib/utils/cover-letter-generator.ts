@@ -3,7 +3,7 @@ import { Superbill } from "@/types/superbill";
 import { formatCurrency, formatDate } from "@/lib/utils/superbill-utils";
 import { calculateTotalFee } from "@/lib/utils/financial-utils";
 
-interface CoverLetterParams {
+export interface CoverLetterOptions {
   patientName: string;
   totalVisits: number;
   totalCharges: number;
@@ -16,6 +16,38 @@ interface CoverLetterParams {
   ein: string;
   npi: string;
   includeInvoiceNote?: boolean;
+}
+
+export function generateOptionsFromSuperbill(superbill: Superbill, includeInvoiceNote = true): CoverLetterOptions {
+  const totalVisits = superbill.visits.length;
+  const totalCharges = calculateTotalFee(superbill.visits);
+  
+  // Find date range for visits
+  const sortedVisits = [...superbill.visits].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  
+  const earliestDate = sortedVisits.length > 0 ? new Date(sortedVisits[0].date) : new Date();
+  const latestDate = sortedVisits.length > 0 
+    ? new Date(sortedVisits[sortedVisits.length - 1].date) 
+    : new Date();
+    
+  const visitDateRange = `${formatDate(earliestDate)} - ${formatDate(latestDate)}`;
+  
+  return {
+    patientName: superbill.patientName,
+    totalVisits,
+    totalCharges,
+    visitDateRange,
+    providerName: superbill.providerName,
+    clinicName: superbill.clinicName,
+    clinicAddress: superbill.clinicAddress,
+    clinicPhone: superbill.clinicPhone,
+    clinicEmail: superbill.clinicEmail,
+    ein: superbill.ein,
+    npi: superbill.npi,
+    includeInvoiceNote
+  };
 }
 
 export function generateCoverLetter({
@@ -31,7 +63,7 @@ export function generateCoverLetter({
   ein,
   npi,
   includeInvoiceNote = true,
-}: CoverLetterParams) {
+}: CoverLetterOptions) {
   return `
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; font-size: 14px; padding: 20px;">
       <p>${new Date().toLocaleDateString()}</p>

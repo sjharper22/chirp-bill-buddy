@@ -14,7 +14,8 @@ interface BulkActionsProps {
   setShowCoverLetter: (show: boolean) => void;
   handleDownloadAll: () => void;
   handlePreviewCoverLetter: () => void;
-  generateCoverSheetHtml: (superbills: Superbill[]) => string;
+  // Update the type to accept a function that returns a Promise<string> or string
+  generateCoverSheetHtml: (superbills: Superbill[]) => Promise<string> | string;
 }
 
 export function BulkActions({
@@ -28,6 +29,41 @@ export function BulkActions({
   generateCoverSheetHtml
 }: BulkActionsProps) {
   const [activeTab, setActiveTab] = useState<string>("options");
+
+  // Helper function to handle cover sheet printing
+  const printCoverSheet = async () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow pop-ups to print the cover sheet.');
+      return;
+    }
+    
+    // Get the cover sheet HTML content, handling both Promise and string return types
+    const coverSheetHtml = await Promise.resolve(generateCoverSheetHtml(selectedSuperbills));
+    
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Submission Cover Sheet</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+          </style>
+        </head>
+        <body>
+          ${coverSheetHtml}
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
 
   return (
     <div className="mb-6 p-4 bg-muted rounded-lg">
@@ -112,36 +148,7 @@ export function BulkActions({
                 <Button 
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    const printWindow = window.open('', '_blank');
-                    if (!printWindow) {
-                      alert('Please allow pop-ups to print the cover sheet.');
-                      return;
-                    }
-                    
-                    const coverSheetHtml = `
-                      <!DOCTYPE html>
-                      <html>
-                        <head>
-                          <title>Submission Cover Sheet</title>
-                          <style>
-                            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                          </style>
-                        </head>
-                        <body>
-                          ${generateCoverSheetHtml(selectedSuperbills)}
-                        </body>
-                      </html>
-                    `;
-                    
-                    printWindow.document.open();
-                    printWindow.document.write(coverSheetHtml);
-                    printWindow.document.close();
-                    
-                    setTimeout(() => {
-                      printWindow.print();
-                    }, 500);
-                  }}
+                  onClick={printCoverSheet}
                 >
                   <Check className="mr-2 h-4 w-4" />
                   Print Cover Sheet Only
