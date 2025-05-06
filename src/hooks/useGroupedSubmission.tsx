@@ -174,6 +174,7 @@ export function useGroupedSubmission() {
   const handlePreviewCoverLetter = () => {
     // Generate cover letter content before opening dialog
     if (selectedSuperbills.length > 0) {
+      // Fixed: Pass the second parameter (includeInvoiceNote) as true
       const generatedContent = generateCoverLetterFromSuperbills(selectedSuperbills, true);
       setCoverLetterContent(generatedContent);
     }
