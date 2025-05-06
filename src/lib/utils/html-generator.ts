@@ -94,6 +94,12 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         p {
           margin: 0 0 10px 0;
         }
+        ol li, ul li {
+          margin-bottom: 8px;
+        }
+        ol, ul {
+          padding-left: 25px;
+        }
         @media print {
           body { margin: 0; padding: 20px; }
           button { display: none; }
