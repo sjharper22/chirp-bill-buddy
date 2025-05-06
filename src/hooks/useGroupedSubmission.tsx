@@ -200,7 +200,67 @@ export function useGroupedSubmission() {
             @media print {
               .page-break { page-break-after: always; }
             }
-            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 0; 
+              padding: 20px;
+              line-height: 1.5;
+            }
+            p {
+              margin: 0 0 10px 0;
+            }
+            h1, h2, h3 {
+              margin: 15px 0;
+            }
+            .container {
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 15px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 15px 0;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            .cover-letter {
+              margin-bottom: 30px;
+              padding-bottom: 20px;
+            }
+            .info-section {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 20px;
+            }
+            .info-block {
+              width: 48%;
+            }
+            .clinic-info {
+              margin-bottom: 20px;
+            }
+            .clinic-info p {
+              margin: 3px 0;
+            }
+            ul, ol {
+              padding-left: 25px;
+            }
+            li {
+              margin-bottom: 8px;
+            }
+            .patient-grid {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 10px;
+            }
+            .patient-card {
+              border: 1px solid #ddd;
+              padding: 10px;
+              border-radius: 4px;
+            }
           </style>
         </head>
         <body>
@@ -208,14 +268,14 @@ export function useGroupedSubmission() {
     
     // Add cover letter if enabled
     if (showCoverLetter && selectedSuperbills.length > 0) {
-      completeHtml += coverLetterContent + '<div class="page-break"></div>';
+      completeHtml += `<div class="container cover-letter">${coverLetterContent}</div><div class="page-break"></div>`;
     }
     
     // Add cover sheet if enabled
     if (showCoverSheet && selectedSuperbills.length > 0) {
       // Fixed: Pass the includeInvoiceNote parameter (true as default)
       const coverSheetHtml = generateCoverSheetHtml(selectedSuperbills, true);
-      completeHtml += coverSheetHtml + '<div class="page-break"></div>';
+      completeHtml += `<div class="container">${coverSheetHtml}</div><div class="page-break"></div>`;
     }
     
     // Add each superbill
@@ -223,7 +283,7 @@ export function useGroupedSubmission() {
       const superbillHtml = generatePrintableHTML(superbill);
       // Extract the body content from the superbill HTML
       const bodyContent = superbillHtml.match(/<body>([\s\S]*)<\/body>/)?.[1] || '';
-      completeHtml += bodyContent;
+      completeHtml += `<div class="container">${bodyContent}</div>`;
       
       // Add page break after each superbill except the last one
       if (index < selectedSuperbills.length - 1) {

@@ -26,6 +26,7 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           font-family: Arial, sans-serif;
           margin: 20px;
           color: #333;
+          line-height: 1.5;
         }
         .container {
           max-width: 800px;
@@ -34,6 +35,8 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         .header {
           text-align: center;
           margin-bottom: 20px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #eee;
         }
         .info-section {
           display: flex;
@@ -45,7 +48,8 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         }
         .info-title {
           font-weight: bold;
-          margin-bottom: 5px;
+          margin-bottom: 10px;
+          font-size: 16px;
         }
         table {
           width: 100%;
@@ -54,7 +58,7 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         }
         th, td {
           border: 1px solid #ddd;
-          padding: 8px;
+          padding: 10px;
           text-align: left;
         }
         th {
@@ -65,19 +69,21 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         }
         .total-row {
           font-weight: bold;
+          background-color: #f2f2f2;
         }
         .notes {
           border: 1px solid #ddd;
-          padding: 10px;
+          padding: 15px;
           min-height: 80px;
           margin-bottom: 20px;
+          background-color: #fcfcfc;
         }
         .footer {
           text-align: center;
           font-size: 12px;
           color: #666;
-          margin-top: 20px;
-          padding-top: 10px;
+          margin-top: 30px;
+          padding-top: 15px;
           border-top: 1px solid #ddd;
         }
         .cover-letter {
@@ -85,8 +91,11 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           border-bottom: 1px dashed #ccc;
           padding-bottom: 20px;
         }
+        p {
+          margin: 0 0 10px 0;
+        }
         @media print {
-          body { margin: 0; }
+          body { margin: 0; padding: 20px; }
           button { display: none; }
           .page-break { page-break-before: always; }
         }
@@ -103,21 +112,21 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         <div class="info-section">
           <div class="info-block">
             <div class="info-title">Patient Information</div>
-            <p>Name: ${superbill.patientName}</p>
-            <p>DOB: ${formatDate(superbill.patientDob)}</p>
-            <p>Date: ${formatDate(superbill.issueDate)}</p>
-            ${visitDates.length > 0 ? `<p>Visit Period: ${formatDate(earliestDate)} to ${formatDate(latestDate)}</p>` : ''}
+            <p style="margin: 5px 0;">Name: ${superbill.patientName}</p>
+            <p style="margin: 5px 0;">DOB: ${formatDate(superbill.patientDob)}</p>
+            <p style="margin: 5px 0;">Date: ${formatDate(superbill.issueDate)}</p>
+            ${visitDates.length > 0 ? `<p style="margin: 5px 0;">Visit Period: ${formatDate(earliestDate)} to ${formatDate(latestDate)}</p>` : ''}
           </div>
           
           <div class="info-block">
             <div class="info-title">Provider Information</div>
-            <p>Provider: ${superbill.providerName}</p>
-            <p>${superbill.clinicName}</p>
-            <p>${superbill.clinicAddress}</p>
-            <p>Phone: ${superbill.clinicPhone}</p>
-            <p>Email: ${superbill.clinicEmail}</p>
-            <p>EIN: ${superbill.ein}</p>
-            <p>NPI #: ${superbill.npi}</p>
+            <p style="margin: 5px 0;">Provider: ${superbill.providerName}</p>
+            <p style="margin: 5px 0;">${superbill.clinicName}</p>
+            <p style="margin: 5px 0;">${superbill.clinicAddress}</p>
+            <p style="margin: 5px 0;">Phone: ${superbill.clinicPhone}</p>
+            <p style="margin: 5px 0;">Email: ${superbill.clinicEmail}</p>
+            <p style="margin: 5px 0;">EIN: ${superbill.ein}</p>
+            <p style="margin: 5px 0;">NPI #: ${superbill.npi}</p>
           </div>
         </div>
         
