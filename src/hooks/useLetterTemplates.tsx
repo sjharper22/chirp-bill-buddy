@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Superbill } from "@/types/superbill";
 import { LetterTemplate } from "@/types/template";
 import { processTemplate, createContextFromSuperbill } from "@/lib/utils/template-utils";
+import { generatePatientReimbursementGuide } from "@/lib/utils/reimbursement-guide-template";
 
 export const useLetterTemplates = (
   superbill: Superbill,
@@ -67,13 +68,24 @@ export const useLetterTemplates = (
   
   // Process the template content with the superbill data
   useEffect(() => {
-    if (selectedTemplate && selectedTemplate.content?.text) {
-      const context = createContextFromSuperbill(superbill);
-      const processed = processTemplate(selectedTemplate.content.text, context);
-      setProcessedContent(processed);
-      
-      if (onTemplateSelected) {
-        onTemplateSelected(selectedTemplate, processed);
+    if (selectedTemplate) {
+      if (selectedTemplate.id === 'custom-patient-reimbursement') {
+        // Use the direct generator for the special reimbursement guide
+        const processed = generatePatientReimbursementGuide(superbill);
+        setProcessedContent(processed);
+        
+        if (onTemplateSelected) {
+          onTemplateSelected(selectedTemplate, processed);
+        }
+      } else if (selectedTemplate.content?.text) {
+        // Process normal templates with variable substitution
+        const context = createContextFromSuperbill(superbill);
+        const processed = processTemplate(selectedTemplate.content.text, context);
+        setProcessedContent(processed);
+        
+        if (onTemplateSelected) {
+          onTemplateSelected(selectedTemplate, processed);
+        }
       }
     }
   }, [selectedTemplate, superbill, onTemplateSelected]);
@@ -99,69 +111,27 @@ export const useLetterTemplates = (
 
   // Function to create and process the custom template
   const createAndProcessCustomTemplate = () => {
-    const customTemplateText = `Collective Family Chiropractic  
-700 Churchill Court, Suite 130  
-Woodstock, GA 30188  
-(678) 540-8850  
-info@collectivefamilychiro.com  
-
-{{dates.today}}
-
-RE: Request for Reimbursement — Chiropractic Services for {{patient.name}}
-
-Dear {{patient.salutation_name}},  
-
-Enclosed with this letter, you will find a superbill summarizing the chiropractic care you received at our office, along with individual invoices for your records. These documents are provided to assist you in submitting a reimbursement claim to your insurance provider for out-of-network services.
-
-Below is a simple set of steps to help guide you through the process:
-
----
-
-1. Access Your Claim Form  
-Log in to your insurance provider's member portal or contact them directly to obtain their standard out-of-network reimbursement form.
-
-2. Fill Out the Required Fields  
-Complete all necessary sections of the form, including your personal information and the dates of care.
-
-3. Attach Supporting Documents  
-Include the following with your submission:  
-- The superbill we've provided  
-- The attached invoices  
-- Your completed claim form
-
-4. Submit to Your Insurance Provider  
-Most providers accept claims by mail, fax, or through a member portal. Be sure to keep a copy for your records.
-
-5. Track Your Claim  
-After processing, your provider will issue an Explanation of Benefits (EOB) and, if approved, send your reimbursement.
-
----
-
-If your provider requests additional documentation, they're welcome to contact our clinic directly. We're happy to assist if needed.
-
-Thank you again for choosing Collective Family Chiropractic. We're honored to be part of your wellness journey.
-
-Warmly,  
-The Collective Family Chiropractic Team`;
-      
-    const context = createContextFromSuperbill(superbill);
-    const processed = processTemplate(customTemplateText, context);
-    
-    const customTemplate: LetterTemplate = {
+    // Create a proper HTML template with formatting for the reimbursement guide
+    const customTemplateObj: LetterTemplate = {
       id: 'custom-patient-reimbursement',
       title: 'Patient Reimbursement Guide',
-      content: { text: customTemplateText },
+      content: { 
+        text: "This is a template for the patient reimbursement guide - the actual content is dynamically generated."
+      },
       category: 'cover_letter',
       created_by: 'system',
       is_default: true
     };
     
-    setCustomTemplates([customTemplate]);
-    setSelectedTemplateId(customTemplate.id);
-    setProcessedContent(processed);
+    setCustomTemplates([customTemplateObj]);
+    setSelectedTemplateId(customTemplateObj.id);
+    
+    // Generate the actual content
+    const generated = generatePatientReimbursementGuide(superbill);
+    setProcessedContent(generated);
     
     if (onTemplateSelected) {
-      onTemplateSelected(customTemplate, processed);
+      onTemplateSelected(customTemplateObj, generated);
     }
   };
   

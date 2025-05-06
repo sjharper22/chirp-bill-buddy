@@ -8,7 +8,8 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
   
   let coverLetterHTML = '';
-  if (coverLetterContent) {
+  if (coverLetterContent && coverLetterContent.trim() !== '') {
+    // Make sure the cover letter has proper page break after it
     coverLetterHTML = `
       <div class="cover-letter" style="margin-bottom: 30px; page-break-after: always;">
         ${coverLetterContent}
@@ -26,7 +27,7 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           font-family: Arial, sans-serif;
           margin: 20px;
           color: #333;
-          line-height: 1.5;
+          line-height: 1.6;
         }
         .container {
           max-width: 800px;
@@ -88,7 +89,6 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         }
         .cover-letter {
           margin-bottom: 30px;
-          border-bottom: 1px dashed #ccc;
           padding-bottom: 20px;
         }
         p {

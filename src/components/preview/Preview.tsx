@@ -14,9 +14,15 @@ interface PreviewProps {
   superbill: Superbill;
   selectedTemplateId?: string;
   showCoverLetter?: boolean;
+  coverLetterContent?: string;
 }
 
-export function Preview({ superbill, selectedTemplateId, showCoverLetter = true }: PreviewProps) {
+export function Preview({ 
+  superbill, 
+  selectedTemplateId, 
+  showCoverLetter = true,
+  coverLetterContent
+}: PreviewProps) {
   const [displayCoverLetter, setDisplayCoverLetter] = useState(showCoverLetter);
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
@@ -27,7 +33,13 @@ export function Preview({ superbill, selectedTemplateId, showCoverLetter = true 
     setDisplayCoverLetter(showCoverLetter);
   }, [showCoverLetter]);
   
-  console.log("Preview render:", { showCoverLetter, displayCoverLetter, selectedTemplateId });
+  console.log("Preview render:", { 
+    showCoverLetter, 
+    displayCoverLetter, 
+    selectedTemplateId,
+    hasContent: Boolean(coverLetterContent),
+    contentLength: coverLetterContent?.length || 0 
+  });
   
   return (
     <div className="mt-4 p-6 border rounded-lg superbill-preview-content">
@@ -46,6 +58,7 @@ export function Preview({ superbill, selectedTemplateId, showCoverLetter = true 
         <CoverLetterPreview 
           superbills={[superbill]}
           selectedTemplateId={selectedTemplateId}
+          content={coverLetterContent}
         />
       )}
       

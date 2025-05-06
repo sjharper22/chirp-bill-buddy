@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Superbill } from "@/types/superbill";
 import { useState, useEffect } from "react";
@@ -10,6 +9,7 @@ interface CoverLetterPreviewProps {
   editable?: boolean;
   superbill?: Superbill; // Added to support single superbill use case
   selectedTemplateId?: string;
+  content?: string; // Allow direct content to be provided
 }
 
 export function CoverLetterPreview({ 
@@ -17,28 +17,37 @@ export function CoverLetterPreview({
   superbill, // Single superbill support
   includeInvoiceNote = true,
   editable = false,
-  selectedTemplateId
+  selectedTemplateId,
+  content
 }: CoverLetterPreviewProps) {
-  const [content, setContent] = useState<string>("");
+  const [displayContent, setDisplayContent] = useState<string>("");
   
   useEffect(() => {
-    // If a single superbill is provided, use that; otherwise use the array
+    // If direct content is provided, use it
+    if (content) {
+      console.log("Using provided content for cover letter");
+      setDisplayContent(content);
+      return;
+    }
+    
+    // Otherwise, generate content from superbills
     const billsToProcess = superbill ? [superbill] : superbills;
     
     if (billsToProcess.length > 0) {
+      console.log("Generating cover letter from superbills");
       const letterContent = generateCoverLetterFromSuperbills(billsToProcess, includeInvoiceNote);
-      setContent(letterContent);
+      setDisplayContent(letterContent);
     }
-  }, [superbills, superbill, includeInvoiceNote, selectedTemplateId]);
+  }, [superbills, superbill, includeInvoiceNote, selectedTemplateId, content]);
   
-  // Don't render if we have neither superbills nor a superbill
-  if ((superbills.length === 0) && !superbill) {
+  // Don't render if we have no content to display
+  if (!displayContent && superbills.length === 0 && !superbill) {
     return null;
   }
 
   return (
-    <Card className="p-6 border rounded-md shadow-sm" data-testid="cover-letter-preview">
-      <div dangerouslySetInnerHTML={{ __html: content }} />
+    <Card className="p-6 border rounded-md shadow-sm mb-8" data-testid="cover-letter-preview">
+      <div dangerouslySetInnerHTML={{ __html: displayContent }} />
     </Card>
   );
 }

@@ -28,7 +28,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
       <div style="margin-bottom: 20px;">
         <p>Dear ${superbill.patientName.split(' ')[0]},</p>
         
-        <p style="margin-top: 15px; text-indent: 20px;">
+        <p style="margin-top: 15px;">
           Enclosed with this letter, you will find a superbill summarizing the chiropractic care you received at our office, 
           along with individual invoices for your records. These documents are provided to assist you in submitting a 
           reimbursement claim to your insurance provider for out-of-network services.
@@ -37,7 +37,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
         <p style="margin-top: 15px;">Below is a simple set of steps to help guide you through the process:</p>
       </div>
       
-      <div style="margin: 20px 0; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 20px 0;">
+      <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
         <ol style="padding-left: 25px; margin: 0;">
           <li style="margin-bottom: 15px;">
             <strong>Access Your Claim Form</strong><br/>

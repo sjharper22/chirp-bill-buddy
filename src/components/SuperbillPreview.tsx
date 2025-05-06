@@ -21,14 +21,16 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
   
   const handleTemplateSelected = (template: LetterTemplate, content: string) => {
     console.log("Template selected:", template.title);
-    console.log("Processed content:", content);
+    console.log("Processed content length:", content.length);
     setSelectedTemplate(template);
     setProcessedContent(content);
   };
 
   // Generate a default custom cover letter if none is selected
   useEffect(() => {
-    if (!processedContent && dialogOpen) {
+    if ((!processedContent || processedContent.trim() === "") && dialogOpen) {
+      console.log("Generating default reimbursement guide");
+      
       // Use the improved reimbursement guide generator
       const defaultContent = generatePatientReimbursementGuide(superbill);
       setProcessedContent(defaultContent);
@@ -38,7 +40,7 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
         id: 'custom-patient-reimbursement',
         title: 'Patient Reimbursement Guide',
         content: { 
-          text: "This is a template for the patient reimbursement guide - the actual content is dynamically generated."
+          text: generatePatientReimbursementGuide(superbill)
         },
         category: 'cover_letter',
         created_by: 'system',
@@ -74,6 +76,7 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
           superbill={superbill} 
           selectedTemplateId={selectedTemplate?.id}
           showCoverLetter={true}
+          coverLetterContent={processedContent}
         />
         
         <ActionButtons 
