@@ -12,10 +12,10 @@ export function useDocumentGeneration() {
   const [isCoverLetterDialogOpen, setIsCoverLetterDialogOpen] = useState(false);
   
   // Handle preview cover letter
-  const handlePreviewCoverLetter = (selectedSuperbills: Superbill[]) => {
+  const handlePreviewCoverLetter = (selectedSuperbills: Superbill[], includeInvoiceNote: boolean = true) => {
     // Generate cover letter content before opening dialog
     if (selectedSuperbills.length > 0) {
-      const generatedContent = generateCoverLetterFromSuperbills(selectedSuperbills, true);
+      const generatedContent = generateCoverLetterFromSuperbills(selectedSuperbills, includeInvoiceNote);
       setCoverLetterContent(generatedContent);
     }
     setIsCoverLetterDialogOpen(true);

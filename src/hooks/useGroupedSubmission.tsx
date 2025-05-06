@@ -1,19 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { usePatient } from "@/context/patient-context";
-import { useSuperbill } from "@/context/superbill-context";
-import { PatientWithSuperbills } from "@/components/group-submission/types";
 import { SuperbillStatus } from "@/types/superbill";
-import { determineStatus } from "./group-submission/useStatusDetermination";
 import { useDocumentGeneration } from "./group-submission/useDocumentGeneration";
 import { usePatientSelection } from "./group-submission/usePatientSelection";
 import { useFilterSearch } from "./group-submission/useFilterSearch";
+import { usePatientProcessing } from "./group-submission/usePatientProcessing";
 
 export function useGroupedSubmission() {
   const navigate = useNavigate();
-  const { patients } = usePatient();
-  const { superbills, updateSuperbill } = useSuperbill();
   
   // Import functionality from our new modules
   const { 
@@ -39,56 +34,8 @@ export function useGroupedSubmission() {
     setSearchTerm
   } = useFilterSearch();
   
-  const [patientsWithSuperbills, setPatientsWithSuperbills] = useState<PatientWithSuperbills[]>([]);
-  
-  // Process patients and their superbills
-  useEffect(() => {
-    const processed: PatientWithSuperbills[] = patients.map(patient => {
-      // Find superbills for this patient
-      const patientSuperbills = superbills.filter(bill => bill.patientName === patient.name);
-      
-      // Calculate total visits and amount
-      const totalVisits = patientSuperbills.reduce((total, bill) => total + bill.visits.length, 0);
-      const totalAmount = patientSuperbills.reduce((total, bill) => {
-        return total + bill.visits.reduce((subtotal, visit) => subtotal + visit.fee, 0);
-      }, 0);
-      
-      // Determine date range across all visits
-      let earliestDate: Date | null = null;
-      let latestDate: Date | null = null;
-      
-      patientSuperbills.forEach(bill => {
-        bill.visits.forEach(visit => {
-          const visitDate = new Date(visit.date);
-          if (!earliestDate || visitDate < earliestDate) {
-            earliestDate = visitDate;
-          }
-          if (!latestDate || visitDate > latestDate) {
-            latestDate = visitDate;
-          }
-        });
-      });
-      
-      // Set date range if we found valid dates
-      const dateRange = (earliestDate && latestDate)
-        ? { start: earliestDate, end: latestDate }
-        : null;
-      
-      // Calculate the status with our helper function
-      const status = determineStatus(patientSuperbills);
-      
-      return {
-        ...patient,
-        superbills: patientSuperbills,
-        totalVisits,
-        totalAmount,
-        status,
-        dateRange
-      };
-    });
-    
-    setPatientsWithSuperbills(processed);
-  }, [patients, superbills]);
+  // New hook for patient processing
+  const { patientsWithSuperbills } = usePatientProcessing();
   
   // Filter patients based on search and status
   const filteredPatients = patientsWithSuperbills.filter(patient => {
@@ -103,6 +50,12 @@ export function useGroupedSubmission() {
   
   // Handle status change
   const handleStatusChange = (id: string, newStatus: SuperbillStatus) => {
+    // Find the patient to modify
+    // Implementation remains in useGroupedSubmission since it's directly changing state
+    // and interacts with the UI controls
+    const { updateSuperbill } = require("@/context/superbill-context").useSuperbill();
+    const { superbills } = require("@/context/superbill-context").useSuperbill();
+    
     // Find the superbill to update
     const superbill = superbills.find(bill => bill.id === id);
     if (!superbill) return;
@@ -116,7 +69,7 @@ export function useGroupedSubmission() {
   
   // Custom handler that uses the imported handlePreviewCoverLetter function
   const previewCoverLetterHandler = () => {
-    handlePreviewCoverLetter(selectedSuperbills);
+    handlePreviewCoverLetter(selectedSuperbills, true);
   };
   
   // Custom handler that uses the imported handleDownloadAll function
