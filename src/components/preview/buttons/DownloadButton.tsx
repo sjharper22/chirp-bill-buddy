@@ -31,6 +31,8 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       tempContainer.style.position = "absolute";
       tempContainer.style.left = "-9999px";
       tempContainer.style.top = "-9999px";
+      tempContainer.style.width = "800px"; // Set a fixed width to ensure proper rendering
+      
       // Generate HTML with cover letter if available
       tempContainer.innerHTML = generatePrintableHTML(superbill, coverLetterContent);
       document.body.appendChild(tempContainer);
@@ -40,7 +42,19 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         scale: 2, // Higher scale for better quality
         useCORS: true,
         logging: false,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
+        width: 800, // Match the container width
+        height: tempContainer.offsetHeight,
+        onclone: (clonedDoc) => {
+          // Ensure all content is visible in the cloned document
+          const clonedContainer = clonedDoc.body.querySelector('div');
+          if (clonedContainer) {
+            clonedContainer.style.position = 'static';
+            clonedContainer.style.transform = 'none';
+            clonedContainer.style.width = '800px';
+            clonedContainer.style.margin = '0';
+          }
+        }
       });
       
       // Create PDF with appropriate page size
@@ -52,7 +66,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       
       // Calculate dimensions to fit content properly
       const imgWidth = 210; // A4 width in mm (210mm)
-      const pageHeight = 295; // A4 height in mm (297mm) minus margins
+      const pageHeight = 287; // A4 height in mm (297mm) minus margins
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
       // Add the image to the PDF with multi-page support

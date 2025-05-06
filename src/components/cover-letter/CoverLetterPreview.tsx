@@ -48,7 +48,7 @@ export function CoverLetterPreview({
   }
 
   return (
-    <Card className="p-6 border rounded-md shadow-sm mb-8" data-testid="cover-letter-preview">
+    <Card className="p-6 border rounded-md shadow-sm mb-8 no-page-break" data-testid="cover-letter-preview">
       <div dangerouslySetInnerHTML={{ __html: displayContent }} />
     </Card>
   );

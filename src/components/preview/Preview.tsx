@@ -56,32 +56,36 @@ export function Preview({
       </div>
       
       {displayCoverLetter && (
-        <CoverLetterPreview 
-          superbills={[superbill]}
-          selectedTemplateId={selectedTemplateId}
-          content={coverLetterContent}
+        <div className="page-break-after">
+          <CoverLetterPreview 
+            superbills={[superbill]}
+            selectedTemplateId={selectedTemplateId}
+            content={coverLetterContent}
+          />
+        </div>
+      )}
+      
+      <div className="no-page-break">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold">SUPERBILL</h2>
+        </div>
+        
+        <InfoSection 
+          superbill={superbill}
+          earliestDate={earliestDate}
+          latestDate={latestDate}
         />
-      )}
-      
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold">SUPERBILL</h2>
+        
+        {superbill.visits.length > 0 && (
+          <VisitSummary visits={superbill.visits} />
+        )}
+        
+        <ServicesTable visits={superbill.visits} />
+        
+        <NotesPreview visits={superbill.visits} />
+        
+        <Footer />
       </div>
-      
-      <InfoSection 
-        superbill={superbill}
-        earliestDate={earliestDate}
-        latestDate={latestDate}
-      />
-      
-      {superbill.visits.length > 0 && (
-        <VisitSummary visits={superbill.visits} />
-      )}
-      
-      <ServicesTable visits={superbill.visits} />
-      
-      <NotesPreview visits={superbill.visits} />
-      
-      <Footer />
     </div>
   );
 }
