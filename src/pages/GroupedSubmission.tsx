@@ -6,6 +6,7 @@ import { GroupTable } from "@/components/group-submission/GroupTable";
 import { GroupHeader } from "@/components/group-submission/GroupHeader";
 import { GroupPreview } from "@/components/group-submission/GroupPreview";
 import { CoverLetterDialog } from "@/components/group-submission/cover-letter/CoverLetterDialog";
+import { generateCoverSheetHtml } from "@/lib/utils/cover-sheet-generator";
 
 export default function GroupedSubmission() {
   const {
@@ -59,7 +60,6 @@ export default function GroupedSubmission() {
           handleDownloadAll={handleDownloadAll}
           handlePreviewCoverLetter={handlePreviewCoverLetter}
           generateCoverSheetHtml={(superbills) => {
-            // Fixed: Make sure to pass the second parameter (includeInvoiceNote)
             return import("@/lib/utils/cover-sheet-generator").then(module => {
               return module.generateCoverSheetHtml(superbills, true);
             });

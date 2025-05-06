@@ -4,79 +4,42 @@ import { useNavigate } from "react-router-dom";
 import { usePatient } from "@/context/patient-context";
 import { useSuperbill } from "@/context/superbill-context";
 import { PatientWithSuperbills } from "@/components/group-submission/types";
-import { Superbill, SuperbillStatus } from "@/types/superbill";
-import { generateCoverSheetHtml } from "@/lib/utils/cover-sheet-generator";
-import { generatePrintableHTML } from "@/lib/utils/html-generator";
-import { generateCoverLetterFromSuperbills } from "@/lib/utils/cover-letter-generator";
-
-// Helper function to determine superbill status
-const determineStatus = (superbills: Superbill[]): "Draft" | "Complete" | "Missing Info" | "No Superbill" => {
-  if (superbills.length === 0) return "No Superbill";
-
-  // Check if any of the superbills have an explicit status
-  // Always trust the superbill's own status field first
-  for (const bill of superbills) {
-    switch (bill.status) {
-      case 'in_progress':
-        return "Missing Info";
-      case 'in_review':
-        return "Missing Info";
-      case 'draft':
-        return "Draft";
-      case 'completed':
-        // Only mark as complete if all superbills are completed
-        if (superbills.every(sb => sb.status === 'completed')) {
-          return "Complete";
-        }
-        // Otherwise continue checking
-    }
-  }
-  
-  // If no definitive status from superbill status fields,
-  // fall back to content-based determination
-  
-  // Check if all required information is present
-  const hasAllInfo = superbills.every(bill => 
-    bill.patientName && 
-    bill.visits.length > 0 && 
-    bill.visits.every(visit => visit.icdCodes.length > 0 && visit.cptCodes.length > 0)
-  );
-  
-  if (hasAllInfo) {
-    // Double check if individual visits are all completed
-    const allVisitsCompleted = superbills.every(bill =>
-      bill.visits.every(visit => !visit.status || visit.status === 'completed')
-    );
-    
-    return allVisitsCompleted ? "Complete" : "Missing Info";
-  }
-  
-  // Check if any visits are missing codes or fees
-  const hasMissingInfo = superbills.some(bill => 
-    bill.visits.some(visit => 
-      visit.icdCodes.length === 0 || 
-      visit.cptCodes.length === 0 || 
-      visit.fee <= 0
-    )
-  );
-  
-  if (hasMissingInfo) return "Missing Info";
-  return "Draft";
-};
+import { SuperbillStatus } from "@/types/superbill";
+import { determineStatus } from "./group-submission/useStatusDetermination";
+import { useDocumentGeneration } from "./group-submission/useDocumentGeneration";
+import { usePatientSelection } from "./group-submission/usePatientSelection";
+import { useFilterSearch } from "./group-submission/useFilterSearch";
 
 export function useGroupedSubmission() {
   const navigate = useNavigate();
   const { patients } = usePatient();
   const { superbills, updateSuperbill } = useSuperbill();
   
-  const [selectedPatientIds, setSelectedPatientIds] = useState<string[]>([]);
+  // Import functionality from our new modules
+  const { 
+    showCoverSheet, setShowCoverSheet,
+    showCoverLetter, setShowCoverLetter,
+    coverLetterContent, setCoverLetterContent,
+    isCoverLetterDialogOpen, setIsCoverLetterDialogOpen,
+    handlePreviewCoverLetter, handleDownloadAll
+  } = useDocumentGeneration();
+  
+  const {
+    selectedPatientIds, 
+    togglePatientSelection,
+    selectAll, 
+    clearSelection,
+    getSelectedPatients
+  } = usePatientSelection();
+  
+  const {
+    filterStatus, 
+    setFilterStatus,
+    searchTerm, 
+    setSearchTerm
+  } = useFilterSearch();
+  
   const [patientsWithSuperbills, setPatientsWithSuperbills] = useState<PatientWithSuperbills[]>([]);
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showCoverSheet, setShowCoverSheet] = useState(false);
-  const [showCoverLetter, setShowCoverLetter] = useState(true);
-  const [coverLetterContent, setCoverLetterContent] = useState("");
-  const [isCoverLetterDialogOpen, setIsCoverLetterDialogOpen] = useState(false);
   
   // Process patients and their superbills
   useEffect(() => {
@@ -96,11 +59,12 @@ export function useGroupedSubmission() {
       
       patientSuperbills.forEach(bill => {
         bill.visits.forEach(visit => {
-          if (!earliestDate || visit.date < earliestDate) {
-            earliestDate = visit.date;
+          const visitDate = new Date(visit.date);
+          if (!earliestDate || visitDate < earliestDate) {
+            earliestDate = visitDate;
           }
-          if (!latestDate || visit.date > latestDate) {
-            latestDate = visit.date;
+          if (!latestDate || visitDate > latestDate) {
+            latestDate = visitDate;
           }
         });
       });
@@ -110,7 +74,7 @@ export function useGroupedSubmission() {
         ? { start: earliestDate, end: latestDate }
         : null;
       
-      // Calculate the status with our helper function that returns the correct type
+      // Calculate the status with our helper function
       const status = determineStatus(patientSuperbills);
       
       return {
@@ -133,28 +97,8 @@ export function useGroupedSubmission() {
     return matchesSearch && matchesStatus;
   });
   
-  // Handle selection
-  const togglePatientSelection = (id: string) => {
-    setSelectedPatientIds(prev => 
-      prev.includes(id) 
-        ? prev.filter(patientId => patientId !== id) 
-        : [...prev, id]
-    );
-  };
-  
-  const selectAll = () => {
-    setSelectedPatientIds(filteredPatients.map(patient => patient.id));
-  };
-  
-  const clearSelection = () => {
-    setSelectedPatientIds([]);
-  };
-  
   // Get selected patients and their superbills
-  const selectedPatients = filteredPatients.filter(patient => 
-    selectedPatientIds.includes(patient.id)
-  );
-  
+  const selectedPatients = getSelectedPatients(filteredPatients);
   const selectedSuperbills = selectedPatients.flatMap(patient => patient.superbills);
   
   // Handle status change
@@ -170,142 +114,14 @@ export function useGroupedSubmission() {
     });
   };
   
-  // Handle preview cover letter
-  const handlePreviewCoverLetter = () => {
-    // Generate cover letter content before opening dialog
-    if (selectedSuperbills.length > 0) {
-      // Fixed: Pass the second parameter (includeInvoiceNote) as true
-      const generatedContent = generateCoverLetterFromSuperbills(selectedSuperbills, true);
-      setCoverLetterContent(generatedContent);
-    }
-    setIsCoverLetterDialogOpen(true);
+  // Custom handler that uses the imported handlePreviewCoverLetter function
+  const previewCoverLetterHandler = () => {
+    handlePreviewCoverLetter(selectedSuperbills);
   };
   
-  // Handle print/download all
-  const handleDownloadAll = () => {
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Please allow pop-ups to download documents.');
-      return;
-    }
-    
-    // Start building the complete HTML content
-    let completeHtml = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Grouped Superbill Submission</title>
-          <style>
-            @media print {
-              .page-break { page-break-after: always; }
-            }
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 0; 
-              padding: 20px;
-              line-height: 1.5;
-            }
-            p {
-              margin: 0 0 10px 0;
-            }
-            h1, h2, h3 {
-              margin: 15px 0;
-            }
-            .container {
-              max-width: 800px;
-              margin: 0 auto;
-              padding: 15px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 15px 0;
-            }
-            th, td {
-              border: 1px solid #ddd;
-              padding: 8px;
-              text-align: left;
-            }
-            .cover-letter {
-              margin-bottom: 30px;
-              padding-bottom: 20px;
-            }
-            .info-section {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 20px;
-            }
-            .info-block {
-              width: 48%;
-            }
-            .clinic-info {
-              margin-bottom: 20px;
-            }
-            .clinic-info p {
-              margin: 3px 0;
-            }
-            ul, ol {
-              padding-left: 25px;
-            }
-            li {
-              margin-bottom: 8px;
-            }
-            .patient-grid {
-              display: grid;
-              grid-template-columns: repeat(2, 1fr);
-              gap: 10px;
-            }
-            .patient-card {
-              border: 1px solid #ddd;
-              padding: 10px;
-              border-radius: 4px;
-            }
-          </style>
-        </head>
-        <body>
-    `;
-    
-    // Add cover letter if enabled
-    if (showCoverLetter && selectedSuperbills.length > 0) {
-      completeHtml += `<div class="container cover-letter">${coverLetterContent}</div><div class="page-break"></div>`;
-    }
-    
-    // Add cover sheet if enabled
-    if (showCoverSheet && selectedSuperbills.length > 0) {
-      // Fixed: Pass the includeInvoiceNote parameter (true as default)
-      const coverSheetHtml = generateCoverSheetHtml(selectedSuperbills, true);
-      completeHtml += `<div class="container">${coverSheetHtml}</div><div class="page-break"></div>`;
-    }
-    
-    // Add each superbill
-    selectedSuperbills.forEach((superbill, index) => {
-      const superbillHtml = generatePrintableHTML(superbill);
-      // Extract the body content from the superbill HTML
-      const bodyContent = superbillHtml.match(/<body>([\s\S]*)<\/body>/)?.[1] || '';
-      completeHtml += `<div class="container">${bodyContent}</div>`;
-      
-      // Add page break after each superbill except the last one
-      if (index < selectedSuperbills.length - 1) {
-        completeHtml += '<div class="page-break"></div>';
-      }
-    });
-    
-    // Close the HTML
-    completeHtml += `
-        </body>
-      </html>
-    `;
-    
-    // Write to the new window and print
-    printWindow.document.open();
-    printWindow.document.write(completeHtml);
-    printWindow.document.close();
-    
-    // Wait for content to load then print
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
+  // Custom handler that uses the imported handleDownloadAll function
+  const downloadAllHandler = () => {
+    handleDownloadAll(selectedSuperbills);
   };
 
   return {
@@ -328,9 +144,9 @@ export function useGroupedSubmission() {
     selectedSuperbills,
     togglePatientSelection,
     clearSelection,
-    selectAll,
+    selectAll: () => selectAll(filteredPatients),
     handleStatusChange,
-    handlePreviewCoverLetter,
-    handleDownloadAll
+    handlePreviewCoverLetter: previewCoverLetterHandler,
+    handleDownloadAll: downloadAllHandler
   };
 }
