@@ -16,7 +16,7 @@ import { EmptyState } from "./table/EmptyState";
 import { StatusBadge } from "./table/StatusBadge";
 import { TableActions } from "./table/TableActions";
 import { PreviewDialog } from "./table/PreviewDialog";
-import { Superbill } from "@/types/superbill";
+import { Superbill, SuperbillStatus } from "@/types/superbill";
 
 interface GroupTableProps {
   filteredPatients: PatientWithSuperbills[];
@@ -24,6 +24,7 @@ interface GroupTableProps {
   togglePatientSelection: (id: string) => void;
   clearSelection: () => void;
   selectAll: () => void;
+  onStatusChange?: (id: string, newStatus: SuperbillStatus) => void; // Added onStatusChange prop
 }
 
 export function GroupTable({
@@ -31,7 +32,8 @@ export function GroupTable({
   selectedPatientIds,
   togglePatientSelection,
   clearSelection,
-  selectAll
+  selectAll,
+  onStatusChange
 }: GroupTableProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [previewSuperbill, setPreviewSuperbill] = useState<Superbill | null>(null);
@@ -103,6 +105,7 @@ export function GroupTable({
                         setPreviewSuperbill(superbill);
                         setDialogOpen(true);
                       }}
+                      onStatusChange={onStatusChange}
                     />
                   </DialogTrigger>
                   <PreviewDialog

@@ -85,31 +85,7 @@ export function SuperbillCard({
           issueDate={superbill.issueDate}
           status={displayStatus}
           statusVariant={statusVariant}
-          onStatusChange={onStatusChange ? 
-            (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="xs" className="h-5 px-1 ml-2">
-                    <ArrowUpDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleStatusChange('draft')}>
-                    Set to Draft
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleStatusChange('in_progress')}>
-                    Set to In Progress
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleStatusChange('in_review')}>
-                    Set to In Review
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleStatusChange('completed')}>
-                    Set to Completed
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : undefined
-          }
+          onStatusChange={onStatusChange ? handleStatusChange : undefined}
         />
         
         <PatientInfo 

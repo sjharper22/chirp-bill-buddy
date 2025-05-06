@@ -1,15 +1,16 @@
 
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Superbill } from "@/types/superbill";
+import { Superbill, SuperbillStatus } from "@/types/superbill";
 
 interface TableActionsProps {
   superbills: Superbill[];
   patientId: string;
   onPreview: (superbill: Superbill) => void;
+  onStatusChange?: (id: string, newStatus: SuperbillStatus) => void;
 }
 
-export function TableActions({ superbills, patientId, onPreview }: TableActionsProps) {
+export function TableActions({ superbills, patientId, onPreview, onStatusChange }: TableActionsProps) {
   const navigate = useNavigate();
   
   if (superbills.length > 0) {

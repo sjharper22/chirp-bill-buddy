@@ -8,23 +8,31 @@ interface CoverLetterPreviewProps {
   superbills: Superbill[];
   includeInvoiceNote?: boolean;
   editable?: boolean;
+  superbill?: Superbill; // Added to support single superbill use case
+  selectedTemplateId?: string;
 }
 
 export function CoverLetterPreview({ 
-  superbills, 
+  superbills = [], // Default to empty array
+  superbill, // Single superbill support
   includeInvoiceNote = true,
-  editable = false
+  editable = false,
+  selectedTemplateId
 }: CoverLetterPreviewProps) {
   const [content, setContent] = useState<string>("");
   
   useEffect(() => {
-    if (superbills.length > 0) {
-      const letterContent = generateCoverLetterFromSuperbills(superbills, includeInvoiceNote);
+    // If a single superbill is provided, use that; otherwise use the array
+    const billsToProcess = superbill ? [superbill] : superbills;
+    
+    if (billsToProcess.length > 0) {
+      const letterContent = generateCoverLetterFromSuperbills(billsToProcess, includeInvoiceNote);
       setContent(letterContent);
     }
-  }, [superbills, includeInvoiceNote]);
+  }, [superbills, superbill, includeInvoiceNote, selectedTemplateId]);
   
-  if (superbills.length === 0) {
+  // Don't render if we have neither superbills nor a superbill
+  if ((superbills.length === 0) && !superbill) {
     return null;
   }
 

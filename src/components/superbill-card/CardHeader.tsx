@@ -3,7 +3,7 @@ import { formatDate } from "@/lib/utils/superbill-utils";
 import { GripHorizontal } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { CardHeaderProps } from "./types";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { SuperbillStatus } from "@/types/superbill";
 import { StatusSelector } from "./StatusSelector";
 
@@ -45,14 +45,10 @@ export function CardHeader({
           variant={statusVariant}
           className={statusColor ? `bg-${statusColor}-100 text-${statusColor}-800 border-${statusColor}-200` : ''}
         />
-        {onStatusChange && (
+        {typeof onStatusChange === 'function' && (
           <StatusSelector
             currentStatus={status as SuperbillStatus}
-            onStatusChange={(newStatus) => {
-              if (typeof onStatusChange === 'function') {
-                onStatusChange(newStatus);
-              }
-            }}
+            onStatusChange={onStatusChange}
           />
         )}
       </div>

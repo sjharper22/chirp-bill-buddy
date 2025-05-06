@@ -1,8 +1,9 @@
 
 import { Superbill } from "@/types/superbill";
-import { formatDate } from "./superbill-utils";
+import { formatCurrency, formatDate } from "@/lib/utils/superbill-utils";
+import { calculateTotalFee } from "@/lib/utils/financial-utils";
 
-export interface CoverLetterOptions {
+interface CoverLetterParams {
   patientName: string;
   totalVisits: number;
   totalCharges: number;
@@ -30,7 +31,7 @@ export function generateCoverLetter({
   ein,
   npi,
   includeInvoiceNote = true,
-}: CoverLetterOptions) {
+}: CoverLetterParams) {
   return `
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; font-size: 14px; padding: 20px;">
       <p>${new Date().toLocaleDateString()}</p>
@@ -40,7 +41,7 @@ export function generateCoverLetter({
       <p>
         Please find attached a detailed superbill for <strong>${patientName}</strong>, covering
         <strong>${totalVisits}</strong> visits between <strong>${visitDateRange}</strong>, totaling
-        <strong>$${totalCharges.toFixed(2)}</strong>.
+        <strong>${formatCurrency(totalCharges)}</strong>.
       </p>
 
       <p>
@@ -75,22 +76,42 @@ export function generateCoverLetter({
   `;
 }
 
-// Generate cover letter options from a superbill
-export function generateOptionsFromSuperbill(superbill: Superbill, includeInvoiceNote: boolean = true): CoverLetterOptions {
-  // Calculate date range
-  const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
-  const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : new Date();
-  const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : new Date();
-  const dateRange = `${formatDate(earliestDate)} to ${formatDate(latestDate)}`;
+export function generateCoverLetterFromSuperbills(
+  superbills: Superbill[],
+  includeInvoiceNote = true
+): string {
+  if (superbills.length === 0) {
+    return "";
+  }
+
+  // Use the first superbill for patient and clinic info
+  const superbill = superbills[0];
   
-  // Calculate total charges
-  const totalCharges = superbill.visits.reduce((sum, visit) => sum + visit.fee, 0);
+  // Calculate total visits and fees across all superbills
+  const totalVisits = superbills.reduce((total, sb) => total + sb.visits.length, 0);
+  const totalCharges = superbills.reduce((total, sb) => {
+    const superbillTotal = calculateTotalFee(sb.visits);
+    return total + superbillTotal;
+  }, 0);
+
+  // Determine date range across all visits in all superbills
+  const allVisitDates: Date[] = [];
+  superbills.forEach(sb => {
+    sb.visits.forEach(visit => {
+      allVisitDates.push(new Date(visit.date));
+    });
+  });
   
-  return {
+  const earliestDate = allVisitDates.length > 0 ? new Date(Math.min(...allVisitDates.map(d => d.getTime()))) : new Date();
+  const latestDate = allVisitDates.length > 0 ? new Date(Math.max(...allVisitDates.map(d => d.getTime()))) : new Date();
+  const visitDateRange = `${formatDate(earliestDate)} - ${formatDate(latestDate)}`;
+
+  // Generate the cover letter using the consolidated information
+  return generateCoverLetter({
     patientName: superbill.patientName,
-    totalVisits: superbill.visits.length,
+    totalVisits,
     totalCharges,
-    visitDateRange: dateRange,
+    visitDateRange,
     providerName: superbill.providerName,
     clinicName: superbill.clinicName,
     clinicAddress: superbill.clinicAddress,
@@ -98,55 +119,6 @@ export function generateOptionsFromSuperbill(superbill: Superbill, includeInvoic
     clinicEmail: superbill.clinicEmail,
     ein: superbill.ein,
     npi: superbill.npi,
-    includeInvoiceNote
-  };
-}
-
-// Generate cover letter from multiple superbills
-export function generateCoverLetterFromSuperbills(superbills: Superbill[], includeInvoiceNote: boolean = true): string {
-  if (superbills.length === 0) return '';
-  
-  const totalVisits = superbills.reduce((total, bill) => total + bill.visits.length, 0);
-  const totalCharges = superbills.reduce((total, bill) => {
-    return total + bill.visits.reduce((subtotal, visit) => subtotal + visit.fee, 0);
-  }, 0);
-  
-  // Find the earliest and latest dates across all superbills
-  let earliestDate: Date | null = null;
-  let latestDate: Date | null = null;
-  
-  superbills.forEach(bill => {
-    bill.visits.forEach(visit => {
-      const visitDate = new Date(visit.date);
-      if (!earliestDate || visitDate < earliestDate) {
-        earliestDate = visitDate;
-      }
-      if (!latestDate || visitDate > latestDate) {
-        latestDate = visitDate;
-      }
-    });
-  });
-  
-  const dateRange = (earliestDate && latestDate) 
-    ? `${formatDate(earliestDate)} to ${formatDate(latestDate)}`
-    : 'N/A';
-  
-  // Use the first superbill for provider/clinic information
-  const firstSuperbill = superbills[0];
-  const patientNames = Array.from(new Set(superbills.map(bill => bill.patientName))).join(", ");
-  
-  return generateCoverLetter({
-    patientName: patientNames,
-    totalVisits,
-    totalCharges,
-    visitDateRange: dateRange,
-    providerName: firstSuperbill.providerName,
-    clinicName: firstSuperbill.clinicName,
-    clinicAddress: firstSuperbill.clinicAddress,
-    clinicPhone: firstSuperbill.clinicPhone,
-    clinicEmail: firstSuperbill.clinicEmail,
-    ein: firstSuperbill.ein,
-    npi: firstSuperbill.npi,
     includeInvoiceNote
   });
 }
