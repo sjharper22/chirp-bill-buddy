@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "@/context/patient-context";
@@ -6,6 +7,7 @@ import { PatientWithSuperbills } from "@/components/group-submission/types";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { generateCoverSheetHtml } from "@/lib/utils/cover-sheet-generator";
 import { generatePrintableHTML } from "@/lib/utils/html-generator";
+import { generateCoverLetterFromSuperbills } from "@/lib/utils/cover-letter-generator";
 
 // Helper function to determine superbill status
 const determineStatus = (superbills: Superbill[]): "Draft" | "Complete" | "Missing Info" | "No Superbill" => {
@@ -170,6 +172,11 @@ export function useGroupedSubmission() {
   
   // Handle preview cover letter
   const handlePreviewCoverLetter = () => {
+    // Generate cover letter content before opening dialog
+    if (selectedSuperbills.length > 0) {
+      const generatedContent = generateCoverLetterFromSuperbills(selectedSuperbills, true);
+      setCoverLetterContent(generatedContent);
+    }
     setIsCoverLetterDialogOpen(true);
   };
   
@@ -205,7 +212,8 @@ export function useGroupedSubmission() {
     
     // Add cover sheet if enabled
     if (showCoverSheet && selectedSuperbills.length > 0) {
-      const coverSheetHtml = generateCoverSheetHtml(selectedSuperbills);
+      // Fixed: Pass the includeInvoiceNote parameter (true as default)
+      const coverSheetHtml = generateCoverSheetHtml(selectedSuperbills, true);
       completeHtml += coverSheetHtml + '<div class="page-break"></div>';
     }
     

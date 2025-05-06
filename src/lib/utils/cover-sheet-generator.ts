@@ -1,7 +1,7 @@
 import { Superbill } from "@/types/superbill";
 import { formatDate } from "./superbill-utils";
 
-export function generateCoverSheetHtml(superbills: Superbill[]): string {
+export function generateCoverSheetHtml(superbills: Superbill[], includeInvoiceNote: boolean = true): string {
   if (superbills.length === 0) return '';
   
   const firstSuperbill = superbills[0];

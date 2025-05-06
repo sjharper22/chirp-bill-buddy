@@ -59,10 +59,9 @@ export default function GroupedSubmission() {
           handleDownloadAll={handleDownloadAll}
           handlePreviewCoverLetter={handlePreviewCoverLetter}
           generateCoverSheetHtml={(superbills) => {
-            // This function reference needs to be passed with its arguments
-            // Fixed the error: Expected 2 arguments, but got 1
+            // Fixed: Make sure to pass the second parameter (includeInvoiceNote)
             return import("@/lib/utils/cover-sheet-generator").then(module => {
-              return module.generateCoverSheetHtml(superbills);
+              return module.generateCoverSheetHtml(superbills, true);
             });
           }}
         />
