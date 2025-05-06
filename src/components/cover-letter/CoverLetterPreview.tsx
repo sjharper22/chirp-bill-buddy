@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Superbill } from "@/types/superbill";
 import { useState, useEffect } from "react";
-import { generateCoverLetterFromSuperbills } from "@/lib/utils/cover-letter-generator";
+import { generateCoverLetterFromSuperbills } from "@/lib/utils/cover-letter";
 
 interface CoverLetterPreviewProps {
   superbills: Superbill[];
