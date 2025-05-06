@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Superbill } from "@/types/superbill";
 import { useState, useEffect } from "react";
@@ -34,7 +35,8 @@ export function CoverLetterPreview({
     const billsToProcess = superbill ? [superbill] : superbills;
     
     if (billsToProcess.length > 0) {
-      console.log("Generating cover letter from superbills");
+      console.log("Generating cover letter from superbills:", billsToProcess.length);
+      console.log("Patients:", billsToProcess.map(b => b.patientName).join(', '));
       const letterContent = generateCoverLetterFromSuperbills(billsToProcess, includeInvoiceNote);
       setDisplayContent(letterContent);
     }

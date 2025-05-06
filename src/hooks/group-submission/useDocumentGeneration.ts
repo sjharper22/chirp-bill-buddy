@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Superbill } from "@/types/superbill";
 import { generateCoverSheetHtml } from "@/lib/utils/cover-sheet-generator";
@@ -15,7 +14,7 @@ export function useDocumentGeneration() {
   const handlePreviewCoverLetter = (selectedSuperbills: Superbill[], includeInvoiceNote: boolean = true) => {
     // Generate cover letter content before opening dialog
     if (selectedSuperbills.length > 0) {
-      // Ensure we're passing both parameters here
+      // Generate the cover letter with patient-specific sections
       const generatedContent = generateCoverLetterFromSuperbills(selectedSuperbills, includeInvoiceNote);
       setCoverLetterContent(generatedContent);
     }
@@ -107,9 +106,8 @@ export function useDocumentGeneration() {
         <body>
     `;
     
-    // Add cover letter if enabled
+    // Add cover letter if enabled - using the updated multi-patient version
     if (showCoverLetter && selectedSuperbills.length > 0) {
-      // Also ensure both parameters are passed here
       const coverLetterHtml = generateCoverLetterFromSuperbills(selectedSuperbills, true);
       completeHtml += `<div class="container cover-letter">${coverLetterHtml}</div><div class="page-break"></div>`;
     }

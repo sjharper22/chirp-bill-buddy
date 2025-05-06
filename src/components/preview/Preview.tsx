@@ -38,7 +38,8 @@ export function Preview({
     displayCoverLetter, 
     selectedTemplateId,
     hasContent: Boolean(coverLetterContent),
-    contentLength: coverLetterContent?.length || 0 
+    contentLength: coverLetterContent?.length || 0,
+    patientName: superbill.patientName
   });
   
   return (
