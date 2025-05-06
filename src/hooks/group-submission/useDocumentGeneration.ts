@@ -15,6 +15,7 @@ export function useDocumentGeneration() {
   const handlePreviewCoverLetter = (selectedSuperbills: Superbill[], includeInvoiceNote: boolean = true) => {
     // Generate cover letter content before opening dialog
     if (selectedSuperbills.length > 0) {
+      // Ensure we're passing both parameters here
       const generatedContent = generateCoverLetterFromSuperbills(selectedSuperbills, includeInvoiceNote);
       setCoverLetterContent(generatedContent);
     }
@@ -108,6 +109,7 @@ export function useDocumentGeneration() {
     
     // Add cover letter if enabled
     if (showCoverLetter && selectedSuperbills.length > 0) {
+      // Also ensure both parameters are passed here
       const coverLetterHtml = generateCoverLetterFromSuperbills(selectedSuperbills, true);
       completeHtml += `<div class="container cover-letter">${coverLetterHtml}</div><div class="page-break"></div>`;
     }

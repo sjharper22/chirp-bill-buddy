@@ -69,6 +69,7 @@ export function useGroupedSubmission() {
   
   // Custom handler that uses the imported handlePreviewCoverLetter function
   const previewCoverLetterHandler = () => {
+    // The error is here - passing both required arguments
     handlePreviewCoverLetter(selectedSuperbills, true);
   };
   
