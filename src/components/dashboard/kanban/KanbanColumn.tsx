@@ -23,23 +23,28 @@ export function KanbanColumn({
 
   return (
     <div
-      className="flex flex-col rounded-md border shadow-sm bg-card h-[500px] min-w-0"
+      className="flex flex-col rounded-md border shadow-sm bg-card h-[500px] min-w-[250px] snap-start"
       onDragOver={(e) => onDragOver(e)}
       onDragLeave={(e) => onDragLeave(e)} 
       onDrop={(e) => onDrop(e, column.id as SuperbillStatus)}
     >
-      <div className="flex items-center justify-between p-2 bg-muted/50 rounded-t-md shrink-0">
-        <div className="flex items-center gap-2">
-          {column.icon && <column.icon className="h-4 w-4 shrink-0" />}
-          <h3 className="font-medium truncate">{column.title}</h3>
+      <div className="flex flex-col p-3 bg-muted/50 rounded-t-md shrink-0 gap-y-2">
+        <div className="flex items-start gap-2 flex-wrap">
+          {column.icon && <column.icon className="h-4 w-4 shrink-0 mt-0.5" />}
+          <h3 className="font-medium">{column.title}</h3>
+        </div>
+        
+        <div className="flex flex-wrap items-start gap-2">
           <StatusBadge 
             status={column.id} 
             variant={getStatusVariant(column.id)} 
+            className="w-fit"
           />
+          
+          <span className="text-sm text-muted-foreground">
+            {columnSuperbills.length} {columnSuperbills.length === 1 ? 'superbill' : 'superbills'}
+          </span>
         </div>
-        <span className="text-sm text-muted-foreground whitespace-nowrap">
-          {columnSuperbills.length} {columnSuperbills.length === 1 ? 'superbill' : 'superbills'}
-        </span>
       </div>
 
       <div className="flex-1 p-2 overflow-y-auto">
@@ -56,9 +61,9 @@ export function KanbanColumn({
               onDragStart={(e) => handleDragStart(e, superbill.id)}
               className="p-3 mb-2 rounded-md border shadow-sm bg-white cursor-move hover:shadow-md transition-shadow"
             >
-              <h4 className="font-semibold text-sm truncate">{superbill.patientName}</h4>
+              <h4 className="font-semibold text-sm">{superbill.patientName}</h4>
               <div className="text-xs mt-1 text-muted-foreground">
-                <p className="truncate">DOB: {formatDate(superbill.patientDob)}</p>
+                <p>DOB: {formatDate(superbill.patientDob)}</p>
                 <div className="flex justify-between mt-1">
                   <span>Visits: {visitCount}</span>
                   <span className="font-medium text-foreground">{formatCurrency(totalFee)}</span>

@@ -49,18 +49,18 @@ export function CardHeader({
   };
 
   return (
-    <>
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center">
-          <GripHorizontal className="h-4 w-4 mr-2 text-muted-foreground drag-handle" />
-          <h3 className="font-semibold text-lg truncate max-w-[180px]">{patientName}</h3>
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2 items-start justify-between">
+        <div className="flex items-center gap-2">
+          <GripHorizontal className="h-4 w-4 text-muted-foreground drag-handle shrink-0" />
+          <h3 className="font-semibold text-lg break-words hyphens-auto">{patientName}</h3>
         </div>
-        <div className="text-sm bg-primary/10 text-primary font-medium px-2 py-0.5 rounded">
+        <div className="text-sm bg-primary/10 text-primary font-medium px-2 py-0.5 rounded whitespace-nowrap">
           {formatDate(issueDate)}
         </div>
       </div>
       
-      <div className="mb-2 flex items-center">
+      <div className="flex flex-wrap items-start gap-2">
         {onStatusChange ? (
           <div onClick={(e) => e.stopPropagation()}>
             <StatusSelector 
@@ -72,10 +72,10 @@ export function CardHeader({
           <StatusBadge 
             status={status} 
             variant={statusVariant}
-            className={statusColor ? `bg-${statusColor}-100 text-${statusColor}-800 border-${statusColor}-200` : ''}
+            className="w-fit"
           />
         )}
       </div>
-    </>
+    </div>
   );
 }

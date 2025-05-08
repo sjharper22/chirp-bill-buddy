@@ -99,23 +99,25 @@ export function KanbanBoard({
         currentSort={sortOrder}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        {kanbanColumns.map(column => (
-          <KanbanColumn
-            key={column.id}
-            column={column}
-            superbills={filteredSuperbills.filter(bill => bill.status === column.id)}
-            onDelete={onDelete}
-            onStatusChange={onStatusChange}
-            allColumns={kanbanColumns}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            handleDragStart={handleDragStart}
-            onSelectPatient={onSelectPatient}
-            selectedPatientIds={selectedPatientIds}
-          />
-        ))}
+      <div className="overflow-x-auto pb-4 snap-x snap-mandatory">
+        <div className="grid grid-flow-col auto-cols-min gap-3 md:gap-4 min-w-full">
+          {kanbanColumns.map(column => (
+            <KanbanColumn
+              key={column.id}
+              column={column}
+              superbills={filteredSuperbills.filter(bill => bill.status === column.id)}
+              onDelete={onDelete}
+              onStatusChange={onStatusChange}
+              allColumns={kanbanColumns}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              handleDragStart={handleDragStart}
+              onSelectPatient={onSelectPatient}
+              selectedPatientIds={selectedPatientIds}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

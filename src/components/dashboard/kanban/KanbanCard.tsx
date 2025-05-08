@@ -18,7 +18,7 @@ export function KanbanCard({
   
   return (
     <div 
-      className="relative min-w-0 w-full"
+      className="relative w-full mb-3"
       draggable
       onDragStart={(e) => onDragStart && onDragStart(e, superbill.id)}
     >
@@ -34,23 +34,25 @@ export function KanbanCard({
       </div>
       
       {/* Move actions - positioned below the card with spacing */}
-      <div className="mt-2 flex flex-wrap gap-1 justify-end">
-        {availableStatuses
-          .filter(targetColumn => targetColumn.id !== currentStatus)
-          .map(targetColumn => (
-            <Button 
-              key={targetColumn.id}
-              variant="ghost" 
-              size="sm"
-              onClick={() => onStatusChange(superbill.id, targetColumn.id)}
-              className="text-xs py-0 h-7 hover:bg-muted"
-            >
-              <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />
-              <span className="truncate">Move to {targetColumn.title}</span>
-            </Button>
-          ))
-        }
-      </div>
+      {availableStatuses && availableStatuses.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1 justify-end">
+          {availableStatuses
+            .filter(targetColumn => targetColumn.id !== currentStatus)
+            .map(targetColumn => (
+              <Button 
+                key={targetColumn.id}
+                variant="ghost" 
+                size="sm"
+                onClick={() => onStatusChange(superbill.id, targetColumn.id)}
+                className="text-xs py-0 h-7 hover:bg-muted w-full sm:w-auto"
+              >
+                <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />
+                <span className="whitespace-normal text-left">Move to {targetColumn.title}</span>
+              </Button>
+            ))
+          }
+        </div>
+      )}
     </div>
   );
 }

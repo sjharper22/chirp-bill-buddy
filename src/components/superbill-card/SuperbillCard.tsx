@@ -8,14 +8,6 @@ import { PatientInfo } from "./PatientInfo";
 import { CardStats } from "./CardStats";
 import { CardActions } from "./CardActions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
 
 export function SuperbillCard({ 
   superbill, 
@@ -65,7 +57,7 @@ export function SuperbillCard({
   
   return (
     <Card 
-      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} relative w-full`} 
+      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} relative`} 
       onClick={onClick ? onClick : undefined}
     >
       {onSelectPatient && (

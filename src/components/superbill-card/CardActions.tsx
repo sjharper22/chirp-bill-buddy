@@ -6,7 +6,7 @@ import { CardActionsProps } from "./types";
 
 export function CardActions({ superbillId, onDelete }: CardActionsProps) {
   return (
-    <div className="border-t pt-4 pb-4 flex justify-between w-full">
+    <div className="border-t pt-4 pb-4 flex flex-wrap gap-2 w-full">
       <Button 
         variant="outline" 
         size="sm" 
@@ -14,13 +14,13 @@ export function CardActions({ superbillId, onDelete }: CardActionsProps) {
           e.stopPropagation(); // Prevent triggering card onClick
           onDelete(superbillId);
         }}
-        className="text-destructive hover:text-destructive/90"
+        className="text-destructive hover:text-destructive/90 mr-auto"
       >
         <Trash2 className="h-4 w-4 mr-1" />
         Delete
       </Button>
       
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button 
           variant="outline" 
           size="sm" 

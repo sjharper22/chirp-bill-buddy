@@ -26,11 +26,20 @@ export function KanbanHeader({
   const [filterOpen, setFilterOpen] = useState(false);
   
   return (
-    <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
-      <h2 className="text-xl font-semibold">Superbills Board</h2>
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Superbills Board</h2>
+        
+        {!selectionMode && (
+          <Button onClick={() => navigate("/new")} size="sm" className="hidden sm:flex">
+            <Plus className="mr-2 h-4 w-4 shrink-0" />
+            New Superbill
+          </Button>
+        )}
+      </div>
       
-      <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-2 w-full sm:w-auto">
-        <div className="relative flex-1 sm:flex-none sm:w-[180px] md:w-[250px]">
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search superbills..."
@@ -40,7 +49,7 @@ export function KanbanHeader({
           />
         </div>
         
-        <div className="flex space-x-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
           {onFilterChange && onSortChange && (
             <Popover open={filterOpen} onOpenChange={setFilterOpen}>
               <PopoverTrigger asChild>
@@ -76,21 +85,20 @@ export function KanbanHeader({
               className="whitespace-nowrap"
             >
               <CheckSquare className="mr-2 h-4 w-4 shrink-0" />
-              {selectionMode ? "Cancel" : "Select Patients"}
+              {selectionMode ? "Cancel" : "Select"}
             </Button>
           )}
 
           {selectionMode && selectedCount && selectedCount > 0 && onAddSelectedToPatients && (
             <Button onClick={onAddSelectedToPatients} size="sm" className="whitespace-nowrap">
               <UserPlus className="mr-2 h-4 w-4 shrink-0" />
-              Add {selectedCount} to Patients
+              Add {selectedCount}
             </Button>
           )}
           
           {!selectionMode && (
-            <Button onClick={() => navigate("/new")} size="sm">
-              <Plus className="mr-2 h-4 w-4 shrink-0" />
-              New Superbill
+            <Button onClick={() => navigate("/new")} size="sm" className="sm:hidden">
+              <Plus className="h-4 w-4" />
             </Button>
           )}
         </div>
