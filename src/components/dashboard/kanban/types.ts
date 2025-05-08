@@ -1,4 +1,3 @@
-
 import { LucideIcon } from "lucide-react";
 import { SuperbillStatus, Superbill } from "@/types/superbill";
 import { StatusDisplayType } from "@/components/group-submission/table/StatusBadge";
@@ -25,15 +24,16 @@ export interface KanbanBoardProps {
 export interface KanbanColumnProps {
   superbills: Superbill[];
   column: KanbanColumn;
-  onStatusChange: (id: string, status: SuperbillStatus) => void;
   onDelete: (id: string) => void;
-  allColumns: KanbanColumn[];
-  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>, status: SuperbillStatus) => void;
-  handleDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  onStatusChange: (id: string, newStatus: SuperbillStatus) => void;
   onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   selectedPatientIds?: string[];
+  allColumns: KanbanColumn[];
+  onDragOver: (e: React.DragEvent) => void;
+  onDragLeave: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent, status: SuperbillStatus) => void;
+  handleDragStart: (e: React.DragEvent, id: string) => void;
+  isMobile?: boolean;
 }
 
 export interface KanbanHeaderProps {
@@ -52,12 +52,13 @@ export interface KanbanHeaderProps {
 export interface KanbanCardProps {
   superbill: Superbill;
   onDelete: (id: string) => void;
-  onStatusChange: (id: string, status: SuperbillStatus) => void;
+  onStatusChange: (id: string, newStatus: SuperbillStatus) => void;
   onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   isPatientSelected?: boolean;
-  onDragStart?: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  onDragStart?: (e: React.DragEvent, id: string) => void;
   availableStatuses?: KanbanColumn[];
-  currentStatus?: SuperbillStatus;
+  currentStatus?: string;
+  isMobile?: boolean;
 }
 
 export interface PatientWithSuperbills {
