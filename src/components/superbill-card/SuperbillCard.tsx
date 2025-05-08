@@ -1,23 +1,28 @@
 
-import { Superbill, SuperbillStatus } from "@/types/superbill";
-import { formatStatus, getStatusVariant, calculateTotalFee } from "@/lib/utils/superbill-utils";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { SuperbillCardProps } from "./types";
+import { Superbill } from "@/types/superbill";
 import { CardHeader } from "./CardHeader";
 import { PatientInfo } from "./PatientInfo";
 import { CardStats } from "./CardStats";
 import { CardActions } from "./CardActions";
+import { Card } from "@/components/ui/card";
+import { SuperbillStatus } from "@/types/superbill";
+import { getStatusVariant } from "@/lib/utils/visit-utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SuperbillCardProps } from "./types";
 
 export function SuperbillCard({ 
   superbill, 
   onDelete, 
-  onClick,
-  onSelectPatient,
+  onClick, 
+  onSelectPatient, 
   isPatientSelected,
-  onStatusChange
+  onStatusChange,
+  isCollapsed
 }: SuperbillCardProps) {
-  const totalFee = calculateTotalFee(superbill.visits);
+  // Calculate total fee from all visits
+  const totalFee = superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0);
+  
+  // Get visit count
   const visitCount = superbill.visits.length;
   
   // Get earliest and latest visit dates if visits exist
@@ -37,15 +42,9 @@ export function SuperbillCard({
     }
   });
   
-  // Format status for display and get status variant
-  const displayStatus = formatStatus(superbill.status);
-  const statusVariant = getStatusVariant(superbill.status);
-  
-  // Handle checkbox change - call onSelectPatient with the appropriate parameters
-  const handleCheckboxChange = (checked: boolean) => {
-    if (onSelectPatient) {
-      onSelectPatient(superbill.id, superbill.patientName, superbill.patientDob, checked);
-    }
+  // Format status for display
+  const formatStatus = (status: string) => {
+    return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
   
   // Handle status change
@@ -55,28 +54,35 @@ export function SuperbillCard({
     }
   };
   
+  // Handle patient selection
+  const handleSelectPatient = () => {
+    if (onSelectPatient) {
+      onSelectPatient(superbill.id);
+    }
+  };
+  
   return (
     <Card 
-      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} relative`} 
-      onClick={onClick ? onClick : undefined}
+      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`} 
+      onClick={onClick}
     >
-      {onSelectPatient && (
-        <div className="absolute top-6 left-2 z-10">
-          <Checkbox 
-            checked={isPatientSelected}
-            onCheckedChange={handleCheckboxChange}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white"
-          />
-        </div>
-      )}
-      
-      <CardContent className={`pt-6 ${onSelectPatient ? 'pl-8' : ''}`}>
+      <div className="p-4 space-y-4">
+        {/* Selection checkbox */}
+        {onSelectPatient && (
+          <div className="flex justify-end">
+            <Checkbox 
+              checked={isPatientSelected} 
+              onCheckedChange={handleSelectPatient}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
+        
         <CardHeader 
           patientName={superbill.patientName}
           issueDate={superbill.issueDate}
-          status={superbill.status}
-          statusVariant={statusVariant}
+          status={formatStatus(superbill.status)}
+          statusVariant={getStatusVariant(superbill.status)}
           onStatusChange={onStatusChange ? handleStatusChange : undefined}
         />
         
@@ -90,14 +96,13 @@ export function SuperbillCard({
           visitCount={visitCount}
           totalFee={totalFee}
         />
-      </CardContent>
+      </div>
       
-      <CardFooter>
-        <CardActions 
-          superbillId={superbill.id}
-          onDelete={onDelete}
-        />
-      </CardFooter>
+      <CardActions 
+        superbillId={superbill.id} 
+        onDelete={onDelete}
+        isCollapsed={isCollapsed}
+      />
     </Card>
   );
 }

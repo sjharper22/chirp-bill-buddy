@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 import { Edit, Eye, Trash2 } from "lucide-react";
 import { CardActionsProps } from "./types";
 
-export function CardActions({ superbillId, onDelete }: CardActionsProps) {
+export function CardActions({ superbillId, onDelete, isCollapsed }: CardActionsProps) {
   return (
-    <div className="border-t pt-4 pb-4 flex flex-wrap gap-2 w-full">
+    <div className="border-t pt-4 pb-4 flex flex-wrap gap-2 p-4">
       <Button 
         variant="outline" 
         size="sm" 
@@ -17,7 +17,7 @@ export function CardActions({ superbillId, onDelete }: CardActionsProps) {
         className="text-destructive hover:text-destructive/90 mr-auto"
       >
         <Trash2 className="h-4 w-4 mr-1" />
-        Delete
+        <span className={isCollapsed ? "hidden sm:inline" : ""}>Delete</span>
       </Button>
       
       <div className="flex gap-2 flex-wrap">
@@ -29,7 +29,7 @@ export function CardActions({ superbillId, onDelete }: CardActionsProps) {
         >
           <Link to={`/view/${superbillId}`}>
             <Eye className="h-4 w-4 mr-1" />
-            View
+            <span className={isCollapsed ? "hidden sm:inline" : ""}>View</span>
           </Link>
         </Button>
         
@@ -41,7 +41,7 @@ export function CardActions({ superbillId, onDelete }: CardActionsProps) {
         >
           <Link to={`/edit/${superbillId}`}>
             <Edit className="h-4 w-4 mr-1" />
-            Edit
+            <span className={isCollapsed ? "hidden sm:inline" : ""}>Edit</span>
           </Link>
         </Button>
       </div>

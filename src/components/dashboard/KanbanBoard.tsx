@@ -6,6 +6,7 @@ import { KanbanHeader } from "./kanban/KanbanHeader";
 import { KanbanColumn } from "./kanban/KanbanColumn";
 import { kanbanColumns } from "./kanban/kanbanConstants";
 import { KanbanBoardProps } from "./kanban/types";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function KanbanBoard({
   superbills,
@@ -20,6 +21,7 @@ export function KanbanBoard({
   const [draggedBillId, setDraggedBillId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const { state: sidebarState } = useSidebar();
 
   // Filter superbills based on search term and status filter
   const filteredSuperbills = superbills
@@ -87,7 +89,7 @@ export function KanbanBoard({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <KanbanHeader 
         searchTerm={searchTerm}
         onSearchChange={onSearchChange}
@@ -99,8 +101,8 @@ export function KanbanBoard({
         currentSort={sortOrder}
       />
 
-      <div className="overflow-x-auto pb-4 snap-x snap-mandatory">
-        <div className="grid grid-flow-col auto-cols-min gap-3 md:gap-4 min-w-full">
+      <div className={`overflow-x-auto pb-4 snap-x snap-mandatory ${sidebarState === "collapsed" ? "pr-0" : "pr-2"}`}>
+        <div className="grid grid-flow-col auto-cols-min md:auto-cols-fr gap-3 md:gap-4 min-w-full">
           {kanbanColumns.map(column => (
             <KanbanColumn
               key={column.id}
@@ -115,6 +117,7 @@ export function KanbanBoard({
               handleDragStart={handleDragStart}
               onSelectPatient={onSelectPatient}
               selectedPatientIds={selectedPatientIds}
+              sidebarState={sidebarState}
             />
           ))}
         </div>

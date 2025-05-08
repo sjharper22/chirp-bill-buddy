@@ -17,12 +17,12 @@ export function PatientInfo({ patientDob, visitDates, complaints }: PatientInfoP
       <p>DOB: {formatDate(patientDob)}</p>
       {earliestDate && latestDate && (
         <p className="break-words">
-          Visit Period: {formatDate(earliestDate)} to {formatDate(latestDate)}
+          <span className="block sm:inline">Visit Period:</span> {formatDate(earliestDate)} to {formatDate(latestDate)}
         </p>
       )}
       {complaintsDisplay && (
         <p className="font-medium text-foreground break-words">
-          Primary Complaints: {complaintsDisplay}
+          <span className="block sm:inline">Primary Complaints:</span> {complaintsDisplay}
         </p>
       )}
     </div>

@@ -12,7 +12,8 @@ export function KanbanCard({
   isPatientSelected,
   onDragStart,
   availableStatuses = [],
-  currentStatus
+  currentStatus,
+  isCollapsed
 }: KanbanCardProps) {
   const navigate = useNavigate();
   
@@ -30,6 +31,7 @@ export function KanbanCard({
           onSelectPatient={onSelectPatient}
           isPatientSelected={isPatientSelected}
           onStatusChange={onStatusChange}
+          isCollapsed={isCollapsed}
         />
       </div>
       
@@ -44,7 +46,7 @@ export function KanbanCard({
                 variant="ghost" 
                 size="sm"
                 onClick={() => onStatusChange(superbill.id, targetColumn.id)}
-                className="text-xs py-0 h-7 hover:bg-muted w-full sm:w-auto"
+                className={`text-xs py-0 h-7 hover:bg-muted ${isCollapsed ? "w-full" : "w-full sm:w-auto"}`}
               >
                 <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />
                 <span className="whitespace-normal text-left">Move to {targetColumn.title}</span>
