@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
@@ -42,10 +41,30 @@ export function RecentSuperbills({
   const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   
-  // Apply additional filtering based on status
+  // Define status priority for sorting (incomplete statuses first)
+  const getStatusPriority = (status: SuperbillStatus): number => {
+    switch(status) {
+      case 'draft': return 1;
+      case 'in_progress': return 2;
+      case 'in_review': return 3;
+      case 'completed': return 4;
+      default: return 5;
+    }
+  };
+  
+  // Apply additional filtering based on status and sort by priority
   const displaySuperbills = filteredSuperbills
     .filter(bill => statusFilter === "all" ? true : bill.status === statusFilter)
     .sort((a, b) => {
+      // First sort by status priority (incomplete first)
+      const statusPriorityA = getStatusPriority(a.status);
+      const statusPriorityB = getStatusPriority(b.status);
+      
+      if (statusPriorityA !== statusPriorityB) {
+        return statusPriorityA - statusPriorityB;
+      }
+      
+      // Then sort by date within the same status priority
       const dateA = a.issueDate ? new Date(a.issueDate).getTime() : 0;
       const dateB = b.issueDate ? new Date(b.issueDate).getTime() : 0;
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA;

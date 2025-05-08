@@ -31,7 +31,7 @@ export function DashboardTabs({
   handleSelectPatient,
   handleAddSelectedToPatients
 }: DashboardTabsProps) {
-  const [activeTab, setActiveTab] = useState("list");
+  const [activeTab, setActiveTab] = useState("board"); // Changed default from "list" to "board"
   
   // Filter superbills based on search term
   const filteredSuperbills = superbills.filter(bill => 
@@ -41,7 +41,7 @@ export function DashboardTabs({
   
   return (
     <Tabs 
-      defaultValue="list" 
+      defaultValue="board" // Changed from "list" to "board"
       value={activeTab} 
       onValueChange={setActiveTab} 
       className="w-full mt-8"
