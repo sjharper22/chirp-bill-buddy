@@ -10,6 +10,11 @@ interface NotesFieldProps {
 }
 
 export function NotesField({ value, onChange, disabled = false }: NotesFieldProps) {
+  // Handle click in the textarea to select all text
+  const handleTextareaClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+    e.currentTarget.select();
+  };
+  
   return (
     <div className="space-y-2">
       <Label htmlFor="notes">Notes</Label>
@@ -17,6 +22,7 @@ export function NotesField({ value, onChange, disabled = false }: NotesFieldProp
         id="notes"
         value={value || ""}
         onChange={e => onChange(e.target.value)}
+        onClick={handleTextareaClick}
         rows={3}
         disabled={disabled}
       />

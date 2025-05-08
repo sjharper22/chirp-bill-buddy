@@ -1,3 +1,4 @@
+
 import { Visit } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,6 +46,11 @@ export function VisitNotes({ visit, onVisitChange, initialShowNotes = false }: V
     setShowNotes(!showNotes);
   };
 
+  // Handle click in the textarea to select all text
+  const handleTextareaClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+    e.currentTarget.select();
+  };
+
   return (
     <div className="mt-3">
       <Button 
@@ -62,6 +68,7 @@ export function VisitNotes({ visit, onVisitChange, initialShowNotes = false }: V
           placeholder="Visit notes..."
           value={notesValue} // Use the local state value
           onChange={handleNotesChange}
+          onClick={handleTextareaClick}
           className="mt-2"
           // Prevent the Enter key from submitting the form
           onKeyDown={(e) => {
