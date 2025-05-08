@@ -25,7 +25,10 @@ export function CardHeader({
       statusColor = '';
   }
 
-  const handleStatusClick = () => {
+  const handleStatusClick = (e: React.MouseEvent) => {
+    // Stop the event from propagating up to the card's onClick handler
+    e.stopPropagation();
+    
     if (typeof onStatusChange === 'function') {
       // Cycle through statuses: draft -> in_progress -> in_review -> completed -> draft
       const currentStatus = status.toLowerCase();
