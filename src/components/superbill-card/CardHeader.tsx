@@ -16,13 +16,17 @@ export function CardHeader({
   let statusColor;
   switch(status.toLowerCase()) {
     case 'in_review':
-      statusColor = 'purple'; // Changed: Make In Review purple
+      statusColor = 'purple'; // In Review is purple
       break;
     case 'in_progress':
-      statusColor = 'amber'; // Changed: Keep In Progress amber/yellow
+      statusColor = 'amber'; // In Progress is amber/yellow
       break;
+    case 'completed':
+      statusColor = 'green'; // Completed is green
+      break;
+    case 'draft':
     default:
-      statusColor = '';
+      statusColor = 'blue'; // Draft is blue
   }
 
   const handleStatusClick = (e: React.MouseEvent) => {
