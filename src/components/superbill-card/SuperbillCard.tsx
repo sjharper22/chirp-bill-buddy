@@ -1,4 +1,3 @@
-
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { formatStatus, getStatusVariant, calculateTotalFee } from "@/lib/utils/superbill-utils";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -58,7 +57,7 @@ export function SuperbillCard({
   
   // Handle status change
   const handleStatusChange = (newStatus: SuperbillStatus) => {
-    if (onStatusChange && newStatus !== superbill.status) {
+    if (onStatusChange) {
       onStatusChange(superbill.id, newStatus);
     }
   };
@@ -83,7 +82,7 @@ export function SuperbillCard({
         <CardHeader 
           patientName={superbill.patientName}
           issueDate={superbill.issueDate}
-          status={displayStatus}
+          status={superbill.status}
           statusVariant={statusVariant}
           onStatusChange={onStatusChange ? handleStatusChange : undefined}
         />

@@ -4,6 +4,7 @@ import { GripHorizontal } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { CardHeaderProps } from "./types";
 import { SuperbillStatus } from "@/types/superbill";
+import { StatusSelector } from "./StatusSelector";
 
 export function CardHeader({ 
   patientName, 
@@ -29,31 +30,20 @@ export function CardHeader({
       statusColor = 'blue'; // Draft is blue
   }
 
-  const handleStatusClick = (e: React.MouseEvent) => {
-    // Stop the event from propagating up to the card's onClick handler
-    e.stopPropagation();
+  // Convert display status back to SuperbillStatus format
+  const getSuperbillStatus = (displayStatus: string): SuperbillStatus => {
+    const normalizedStatus = displayStatus.toLowerCase();
     
-    if (typeof onStatusChange === 'function') {
-      // Cycle through statuses: draft -> in_progress -> in_review -> completed -> draft
-      const currentStatus = status.toLowerCase();
-      let newStatus: SuperbillStatus;
-      
-      switch (currentStatus) {
-        case 'draft':
-          newStatus = 'in_progress';
-          break;
-        case 'in_progress':
-          newStatus = 'in_review';
-          break;
-        case 'in_review':
-          newStatus = 'completed';
-          break;
-        case 'completed':
-        default:
-          newStatus = 'draft';
-          break;
-      }
-      
+    if (normalizedStatus.includes('progress')) return 'in_progress';
+    if (normalizedStatus.includes('review')) return 'in_review';
+    if (normalizedStatus.includes('complet')) return 'completed';
+    return 'draft';
+  };
+
+  const currentStatus = getSuperbillStatus(status);
+  
+  const handleStatusChange = (newStatus: SuperbillStatus) => {
+    if (onStatusChange) {
       onStatusChange(newStatus);
     }
   };
@@ -71,17 +61,20 @@ export function CardHeader({
       </div>
       
       <div className="mb-2 flex items-center">
-        <div 
-          onClick={onStatusChange ? handleStatusClick : undefined}
-          className={onStatusChange ? "cursor-pointer" : ""}
-          title={onStatusChange ? "Click to change status" : undefined}
-        >
+        {onStatusChange ? (
+          <div onClick={(e) => e.stopPropagation()}>
+            <StatusSelector 
+              currentStatus={currentStatus}
+              onStatusChange={handleStatusChange}
+            />
+          </div>
+        ) : (
           <StatusBadge 
             status={status} 
             variant={statusVariant}
-            className={`${statusColor ? `bg-${statusColor}-100 text-${statusColor}-800 border-${statusColor}-200` : ''} ${onStatusChange ? 'hover:bg-opacity-80 transition-colors' : ''}`}
+            className={statusColor ? `bg-${statusColor}-100 text-${statusColor}-800 border-${statusColor}-200` : ''}
           />
-        </div>
+        )}
       </div>
     </>
   );
