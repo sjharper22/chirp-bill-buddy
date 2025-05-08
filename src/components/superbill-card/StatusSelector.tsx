@@ -12,12 +12,63 @@ interface StatusSelectorProps {
 export function StatusSelector({ currentStatus, onStatusChange, className = "" }: StatusSelectorProps) {
   const statuses: SuperbillStatus[] = ['draft', 'in_progress', 'in_review', 'completed'];
   
+  // Get background color class based on status
+  const getStatusBackgroundClass = (status: SuperbillStatus): string => {
+    switch(status) {
+      case 'completed': 
+        return 'bg-green-100';
+      case 'in_review': 
+        return 'bg-purple-100';
+      case 'in_progress': 
+        return 'bg-amber-100';
+      case 'draft':
+      default:
+        return 'bg-blue-100';
+    }
+  };
+  
+  // Get text color class based on status
+  const getStatusTextClass = (status: SuperbillStatus): string => {
+    switch(status) {
+      case 'completed': 
+        return 'text-green-800';
+      case 'in_review': 
+        return 'text-purple-800';
+      case 'in_progress': 
+        return 'text-amber-800';
+      case 'draft':
+      default:
+        return 'text-blue-800';
+    }
+  };
+  
+  // Get border color class based on status
+  const getStatusBorderClass = (status: SuperbillStatus): string => {
+    switch(status) {
+      case 'completed': 
+        return 'border-green-200';
+      case 'in_review': 
+        return 'border-purple-200';
+      case 'in_progress': 
+        return 'border-amber-200';
+      case 'draft':
+      default:
+        return 'border-blue-200';
+    }
+  };
+  
+  const statusBackgroundClass = getStatusBackgroundClass(currentStatus);
+  const statusTextClass = getStatusTextClass(currentStatus);
+  const statusBorderClass = getStatusBorderClass(currentStatus);
+  
   return (
     <Select
       value={currentStatus}
       onValueChange={(value) => onStatusChange(value as SuperbillStatus)}
     >
-      <SelectTrigger className={`h-8 w-[140px] ${className}`}>
+      <SelectTrigger 
+        className={`h-8 w-[140px] ${statusBackgroundClass} ${statusTextClass} ${statusBorderClass} ${className}`}
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
