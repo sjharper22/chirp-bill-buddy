@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { KanbanCardProps } from "./types";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
+import { calculateTotalFee } from "@/lib/utils/superbill-utils";
 
 export function KanbanCard({ 
   superbill, 
@@ -15,10 +16,11 @@ export function KanbanCard({
   currentStatus
 }: KanbanCardProps) {
   const navigate = useNavigate();
+  const totalFee = calculateTotalFee(superbill.visits);
   
   return (
     <div 
-      className="relative min-w-0 w-full"
+      className="relative mb-3 w-full"
       draggable
       onDragStart={(e) => onDragStart && onDragStart(e, superbill.id)}
     >
@@ -34,23 +36,25 @@ export function KanbanCard({
       </div>
       
       {/* Move actions - positioned below the card with spacing */}
-      <div className="mt-2 flex flex-wrap gap-1 justify-end">
-        {availableStatuses
-          .filter(targetColumn => targetColumn.id !== currentStatus)
-          .map(targetColumn => (
-            <Button 
-              key={targetColumn.id}
-              variant="ghost" 
-              size="sm"
-              onClick={() => onStatusChange(superbill.id, targetColumn.id)}
-              className="text-xs py-0 h-7 hover:bg-muted"
-            >
-              <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />
-              <span className="truncate">Move to {targetColumn.title}</span>
-            </Button>
-          ))
-        }
-      </div>
+      {availableStatuses.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-1 justify-end">
+          {availableStatuses
+            .filter(targetColumn => targetColumn.id !== currentStatus)
+            .map(targetColumn => (
+              <Button 
+                key={targetColumn.id}
+                variant="ghost" 
+                size="sm"
+                onClick={() => onStatusChange(superbill.id, targetColumn.id)}
+                className="text-xs py-0 h-6 hover:bg-muted"
+              >
+                <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />
+                <span className="truncate max-w-[80px]">Move to {targetColumn.title}</span>
+              </Button>
+            ))
+          }
+        </div>
+      )}
     </div>
   );
 }

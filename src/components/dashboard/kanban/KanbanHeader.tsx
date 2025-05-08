@@ -9,6 +9,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { SuperbillStatus } from "@/types/superbill";
 import { StatusFilterSelector } from "@/components/visit/filters/StatusFilterSelector";
 import { SortOrderSelector } from "@/components/visit/filters/SortOrderSelector";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function KanbanHeader({ 
   searchTerm, 
@@ -24,36 +25,39 @@ export function KanbanHeader({
 }: KanbanHeaderProps) {
   const navigate = useNavigate();
   const [filterOpen, setFilterOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   return (
-    <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
-      <h2 className="text-xl font-semibold">Superbills Board</h2>
-      
-      <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-2 w-full sm:w-auto">
-        <div className="relative flex-1 sm:flex-none sm:w-[180px] md:w-[250px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <h2 className="text-xl font-semibold">Superbills Board</h2>
+        
+        <div className="relative w-full sm:w-[250px]">
+          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search superbills..."
             value={searchTerm}
             onChange={e => onSearchChange(e.target.value)}
-            className="pl-10 w-full"
+            className="pl-9 w-full"
           />
         </div>
-        
-        <div className="flex space-x-2 flex-wrap">
+      </div>
+      
+      <div className="flex flex-wrap gap-2 items-center justify-between">
+        <div className="flex gap-2 flex-wrap">
           {onFilterChange && onSortChange && (
             <Popover open={filterOpen} onOpenChange={setFilterOpen}>
               <PopoverTrigger asChild>
                 <Button 
                   variant="outline" 
-                  size="sm"
-                  className="flex items-center gap-2"
+                  size={isMobile ? "sm" : "default"}
+                  className="flex items-center gap-1.5"
                 >
                   <Filter className="h-4 w-4 shrink-0" />
                   <span>Filters</span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4" align="end">
+              <PopoverContent className="w-80 p-4" align="start">
                 <div className="space-y-4">
                   <StatusFilterSelector 
                     selectedStatus={currentFilter} 
@@ -67,29 +71,31 @@ export function KanbanHeader({
               </PopoverContent>
             </Popover>
           )}
-          
+        </div>
+        
+        <div className="flex gap-2 flex-wrap ml-auto">
           {toggleSelectionMode && (
             <Button 
               onClick={toggleSelectionMode} 
               variant={selectionMode ? "secondary" : "outline"}
-              size="sm"
+              size={isMobile ? "sm" : "default"}
               className="whitespace-nowrap"
             >
-              <CheckSquare className="mr-2 h-4 w-4 shrink-0" />
-              {selectionMode ? "Cancel" : "Select Patients"}
+              <CheckSquare className="mr-1.5 h-4 w-4 shrink-0" />
+              {selectionMode ? "Cancel" : "Select"}
             </Button>
           )}
 
           {selectionMode && selectedCount && selectedCount > 0 && onAddSelectedToPatients && (
-            <Button onClick={onAddSelectedToPatients} size="sm" className="whitespace-nowrap">
-              <UserPlus className="mr-2 h-4 w-4 shrink-0" />
+            <Button onClick={onAddSelectedToPatients} size={isMobile ? "sm" : "default"} className="whitespace-nowrap">
+              <UserPlus className="mr-1.5 h-4 w-4 shrink-0" />
               Add {selectedCount} to Patients
             </Button>
           )}
           
           {!selectionMode && (
-            <Button onClick={() => navigate("/new")} size="sm">
-              <Plus className="mr-2 h-4 w-4 shrink-0" />
+            <Button onClick={() => navigate("/new")} size={isMobile ? "sm" : "default"}>
+              <Plus className="mr-1.5 h-4 w-4 shrink-0" />
               New Superbill
             </Button>
           )}
