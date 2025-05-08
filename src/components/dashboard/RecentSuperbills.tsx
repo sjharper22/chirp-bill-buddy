@@ -71,6 +71,14 @@ export function RecentSuperbills({
     })
     .slice(0, 6); // Show only the most recent 6 superbills based on filters
   
+  // Helper function to adapt onSelectPatient to handle different signatures
+  const handleSelectPatient = onSelectPatient 
+    ? (id: string) => {
+        // Call onSelectPatient with just the ID, since that's what the SuperbillCard expects
+        onSelectPatient(id);
+      }
+    : undefined;
+  
   return (
     <div className="mb-10">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -134,7 +142,7 @@ export function RecentSuperbills({
               superbill={superbill}
               onDelete={onDelete}
               onClick={!selectionMode ? () => navigate(`/view/${superbill.id}`) : undefined}
-              onSelectPatient={selectionMode ? onSelectPatient : undefined}
+              onSelectPatient={selectionMode ? handleSelectPatient : undefined}
               isPatientSelected={selectedPatientIds.includes(superbill.id)}
               onStatusChange={onStatusChange}
             />

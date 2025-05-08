@@ -5,6 +5,16 @@ import { PatientInfoProps } from "./types";
 export function PatientInfo({ patientDob, visitDates, complaints }: PatientInfoProps) {
   const { earliestDate, latestDate } = visitDates;
   
+  // Format dates properly, handling both string and Date objects
+  const formatDateValue = (dateValue: Date | string | null) => {
+    if (!dateValue) return null;
+    return typeof dateValue === 'string' ? formatDate(new Date(dateValue)) : formatDate(dateValue);
+  };
+
+  const formattedDob = formatDateValue(patientDob);
+  const formattedEarliestDate = formatDateValue(earliestDate);
+  const formattedLatestDate = formatDateValue(latestDate);
+  
   // Display logic for complaints (showing up to 2, then "and X more")
   const complaintsDisplay = complaints.length > 0 
     ? (complaints.length > 2
@@ -14,10 +24,10 @@ export function PatientInfo({ patientDob, visitDates, complaints }: PatientInfoP
     
   return (
     <div className="text-sm text-muted-foreground mb-4 space-y-1">
-      <p>DOB: {formatDate(patientDob)}</p>
+      <p>DOB: {formattedDob}</p>
       {earliestDate && latestDate && (
         <p className="break-words">
-          <span className="block sm:inline">Visit Period:</span> {formatDate(earliestDate)} to {formatDate(latestDate)}
+          <span className="block sm:inline">Visit Period:</span> {formattedEarliestDate} to {formattedLatestDate}
         </p>
       )}
       {complaintsDisplay && (

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { KanbanCardProps } from "./types";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
+import { SuperbillStatus } from "@/types/superbill";
 
 export function KanbanCard({ 
   superbill, 
@@ -16,6 +17,14 @@ export function KanbanCard({
   isCollapsed
 }: KanbanCardProps) {
   const navigate = useNavigate();
+  
+  // Convert string to SuperbillStatus when needed
+  const convertToSuperbillStatus = (status: string): SuperbillStatus => {
+    if (status === 'draft' || status === 'in_progress' || status === 'in_review' || status === 'completed') {
+      return status as SuperbillStatus;
+    }
+    return 'draft'; // Default fallback
+  };
   
   return (
     <div 
@@ -45,7 +54,7 @@ export function KanbanCard({
                 key={targetColumn.id}
                 variant="ghost" 
                 size="sm"
-                onClick={() => onStatusChange(superbill.id, targetColumn.id)}
+                onClick={() => onStatusChange(superbill.id, convertToSuperbillStatus(targetColumn.id))}
                 className={`text-xs py-0 h-7 hover:bg-muted ${isCollapsed ? "w-full" : "w-full sm:w-auto"}`}
               >
                 <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />

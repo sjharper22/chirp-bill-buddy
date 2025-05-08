@@ -4,19 +4,19 @@ import { LucideIcon } from "lucide-react";
 import { Superbill } from "@/types/superbill";
 
 export interface PatientInfoProps {
-  patientDob: string;
+  patientDob: Date | string;
   visitDates: {
-    earliestDate: Date | null;
-    latestDate: Date | null;
+    earliestDate: Date | string | null;
+    latestDate: Date | string | null;
   };
   complaints: string[];
 }
 
 export interface CardHeaderProps {
   patientName: string;
-  issueDate: string;
+  issueDate: Date | string;
   status: string;
-  statusVariant: "default" | "info" | "success" | "warning" | "danger";
+  statusVariant: "default" | "info" | "success" | "warning" | "error" | "danger";
   onStatusChange?: (newStatus: SuperbillStatus) => void;
 }
 

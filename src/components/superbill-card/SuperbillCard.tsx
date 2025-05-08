@@ -60,6 +60,10 @@ export function SuperbillCard({
       onSelectPatient(superbill.id);
     }
   };
+
+  // Get status variant and convert "error" to "danger" if needed for compatibility
+  const statusVariant = getStatusVariant(superbill.status);
+  const convertedStatusVariant = statusVariant === "error" ? "danger" : statusVariant;
   
   return (
     <Card 
@@ -82,7 +86,7 @@ export function SuperbillCard({
           patientName={superbill.patientName}
           issueDate={superbill.issueDate}
           status={formatStatus(superbill.status)}
-          statusVariant={getStatusVariant(superbill.status)}
+          statusVariant={convertedStatusVariant}
           onStatusChange={onStatusChange ? handleStatusChange : undefined}
         />
         

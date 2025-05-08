@@ -1,3 +1,4 @@
+
 import { SuperbillStatus } from "@/types/superbill";
 import { LucideIcon } from "lucide-react";
 import { Superbill } from "@/types/superbill";
@@ -41,4 +42,36 @@ export interface KanbanCardProps {
   }[];
   currentStatus?: SuperbillStatus;
   isCollapsed?: boolean;
+}
+
+export interface KanbanBoardProps {
+  superbills: Superbill[];
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  onDelete: (id: string) => void;
+  onStatusChange: (id: string, newStatus: SuperbillStatus) => void;
+  onSelectPatient?: (id: string) => void;
+  selectedPatientIds?: string[];
+  selectionMode?: boolean;
+}
+
+export interface KanbanHeaderProps {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  selectionMode?: boolean;
+  selectedCount?: number;
+  toggleSelectionMode?: () => void;
+  onAddSelectedToPatients?: () => void;
+  onFilterChange?: (status: SuperbillStatus | "all") => void;
+  onSortChange?: (order: "asc" | "desc") => void;
+  currentFilter?: SuperbillStatus | "all";
+  currentSort?: "asc" | "desc";
+}
+
+export interface KanbanColumn {
+  id: string;
+  title: string;
+  icon: LucideIcon;
+  description?: string;
+  bgColor?: string;
 }

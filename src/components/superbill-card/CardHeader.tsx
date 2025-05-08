@@ -48,6 +48,12 @@ export function CardHeader({
     }
   };
 
+  // Convert issueDate to proper Date if it's a string
+  const formattedDate = typeof issueDate === 'string' ? formatDate(new Date(issueDate)) : formatDate(issueDate);
+
+  // Convert statusVariant to match the expected type (change "danger" to "error" if needed)
+  const convertedStatusVariant = statusVariant === "danger" ? "error" : statusVariant;
+
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2 items-start justify-between">
@@ -56,7 +62,7 @@ export function CardHeader({
           <h3 className="font-semibold text-lg break-words hyphens-auto">{patientName}</h3>
         </div>
         <div className="text-sm bg-primary/10 text-primary font-medium px-2 py-0.5 rounded whitespace-nowrap">
-          {formatDate(issueDate)}
+          {formattedDate}
         </div>
       </div>
       
@@ -71,7 +77,7 @@ export function CardHeader({
         ) : (
           <StatusBadge 
             status={status} 
-            variant={statusVariant}
+            variant={convertedStatusVariant}
             className="w-fit"
           />
         )}
