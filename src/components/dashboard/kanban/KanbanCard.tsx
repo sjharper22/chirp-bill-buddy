@@ -12,14 +12,13 @@ export function KanbanCard({
   isPatientSelected,
   onDragStart,
   availableStatuses = [],
-  currentStatus,
-  isMobile
+  currentStatus
 }: KanbanCardProps) {
   const navigate = useNavigate();
   
   return (
     <div 
-      className="relative w-full"
+      className="relative min-w-0 w-full"
       draggable
       onDragStart={(e) => onDragStart && onDragStart(e, superbill.id)}
     >
@@ -31,29 +30,27 @@ export function KanbanCard({
           onSelectPatient={onSelectPatient}
           isPatientSelected={isPatientSelected}
           onStatusChange={onStatusChange}
-          isMobile={isMobile}
         />
       </div>
       
-      {availableStatuses.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1 justify-end">
-          {availableStatuses
-            .filter(targetColumn => targetColumn.id !== currentStatus)
-            .map(targetColumn => (
-              <Button 
-                key={targetColumn.id}
-                variant="ghost" 
-                size="sm"
-                onClick={() => onStatusChange(superbill.id, targetColumn.id)}
-                className="text-xs py-0 h-7 hover:bg-muted"
-              >
-                <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />
-                <span className="truncate">Move to {targetColumn.title}</span>
-              </Button>
-            ))
-          }
-        </div>
-      )}
+      {/* Move actions - positioned below the card with spacing */}
+      <div className="mt-2 flex flex-wrap gap-1 justify-end">
+        {availableStatuses
+          .filter(targetColumn => targetColumn.id !== currentStatus)
+          .map(targetColumn => (
+            <Button 
+              key={targetColumn.id}
+              variant="ghost" 
+              size="sm"
+              onClick={() => onStatusChange(superbill.id, targetColumn.id)}
+              className="text-xs py-0 h-7 hover:bg-muted"
+            >
+              <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />
+              <span className="truncate">Move to {targetColumn.title}</span>
+            </Button>
+          ))
+        }
+      </div>
     </div>
   );
 }

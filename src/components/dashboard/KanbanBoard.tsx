@@ -6,7 +6,6 @@ import { KanbanHeader } from "./kanban/KanbanHeader";
 import { KanbanColumn } from "./kanban/KanbanColumn";
 import { kanbanColumns } from "./kanban/kanbanConstants";
 import { KanbanBoardProps } from "./kanban/types";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export function KanbanBoard({
   superbills,
@@ -21,7 +20,6 @@ export function KanbanBoard({
   const [draggedBillId, setDraggedBillId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const isMobile = useIsMobile();
 
   // Filter superbills based on search term and status filter
   const filteredSuperbills = superbills
@@ -101,7 +99,7 @@ export function KanbanBoard({
         currentSort={sortOrder}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 lg:grid-cols-3 gap-3 md:gap-4 min-w-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {kanbanColumns.map(column => (
           <KanbanColumn
             key={column.id}
@@ -116,7 +114,6 @@ export function KanbanBoard({
             handleDragStart={handleDragStart}
             onSelectPatient={onSelectPatient}
             selectedPatientIds={selectedPatientIds}
-            isMobile={isMobile}
           />
         ))}
       </div>

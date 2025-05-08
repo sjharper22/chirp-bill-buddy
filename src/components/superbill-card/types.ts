@@ -1,23 +1,22 @@
 
+import { ReactNode } from "react";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 
 export interface SuperbillCardProps {
   superbill: Superbill;
-  onDelete?: (id: string) => void;
+  onDelete: (id: string) => void;
   onClick?: () => void;
   onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   isPatientSelected?: boolean;
   onStatusChange?: (id: string, newStatus: SuperbillStatus) => void;
-  isMobile?: boolean;
 }
 
 export interface CardHeaderProps {
   patientName: string;
   issueDate: Date;
-  status: SuperbillStatus;
-  statusVariant: string;
+  status: string;
+  statusVariant: 'default' | 'success' | 'warning' | 'info' | 'error';
   onStatusChange?: (newStatus: SuperbillStatus) => void;
-  compact?: boolean;
 }
 
 export interface PatientInfoProps {
@@ -27,7 +26,6 @@ export interface PatientInfoProps {
     latestDate: Date | null;
   };
   complaints: string[];
-  compact?: boolean;
 }
 
 export interface CardStatsProps {
@@ -37,6 +35,5 @@ export interface CardStatsProps {
 
 export interface CardActionsProps {
   superbillId: string;
-  onDelete?: (id: string) => void;
-  compact?: boolean;
+  onDelete: (id: string) => void;
 }

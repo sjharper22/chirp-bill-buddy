@@ -4,7 +4,6 @@ import { SuperbillStatus } from "@/types/superbill";
 import { getStatusVariant } from "@/lib/utils/visit-utils";
 import { KanbanColumnProps } from "./types";
 import { formatCurrency, formatDate } from "@/lib/utils/superbill-utils";
-import { KanbanCard } from "./KanbanCard";
 
 export function KanbanColumn({
   superbills,
@@ -17,21 +16,20 @@ export function KanbanColumn({
   onDragOver,
   onDragLeave,
   onDrop,
-  handleDragStart,
-  isMobile
+  handleDragStart
 }: KanbanColumnProps) {
   // Filter superbills that match this column's status
   const columnSuperbills = superbills.filter(bill => bill.status === column.id);
 
   return (
     <div
-      className="flex flex-col rounded-md border shadow-sm bg-card min-h-[400px] max-h-[500px] min-w-0"
+      className="flex flex-col rounded-md border shadow-sm bg-card h-[500px] min-w-0"
       onDragOver={(e) => onDragOver(e)}
       onDragLeave={(e) => onDragLeave(e)} 
       onDrop={(e) => onDrop(e, column.id as SuperbillStatus)}
     >
       <div className="flex items-center justify-between p-2 bg-muted/50 rounded-t-md shrink-0">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {column.icon && <column.icon className="h-4 w-4 shrink-0" />}
           <h3 className="font-medium truncate">{column.title}</h3>
           <StatusBadge 
@@ -40,25 +38,35 @@ export function KanbanColumn({
           />
         </div>
         <span className="text-sm text-muted-foreground whitespace-nowrap">
-          {columnSuperbills.length} {columnSuperbills.length === 1 ? 'bill' : 'bills'}
+          {columnSuperbills.length} {columnSuperbills.length === 1 ? 'superbill' : 'superbills'}
         </span>
       </div>
 
-      <div className="flex-1 p-2 overflow-y-auto space-y-2">
-        {columnSuperbills.map(superbill => (
-          <KanbanCard 
-            key={superbill.id}
-            superbill={superbill}
-            onDelete={onDelete}
-            onStatusChange={onStatusChange}
-            onSelectPatient={onSelectPatient}
-            isPatientSelected={selectedPatientIds?.includes(superbill.id)}
-            onDragStart={handleDragStart}
-            availableStatuses={allColumns}
-            currentStatus={column.id}
-            isMobile={isMobile}
-          />
-        ))}
+      <div className="flex-1 p-2 overflow-y-auto">
+        {columnSuperbills.map(superbill => {
+          // Calculate total fee from all visits
+          const totalFee = superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0);
+          // Get visit count
+          const visitCount = superbill.visits.length;
+          
+          return (
+            <div
+              key={superbill.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, superbill.id)}
+              className="p-3 mb-2 rounded-md border shadow-sm bg-white cursor-move hover:shadow-md transition-shadow"
+            >
+              <h4 className="font-semibold text-sm truncate">{superbill.patientName}</h4>
+              <div className="text-xs mt-1 text-muted-foreground">
+                <p className="truncate">DOB: {formatDate(superbill.patientDob)}</p>
+                <div className="flex justify-between mt-1">
+                  <span>Visits: {visitCount}</span>
+                  <span className="font-medium text-foreground">{formatCurrency(totalFee)}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {columnSuperbills.length === 0 && (

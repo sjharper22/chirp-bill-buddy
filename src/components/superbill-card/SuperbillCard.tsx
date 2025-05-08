@@ -23,8 +23,7 @@ export function SuperbillCard({
   onClick,
   onSelectPatient,
   isPatientSelected,
-  onStatusChange,
-  isMobile
+  onStatusChange
 }: SuperbillCardProps) {
   const totalFee = calculateTotalFee(superbill.visits);
   const visitCount = superbill.visits.length;
@@ -87,14 +86,12 @@ export function SuperbillCard({
           status={superbill.status}
           statusVariant={statusVariant}
           onStatusChange={onStatusChange ? handleStatusChange : undefined}
-          compact={isMobile}
         />
         
         <PatientInfo 
           patientDob={superbill.patientDob}
           visitDates={{ earliestDate, latestDate }}
           complaints={allComplaints}
-          compact={isMobile}
         />
         
         <CardStats 
@@ -107,7 +104,6 @@ export function SuperbillCard({
         <CardActions 
           superbillId={superbill.id}
           onDelete={onDelete}
-          compact={isMobile}
         />
       </CardFooter>
     </Card>
