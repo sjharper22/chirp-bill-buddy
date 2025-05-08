@@ -3,9 +3,7 @@ import { formatDate } from "@/lib/utils/superbill-utils";
 import { GripHorizontal } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { CardHeaderProps } from "./types";
-import { ReactNode } from "react";
 import { SuperbillStatus } from "@/types/superbill";
-import { StatusSelector } from "./StatusSelector";
 
 export function CardHeader({ 
   patientName, 
@@ -27,6 +25,32 @@ export function CardHeader({
       statusColor = '';
   }
 
+  const handleStatusClick = () => {
+    if (typeof onStatusChange === 'function') {
+      // Cycle through statuses: draft -> in_progress -> in_review -> completed -> draft
+      const currentStatus = status.toLowerCase();
+      let newStatus: SuperbillStatus;
+      
+      switch (currentStatus) {
+        case 'draft':
+          newStatus = 'in_progress';
+          break;
+        case 'in_progress':
+          newStatus = 'in_review';
+          break;
+        case 'in_review':
+          newStatus = 'completed';
+          break;
+        case 'completed':
+        default:
+          newStatus = 'draft';
+          break;
+      }
+      
+      onStatusChange(newStatus);
+    }
+  };
+
   return (
     <>
       <div className="flex justify-between items-start mb-2">
@@ -39,18 +63,18 @@ export function CardHeader({
         </div>
       </div>
       
-      <div className="mb-2 flex items-center justify-between">
-        <StatusBadge 
-          status={status} 
-          variant={statusVariant}
-          className={statusColor ? `bg-${statusColor}-100 text-${statusColor}-800 border-${statusColor}-200` : ''}
-        />
-        {typeof onStatusChange === 'function' && (
-          <StatusSelector
-            currentStatus={status as SuperbillStatus}
-            onStatusChange={onStatusChange}
+      <div className="mb-2 flex items-center">
+        <div 
+          onClick={onStatusChange ? handleStatusClick : undefined}
+          className={onStatusChange ? "cursor-pointer" : ""}
+          title={onStatusChange ? "Click to change status" : undefined}
+        >
+          <StatusBadge 
+            status={status} 
+            variant={statusVariant}
+            className={`${statusColor ? `bg-${statusColor}-100 text-${statusColor}-800 border-${statusColor}-200` : ''} ${onStatusChange ? 'hover:bg-opacity-80 transition-colors' : ''}`}
           />
-        )}
+        </div>
       </div>
     </>
   );

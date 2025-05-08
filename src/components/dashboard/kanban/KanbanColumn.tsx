@@ -3,6 +3,7 @@ import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { SuperbillStatus } from "@/types/superbill";
 import { getStatusVariant } from "@/lib/utils/visit-utils";
 import { KanbanColumnProps } from "./types";
+import { formatCurrency, formatDate } from "@/lib/utils/superbill-utils";
 
 export function KanbanColumn({
   superbills,
@@ -42,17 +43,30 @@ export function KanbanColumn({
       </div>
 
       <div className="flex-1 p-2 overflow-y-auto">
-        {columnSuperbills.map(superbill => (
-          <div
-            key={superbill.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, superbill.id)}
-            className="p-3 mb-2 rounded-md border shadow-sm bg-white cursor-move"
-          >
-            <h4 className="font-semibold text-sm">{superbill.patientName}</h4>
-            <p className="text-xs text-muted-foreground">{superbill.id}</p>
-          </div>
-        ))}
+        {columnSuperbills.map(superbill => {
+          // Calculate total fee from all visits
+          const totalFee = superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0);
+          // Get visit count
+          const visitCount = superbill.visits.length;
+          
+          return (
+            <div
+              key={superbill.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, superbill.id)}
+              className="p-3 mb-2 rounded-md border shadow-sm bg-white cursor-move"
+            >
+              <h4 className="font-semibold text-sm">{superbill.patientName}</h4>
+              <div className="text-xs mt-1 text-muted-foreground">
+                <p>DOB: {formatDate(superbill.patientDob)}</p>
+                <div className="flex justify-between mt-1">
+                  <span>Visits: {visitCount}</span>
+                  <span className="font-medium text-foreground">{formatCurrency(totalFee)}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {columnSuperbills.length === 0 && (
