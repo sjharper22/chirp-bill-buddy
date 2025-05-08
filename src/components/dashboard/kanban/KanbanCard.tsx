@@ -18,7 +18,7 @@ export function KanbanCard({
   
   return (
     <div 
-      className="relative"
+      className="relative min-w-0 w-full"
       draggable
       onDragStart={(e) => onDragStart && onDragStart(e, superbill.id)}
     >
@@ -45,8 +45,8 @@ export function KanbanCard({
               onClick={() => onStatusChange(superbill.id, targetColumn.id)}
               className="text-xs py-0 h-7 hover:bg-muted"
             >
-              <targetColumn.icon className="h-3 w-3 mr-1" />
-              Move to {targetColumn.title}
+              <targetColumn.icon className="h-3 w-3 mr-1 shrink-0" />
+              <span className="truncate">Move to {targetColumn.title}</span>
             </Button>
           ))
         }

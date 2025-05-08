@@ -23,21 +23,21 @@ export function KanbanColumn({
 
   return (
     <div
-      className="w-full h-full flex flex-col rounded-md border shadow-sm bg-card"
+      className="flex flex-col rounded-md border shadow-sm bg-card h-[500px] min-w-0"
       onDragOver={(e) => onDragOver(e)}
       onDragLeave={(e) => onDragLeave(e)} 
       onDrop={(e) => onDrop(e, column.id as SuperbillStatus)}
     >
-      <div className="flex items-center justify-between mb-2 p-2 bg-muted/50 rounded-t-md">
+      <div className="flex items-center justify-between p-2 bg-muted/50 rounded-t-md shrink-0">
         <div className="flex items-center gap-2">
-          {column.icon && <column.icon className="h-4 w-4" />}
-          <h3 className="font-medium">{column.title}</h3>
+          {column.icon && <column.icon className="h-4 w-4 shrink-0" />}
+          <h3 className="font-medium truncate">{column.title}</h3>
           <StatusBadge 
             status={column.id} 
             variant={getStatusVariant(column.id)} 
           />
         </div>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
           {columnSuperbills.length} {columnSuperbills.length === 1 ? 'superbill' : 'superbills'}
         </span>
       </div>
@@ -54,11 +54,11 @@ export function KanbanColumn({
               key={superbill.id}
               draggable
               onDragStart={(e) => handleDragStart(e, superbill.id)}
-              className="p-3 mb-2 rounded-md border shadow-sm bg-white cursor-move"
+              className="p-3 mb-2 rounded-md border shadow-sm bg-white cursor-move hover:shadow-md transition-shadow"
             >
-              <h4 className="font-semibold text-sm">{superbill.patientName}</h4>
+              <h4 className="font-semibold text-sm truncate">{superbill.patientName}</h4>
               <div className="text-xs mt-1 text-muted-foreground">
-                <p>DOB: {formatDate(superbill.patientDob)}</p>
+                <p className="truncate">DOB: {formatDate(superbill.patientDob)}</p>
                 <div className="flex justify-between mt-1">
                   <span>Visits: {visitCount}</span>
                   <span className="font-medium text-foreground">{formatCurrency(totalFee)}</span>
@@ -70,9 +70,9 @@ export function KanbanColumn({
       </div>
 
       {columnSuperbills.length === 0 && (
-        <div className="p-4 text-center">
-          <div className="bg-muted/30 p-8 rounded-md">
-            {column.icon && <column.icon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />}
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-muted/30 p-4 rounded-md w-full text-center">
+            {column.icon && <column.icon className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />}
             <p className="text-sm font-medium text-muted-foreground">No superbills</p>
             <p className="text-xs text-muted-foreground mt-1">
               {column.description || "Drag superbills here"}

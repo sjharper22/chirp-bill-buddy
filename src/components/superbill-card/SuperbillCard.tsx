@@ -1,3 +1,4 @@
+
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { formatStatus, getStatusVariant, calculateTotalFee } from "@/lib/utils/superbill-utils";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -64,7 +65,7 @@ export function SuperbillCard({
   
   return (
     <Card 
-      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} relative`} 
+      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''} relative w-full`} 
       onClick={onClick ? onClick : undefined}
     >
       {onSelectPatient && (

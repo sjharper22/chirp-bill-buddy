@@ -99,7 +99,7 @@ export function KanbanBoard({
         currentSort={sortOrder}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {kanbanColumns.map(column => (
           <KanbanColumn
             key={column.id}
