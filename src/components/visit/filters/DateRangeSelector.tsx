@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,6 +18,15 @@ interface DateRangeSelectorProps {
 }
 
 export function DateRangeSelector({ dateRange, onDateRangeChange }: DateRangeSelectorProps) {
+  const [fromMonth, setFromMonth] = useState<Date | undefined>(dateRange.from);
+  const [toMonth, setToMonth] = useState<Date | undefined>(dateRange.to);
+  
+  // Update displayed months when dateRange changes
+  useEffect(() => {
+    setFromMonth(dateRange.from);
+    setToMonth(dateRange.to);
+  }, [dateRange.from, dateRange.to]);
+
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Date Range</label>
@@ -34,6 +44,8 @@ export function DateRangeSelector({ dateRange, onDateRangeChange }: DateRangeSel
               selected={dateRange.from}
               onSelect={(date) => onDateRangeChange({ ...dateRange, from: date })}
               initialFocus
+              month={fromMonth}
+              defaultMonth={dateRange.from || new Date()}
               className={cn("p-3 pointer-events-auto")}
             />
           </PopoverContent>
@@ -52,6 +64,8 @@ export function DateRangeSelector({ dateRange, onDateRangeChange }: DateRangeSel
               selected={dateRange.to}
               onSelect={(date) => onDateRangeChange({ ...dateRange, to: date })}
               initialFocus
+              month={toMonth}
+              defaultMonth={dateRange.to || new Date()}
               className={cn("p-3 pointer-events-auto")}
             />
           </PopoverContent>

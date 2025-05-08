@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
@@ -17,6 +17,14 @@ interface DateOfBirthFieldProps {
 }
 
 export function DateOfBirthField({ value, onChange, error, disabled = false }: DateOfBirthFieldProps) {
+  // Track the month to display when the calendar is opened
+  const [displayedMonth, setDisplayedMonth] = useState<Date | undefined>(value);
+  
+  // Update displayedMonth when value changes
+  useEffect(() => {
+    setDisplayedMonth(value);
+  }, [value]);
+  
   return (
     <div className="space-y-2">
       <Label htmlFor="dob" className={error ? "text-destructive" : ""}>
@@ -56,6 +64,8 @@ export function DateOfBirthField({ value, onChange, error, disabled = false }: D
               selected={value}
               onSelect={date => date && onChange(date)}
               initialFocus
+              month={displayedMonth}
+              defaultMonth={value}
               className={cn("p-3 pointer-events-auto")}
               fromYear={1900}
               toYear={new Date().getFullYear()}

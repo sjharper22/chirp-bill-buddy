@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/utils/superbill-utils";
 import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 interface VisitDatePickerProps {
   visit: Visit;
@@ -13,6 +14,14 @@ interface VisitDatePickerProps {
 }
 
 export function VisitDatePicker({ visit, onVisitChange }: VisitDatePickerProps) {
+  // Track the month to display when the calendar is opened
+  const [displayedMonth, setDisplayedMonth] = useState<Date | undefined>(visit.date);
+  
+  // Update displayedMonth when visit.date changes
+  useEffect(() => {
+    setDisplayedMonth(visit.date);
+  }, [visit.date]);
+
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       onVisitChange({ ...visit, date });
@@ -33,6 +42,8 @@ export function VisitDatePicker({ visit, onVisitChange }: VisitDatePickerProps) 
           selected={visit.date}
           onSelect={handleDateChange}
           initialFocus
+          month={displayedMonth}
+          defaultMonth={visit.date}
           className={cn("p-3 pointer-events-auto")}
         />
       </PopoverContent>
