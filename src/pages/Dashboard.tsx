@@ -23,7 +23,7 @@ export default function Dashboard() {
   } = useDashboard();
   
   return (
-    <div className="space-y-6 w-full max-w-full overflow-hidden">
+    <div className="space-y-6 w-full">
       <DashboardHeader
         selectionMode={selectionMode}
         selectedPatientIds={selectedPatientIds}

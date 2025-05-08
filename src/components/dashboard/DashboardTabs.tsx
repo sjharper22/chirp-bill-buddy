@@ -31,7 +31,7 @@ export function DashboardTabs({
   handleSelectPatient,
   handleAddSelectedToPatients
 }: DashboardTabsProps) {
-  const [activeTab, setActiveTab] = useState("board"); // Default to board view
+  const [activeTab, setActiveTab] = useState("board"); // Changed default from "list" to "board"
   
   // Filter superbills based on search term
   const filteredSuperbills = superbills.filter(bill => 
@@ -41,19 +41,17 @@ export function DashboardTabs({
   
   return (
     <Tabs 
-      defaultValue="board"
+      defaultValue="board" // Changed from "list" to "board"
       value={activeTab} 
       onValueChange={setActiveTab} 
-      className="w-full"
+      className="w-full mt-8"
     >
-      <div className="flex justify-center mb-4">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="list">List View</TabsTrigger>
-          <TabsTrigger value="board">Board View</TabsTrigger>
-        </TabsList>
-      </div>
+      <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsTrigger value="list">List View</TabsTrigger>
+        <TabsTrigger value="board">Board View</TabsTrigger>
+      </TabsList>
       
-      <TabsContent value="list" className="mt-4 overflow-x-auto">
+      <TabsContent value="list" className="mt-6">
         <RecentSuperbills 
           filteredSuperbills={filteredSuperbills}
           searchTerm={searchTerm}
@@ -71,19 +69,17 @@ export function DashboardTabs({
         {!selectionMode && <QuickActions />}
       </TabsContent>
       
-      <TabsContent value="board" className="mt-4 overflow-hidden">
-        <div className="overflow-x-auto pb-4">
-          <KanbanBoard
-            superbills={filteredSuperbills}
-            searchTerm={searchTerm}
-            onSearchChange={onSearchChange}
-            onDelete={onDelete}
-            onStatusChange={onStatusChange}
-            onSelectPatient={selectionMode ? handleSelectPatient : undefined}
-            selectedPatientIds={selectedPatientIds}
-            selectionMode={selectionMode}
-          />
-        </div>
+      <TabsContent value="board" className="mt-6">
+        <KanbanBoard
+          superbills={filteredSuperbills}
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+          onDelete={onDelete}
+          onStatusChange={onStatusChange}
+          onSelectPatient={selectionMode ? handleSelectPatient : undefined}
+          selectedPatientIds={selectedPatientIds}
+          selectionMode={selectionMode}
+        />
       </TabsContent>
     </Tabs>
   );

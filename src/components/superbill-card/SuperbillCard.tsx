@@ -69,7 +69,7 @@ export function SuperbillCard({
       onClick={onClick ? onClick : undefined}
     >
       {onSelectPatient && (
-        <div className="absolute top-4 left-2 z-10">
+        <div className="absolute top-6 left-2 z-10">
           <Checkbox 
             checked={isPatientSelected}
             onCheckedChange={handleCheckboxChange}
@@ -79,7 +79,7 @@ export function SuperbillCard({
         </div>
       )}
       
-      <CardContent className={`pt-4 px-3 ${onSelectPatient ? 'pl-7' : ''}`}>
+      <CardContent className={`pt-6 ${onSelectPatient ? 'pl-8' : ''}`}>
         <CardHeader 
           patientName={superbill.patientName}
           issueDate={superbill.issueDate}
@@ -100,7 +100,7 @@ export function SuperbillCard({
         />
       </CardContent>
       
-      <CardFooter className="px-3 py-2">
+      <CardFooter>
         <CardActions 
           superbillId={superbill.id}
           onDelete={onDelete}
