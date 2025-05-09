@@ -7,6 +7,9 @@ import { KanbanColumn } from "./kanban/KanbanColumn";
 import { kanbanColumns } from "./kanban/kanbanConstants";
 import { KanbanBoardProps } from "./kanban/types";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useDragAndDrop } from "./kanban/hooks/useDragAndDrop";
+import { useKanbanFiltering } from "./kanban/hooks/useKanbanFiltering";
+import { useCardExpansion } from "./kanban/hooks/useCardExpansion";
 
 export function KanbanBoard({
   superbills,
@@ -18,112 +21,31 @@ export function KanbanBoard({
   selectedPatientIds,
   selectionMode
 }: KanbanBoardProps) {
-  const [draggedBillId, setDraggedBillId] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [expandedCardIds, setExpandedCardIds] = useState<string[]>([]);
-  const [isCompactView, setIsCompactView] = useState(true);
   const { state: sidebarState } = useSidebar();
-
-  // Filter superbills based on search term and status filter
-  const filteredSuperbills = superbills
-    .filter(bill => 
-      bill.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bill.id.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter(bill => statusFilter === "all" ? true : bill.status === statusFilter)
-    .sort((a, b) => {
-      const dateA = a.issueDate ? new Date(a.issueDate).getTime() : 0;
-      const dateB = b.issueDate ? new Date(b.issueDate).getTime() : 0;
-      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-    });
-
-  // Start dragging a superbill
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    setDraggedBillId(id);
-    if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = 'move';
-    }
-  };
-
-  // Handle drag over column to allow drop
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (e.currentTarget) {
-      e.currentTarget.classList.add('bg-muted/50');
-    }
-  };
-
-  // Handle drag leave to remove highlighting
-  const handleDragLeave = (e: React.DragEvent) => {
-    if (e.currentTarget) {
-      e.currentTarget.classList.remove('bg-muted/50');
-    }
-  };
-
-  // Handle drop of superbill in a column
-  const handleDrop = (e: React.DragEvent, newStatus: SuperbillStatus) => {
-    e.preventDefault();
-    
-    if (e.currentTarget) {
-      e.currentTarget.classList.remove('bg-muted/50');
-    }
-    
-    if (draggedBillId) {
-      const bill = superbills.find(b => b.id === draggedBillId);
-      if (bill && bill.status !== newStatus) {
-        onStatusChange(draggedBillId, newStatus);
-        toast({
-          title: "Status updated",
-          description: `Superbill for ${bill.patientName} moved to ${newStatus.replace('_', ' ')}.`,
-        });
-      }
-      setDraggedBillId(null);
-    }
-  };
-
-  const handleFilterChange = (status: SuperbillStatus | "all") => {
-    setStatusFilter(status);
-  };
-
-  const handleSortChange = (order: "asc" | "desc") => {
-    setSortOrder(order);
-  };
-
-  // Toggle individual card expansion
-  const handleToggleCardExpand = (id: string) => {
-    setExpandedCardIds(prevIds => {
-      if (prevIds.includes(id)) {
-        return prevIds.filter(cardId => cardId !== id);
-      } else {
-        return [...prevIds, id];
-      }
-    });
-  };
-
-  // Toggle global compact view
-  const handleViewModeToggle = () => {
-    // Get all visible superbill IDs
-    const allVisibleIds = filteredSuperbills.map(bill => bill.id);
-    
-    if (isCompactView) {
-      // Expand all cards - important to use ALL visible IDs
-      setExpandedCardIds(allVisibleIds);
-      toast({
-        description: "Expanded all cards",
-        duration: 2000,
-      });
-    } else {
-      // Collapse all cards
-      setExpandedCardIds([]);
-      toast({
-        description: "Collapsed all cards",
-        duration: 2000,
-      });
-    }
-    
-    setIsCompactView(!isCompactView);
-  };
+  const [isCompactView, setIsCompactView] = useState(true);
+  
+  // Custom hooks for kanban functionality
+  const { 
+    draggedBillId, 
+    handleDragStart, 
+    handleDragOver, 
+    handleDragLeave, 
+    handleDrop 
+  } = useDragAndDrop(superbills, onStatusChange);
+  
+  const {
+    statusFilter,
+    sortOrder,
+    filteredSuperbills,
+    handleFilterChange,
+    handleSortChange
+  } = useKanbanFiltering(superbills, searchTerm);
+  
+  const {
+    expandedCardIds,
+    handleToggleCardExpand,
+    handleViewModeToggle
+  } = useCardExpansion(filteredSuperbills, isCompactView, setIsCompactView);
 
   return (
     <div className="space-y-6 w-full">

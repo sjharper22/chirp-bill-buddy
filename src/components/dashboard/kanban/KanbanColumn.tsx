@@ -3,7 +3,6 @@ import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { SuperbillStatus } from "@/types/superbill";
 import { getStatusVariant } from "@/lib/utils/visit-utils";
 import { KanbanColumnProps } from "./types";
-import { formatCurrency, formatDate } from "@/lib/utils/superbill-utils";
 import { KanbanCard } from "./KanbanCard";
 
 export function KanbanColumn({
@@ -18,7 +17,10 @@ export function KanbanColumn({
   onDragLeave,
   onDrop,
   handleDragStart,
-  sidebarState
+  sidebarState,
+  expandedCardIds,
+  onToggleCardExpand,
+  isCompactView
 }: KanbanColumnProps) {
   // Filter superbills that match this column's status
   const columnSuperbills = superbills.filter(bill => bill.status === column.id);
@@ -65,6 +67,8 @@ export function KanbanColumn({
             availableStatuses={allColumns}
             currentStatus={column.id as SuperbillStatus}
             isCollapsed={isCollapsed}
+            isExpanded={expandedCardIds?.includes(superbill.id)}
+            onToggleExpand={onToggleCardExpand ? () => onToggleCardExpand(superbill.id) : undefined}
           />
         ))}
       </div>
