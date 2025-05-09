@@ -1,14 +1,12 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, UserPlus, CheckSquare, Expand, Minimize } from "lucide-react";
+import { Search, Plus, UserPlus, CheckSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
 import { toast } from "@/components/ui/use-toast";
 import { SuperbillFilters } from "./filters/SuperbillFilters";
-import { filterSuperbills, sortSuperbillsByDate } from "@/lib/utils/superbill-filter-utils";
 import { ViewModeToggle } from "@/components/superbill-card/ViewModeToggle";
 
 interface RecentSuperbillsProps {
@@ -102,14 +100,24 @@ export function RecentSuperbills({
 
   // Toggle global compact view
   const handleViewModeToggle = () => {
+    const allIds = displaySuperbills.map(bill => bill.id);
+    
     if (isCompactView) {
       // Expand all cards
-      const allIds = displaySuperbills.map(bill => bill.id);
       setExpandedCardIds(allIds);
+      toast({
+        description: "Expanded all cards",
+        duration: 2000,
+      });
     } else {
       // Collapse all cards
       setExpandedCardIds([]);
+      toast({
+        description: "Collapsed all cards",
+        duration: 2000,
+      });
     }
+    
     setIsCompactView(!isCompactView);
   };
 
