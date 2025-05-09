@@ -14,7 +14,9 @@ export function KanbanCard({
   onDragStart,
   availableStatuses = [],
   currentStatus,
-  isCollapsed
+  isCollapsed,
+  isExpanded,
+  onToggleExpand
 }: KanbanCardProps) {
   const navigate = useNavigate();
   
@@ -41,6 +43,8 @@ export function KanbanCard({
           isPatientSelected={isPatientSelected}
           onStatusChange={onStatusChange}
           isCollapsed={isCollapsed}
+          isExpanded={isExpanded}
+          onToggleExpand={onToggleExpand}
         />
       </div>
       

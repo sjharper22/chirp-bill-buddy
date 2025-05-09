@@ -1,13 +1,15 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, UserPlus, CheckSquare } from "lucide-react";
+import { Search, Plus, UserPlus, CheckSquare, Expand, Minimize } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
 import { toast } from "@/components/ui/use-toast";
 import { SuperbillFilters } from "./filters/SuperbillFilters";
 import { filterSuperbills, sortSuperbillsByDate } from "@/lib/utils/superbill-filter-utils";
+import { ViewModeToggle } from "@/components/superbill-card/ViewModeToggle";
 
 interface RecentSuperbillsProps {
   filteredSuperbills: Superbill[];
@@ -40,6 +42,8 @@ export function RecentSuperbills({
   const [expandSearch, setExpandSearch] = useState(false);
   const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [expandedCardIds, setExpandedCardIds] = useState<string[]>([]);
+  const [isCompactView, setIsCompactView] = useState(true);
   
   // Define status priority for sorting (incomplete statuses first)
   const getStatusPriority = (status: SuperbillStatus): number => {
@@ -85,12 +89,36 @@ export function RecentSuperbills({
       }
     : undefined;
   
+  // Toggle individual card expansion
+  const handleToggleCardExpand = (id: string) => {
+    setExpandedCardIds(prevIds => {
+      if (prevIds.includes(id)) {
+        return prevIds.filter(cardId => cardId !== id);
+      } else {
+        return [...prevIds, id];
+      }
+    });
+  };
+
+  // Toggle global compact view
+  const handleViewModeToggle = () => {
+    if (isCompactView) {
+      // Expand all cards
+      const allIds = displaySuperbills.map(bill => bill.id);
+      setExpandedCardIds(allIds);
+    } else {
+      // Collapse all cards
+      setExpandedCardIds([]);
+    }
+    setIsCompactView(!isCompactView);
+  };
+
   return (
     <div className="mb-10">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h2 className="text-xl font-semibold">Recent Superbills</h2>
         
-        <div className="flex items-center gap-4 mt-4 sm:mt-0 w-full sm:w-auto">
+        <div className="flex items-center gap-4 mt-4 sm:mt-0 w-full sm:w-auto flex-wrap">
           <div className={`relative transition-all ${expandSearch ? 'w-full sm:w-64' : 'w-10'}`}>
             <Search 
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer z-10" 
@@ -111,6 +139,11 @@ export function RecentSuperbills({
             onSortChange={setSortOrder}
             currentStatus={statusFilter}
             currentSort={sortOrder}
+          />
+          
+          <ViewModeToggle
+            isCompactView={isCompactView}
+            onToggle={handleViewModeToggle}
           />
           
           {toggleSelectionMode && (
@@ -151,6 +184,8 @@ export function RecentSuperbills({
               onSelectPatient={selectionMode ? handleSelectPatient : undefined}
               isPatientSelected={selectedPatientIds.includes(superbill.id)}
               onStatusChange={onStatusChange}
+              isExpanded={expandedCardIds.includes(superbill.id)}
+              onToggleExpand={handleToggleCardExpand}
             />
           ))
         ) : (

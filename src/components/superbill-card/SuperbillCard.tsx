@@ -9,6 +9,7 @@ import { SuperbillStatus } from "@/types/superbill";
 import { getStatusVariant } from "@/lib/utils/visit-utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SuperbillCardProps } from "./types";
+import { useState, useEffect } from "react";
 
 export function SuperbillCard({ 
   superbill, 
@@ -17,8 +18,16 @@ export function SuperbillCard({
   onSelectPatient, 
   isPatientSelected,
   onStatusChange,
-  isCollapsed
+  isCollapsed,
+  isExpanded: controlledIsExpanded,
+  onToggleExpand
 }: SuperbillCardProps) {
+  // Use internal state for expansion if not controlled externally
+  const [isExpandedInternal, setIsExpandedInternal] = useState(false);
+  
+  // Determine if card is expanded - use controlled prop if provided, otherwise use internal state
+  const isExpanded = controlledIsExpanded !== undefined ? controlledIsExpanded : isExpandedInternal;
+  
   // Calculate total fee from all visits
   const totalFee = superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0);
   
@@ -61,6 +70,15 @@ export function SuperbillCard({
     }
   };
 
+  // Handle expand toggle
+  const handleToggleExpand = () => {
+    if (onToggleExpand) {
+      onToggleExpand(superbill.id);
+    } else {
+      setIsExpandedInternal(!isExpandedInternal);
+    }
+  };
+
   // Get status variant and convert "error" to "danger" if needed for compatibility
   const statusVariant = getStatusVariant(superbill.status);
   const convertedStatusVariant = statusVariant === "error" ? "danger" : statusVariant;
@@ -88,12 +106,15 @@ export function SuperbillCard({
           status={formatStatus(superbill.status)}
           statusVariant={convertedStatusVariant}
           onStatusChange={onStatusChange ? handleStatusChange : undefined}
+          isExpanded={isExpanded}
+          onToggleExpand={handleToggleExpand}
         />
         
         <PatientInfo 
           patientDob={superbill.patientDob}
           visitDates={{ earliestDate, latestDate }}
           complaints={allComplaints}
+          isExpanded={isExpanded}
         />
         
         <CardStats 
@@ -106,6 +127,7 @@ export function SuperbillCard({
         superbillId={superbill.id} 
         onDelete={onDelete}
         isCollapsed={isCollapsed}
+        isExpanded={isExpanded}
       />
     </Card>
   );

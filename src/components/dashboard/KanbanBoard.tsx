@@ -21,6 +21,8 @@ export function KanbanBoard({
   const [draggedBillId, setDraggedBillId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [expandedCardIds, setExpandedCardIds] = useState<string[]>([]);
+  const [isCompactView, setIsCompactView] = useState(true);
   const { state: sidebarState } = useSidebar();
 
   // Filter superbills based on search term and status filter
@@ -88,6 +90,30 @@ export function KanbanBoard({
     setSortOrder(order);
   };
 
+  // Toggle individual card expansion
+  const handleToggleCardExpand = (id: string) => {
+    setExpandedCardIds(prevIds => {
+      if (prevIds.includes(id)) {
+        return prevIds.filter(cardId => cardId !== id);
+      } else {
+        return [...prevIds, id];
+      }
+    });
+  };
+
+  // Toggle global compact view
+  const handleViewModeToggle = () => {
+    if (isCompactView) {
+      // Expand all cards
+      const allIds = filteredSuperbills.map(bill => bill.id);
+      setExpandedCardIds(allIds);
+    } else {
+      // Collapse all cards
+      setExpandedCardIds([]);
+    }
+    setIsCompactView(!isCompactView);
+  };
+
   return (
     <div className="space-y-6 w-full">
       <KanbanHeader 
@@ -99,6 +125,8 @@ export function KanbanBoard({
         onSortChange={handleSortChange}
         currentFilter={statusFilter}
         currentSort={sortOrder}
+        isCompactView={isCompactView}
+        onViewModeToggle={handleViewModeToggle}
       />
 
       <div className={`overflow-x-auto pb-4 snap-x snap-mandatory ${sidebarState === "collapsed" ? "pr-0" : "pr-2"}`}>
@@ -118,6 +146,9 @@ export function KanbanBoard({
               onSelectPatient={onSelectPatient}
               selectedPatientIds={selectedPatientIds}
               sidebarState={sidebarState}
+              expandedCardIds={expandedCardIds}
+              onToggleCardExpand={handleToggleCardExpand}
+              isCompactView={isCompactView}
             />
           ))}
         </div>

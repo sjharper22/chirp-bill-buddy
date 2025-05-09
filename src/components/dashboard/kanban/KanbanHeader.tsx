@@ -1,107 +1,140 @@
 
-import { Search, Plus, UserPlus, CheckSquare, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { KanbanHeaderProps } from "./types";
+import { Input } from "@/components/ui/input";
+import { Search, Plus, CheckSquare, UserPlus } from "lucide-react";
 import { useState } from "react";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { KanbanHeaderProps } from "./types";
 import { SuperbillStatus } from "@/types/superbill";
-import { StatusFilterSelector } from "@/components/visit/filters/StatusFilterSelector";
-import { SortOrderSelector } from "@/components/visit/filters/SortOrderSelector";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ViewModeToggle } from "@/components/superbill-card/ViewModeToggle";
 
-export function KanbanHeader({ 
-  searchTerm, 
-  onSearchChange, 
-  selectionMode, 
-  selectedCount,
+export function KanbanHeader({
+  searchTerm,
+  onSearchChange,
+  selectionMode,
+  selectedCount = 0,
   toggleSelectionMode,
   onAddSelectedToPatients,
   onFilterChange,
   onSortChange,
   currentFilter = "all",
-  currentSort = "desc"
+  currentSort = "desc",
+  isCompactView,
+  onViewModeToggle
 }: KanbanHeaderProps) {
-  const navigate = useNavigate();
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [expandSearch, setExpandSearch] = useState(false);
+  
+  // Filter options
+  const filterOptions = [
+    { value: "all", label: "All Statuses" },
+    { value: "draft", label: "Draft" },
+    { value: "in_progress", label: "In Progress" },
+    { value: "in_review", label: "In Review" },
+    { value: "completed", label: "Completed" }
+  ];
+  
+  // Sort options
+  const sortOptions = [
+    { value: "desc", label: "Newest First" },
+    { value: "asc", label: "Oldest First" }
+  ];
   
   return (
-    <div className="flex flex-col space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+      <div className="flex items-center space-x-2">
         <h2 className="text-xl font-semibold">Superbills Board</h2>
-        
-        {!selectionMode && (
-          <Button onClick={() => navigate("/new")} size="sm" className="hidden sm:flex">
-            <Plus className="mr-2 h-4 w-4 shrink-0" />
-            New Superbill
-          </Button>
+        {selectedCount > 0 && (
+          <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
+            {selectedCount} selected
+          </span>
         )}
       </div>
       
-      <div className="flex flex-wrap gap-2">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+      <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+        <div className={`relative transition-all ${expandSearch ? 'w-full sm:w-64' : 'w-10'}`}>
+          <Search 
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer z-10" 
+            onClick={() => setExpandSearch(true)}
+          />
           <Input
             placeholder="Search superbills..."
             value={searchTerm}
             onChange={e => onSearchChange(e.target.value)}
-            className="pl-10 w-full"
+            onFocus={() => setExpandSearch(true)}
+            onBlur={() => searchTerm === '' && setExpandSearch(false)}
+            className={`transition-all pl-10 ${expandSearch ? 'opacity-100 w-full' : 'opacity-0 w-0 p-0 -ml-10'}`}
           />
         </div>
         
-        <div className="flex flex-wrap gap-2">
-          {onFilterChange && onSortChange && (
-            <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Filter className="h-4 w-4 shrink-0" />
-                  <span>Filters</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4" align="end">
-                <div className="space-y-4">
-                  <StatusFilterSelector 
-                    selectedStatus={currentFilter} 
-                    onStatusChange={onFilterChange} 
-                  />
-                  <SortOrderSelector 
-                    sortOrder={currentSort} 
-                    onSortOrderChange={onSortChange} 
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
-          )}
-          
-          {toggleSelectionMode && (
-            <Button 
-              onClick={toggleSelectionMode} 
-              variant={selectionMode ? "secondary" : "outline"}
-              size="sm"
-              className="whitespace-nowrap"
-            >
-              <CheckSquare className="mr-2 h-4 w-4 shrink-0" />
-              {selectionMode ? "Cancel" : "Select"}
-            </Button>
-          )}
+        {onFilterChange && (
+          <Select
+            value={currentFilter}
+            onValueChange={(value) => onFilterChange(value as SuperbillStatus | "all")}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              {filterOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        
+        {onSortChange && (
+          <Select
+            value={currentSort}
+            onValueChange={(value) => onSortChange(value as "asc" | "desc")}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Sort by date" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        
+        {onViewModeToggle && isCompactView !== undefined && (
+          <ViewModeToggle 
+            isCompactView={isCompactView}
+            onToggle={onViewModeToggle}
+          />
+        )}
+        
+        {toggleSelectionMode && (
+          <Button 
+            onClick={toggleSelectionMode} 
+            variant={selectionMode ? "secondary" : "outline"}
+            className="whitespace-nowrap"
+          >
+            <CheckSquare className="mr-2 h-4 w-4" />
+            {selectionMode ? "Cancel Selection" : "Select Patients"}
+          </Button>
+        )}
 
-          {selectionMode && selectedCount && selectedCount > 0 && onAddSelectedToPatients && (
-            <Button onClick={onAddSelectedToPatients} size="sm" className="whitespace-nowrap">
-              <UserPlus className="mr-2 h-4 w-4 shrink-0" />
-              Add {selectedCount}
-            </Button>
-          )}
-          
-          {!selectionMode && (
-            <Button onClick={() => navigate("/new")} size="sm" className="sm:hidden">
-              <Plus className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+        {selectionMode && selectedCount > 0 && onAddSelectedToPatients && (
+          <Button onClick={onAddSelectedToPatients} className="whitespace-nowrap">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add {selectedCount} to Patients
+          </Button>
+        )}
+        
+        {!selectionMode && (
+          <Button asChild>
+            <a href="/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Superbill
+            </a>
+          </Button>
+        )}
       </div>
     </div>
   );

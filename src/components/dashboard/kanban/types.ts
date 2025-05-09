@@ -26,6 +26,9 @@ export interface KanbanColumnProps {
   onDrop: (e: React.DragEvent, status: SuperbillStatus) => void;
   handleDragStart: (e: React.DragEvent, id: string) => void;
   sidebarState?: "expanded" | "collapsed";
+  expandedCardIds?: string[];
+  onToggleCardExpand?: (id: string) => void;
+  isCompactView?: boolean;
 }
 
 export interface KanbanCardProps {
@@ -42,6 +45,8 @@ export interface KanbanCardProps {
   }[];
   currentStatus?: SuperbillStatus;
   isCollapsed?: boolean;
+  isExpanded?: boolean;
+  onToggleExpand?: (id: string) => void;
 }
 
 export interface KanbanBoardProps {
@@ -66,6 +71,8 @@ export interface KanbanHeaderProps {
   onSortChange?: (order: "asc" | "desc") => void;
   currentFilter?: SuperbillStatus | "all";
   currentSort?: "asc" | "desc";
+  isCompactView?: boolean;
+  onViewModeToggle?: () => void;
 }
 
 export interface KanbanColumn {

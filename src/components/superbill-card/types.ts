@@ -10,6 +10,7 @@ export interface PatientInfoProps {
     latestDate: Date | string | null;
   };
   complaints: string[];
+  isExpanded: boolean;
 }
 
 export interface CardHeaderProps {
@@ -18,6 +19,8 @@ export interface CardHeaderProps {
   status: string;
   statusVariant: "default" | "info" | "success" | "warning" | "error" | "danger";
   onStatusChange?: (newStatus: SuperbillStatus) => void;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
 }
 
 export interface CardStatsProps {
@@ -29,6 +32,7 @@ export interface CardActionsProps {
   superbillId: string;
   onDelete: (id: string) => void;
   isCollapsed?: boolean;
+  isExpanded: boolean;
 }
 
 export interface SuperbillCardProps {
@@ -39,9 +43,16 @@ export interface SuperbillCardProps {
   isPatientSelected?: boolean;
   onStatusChange?: (id: string, newStatus: SuperbillStatus) => void;
   isCollapsed?: boolean;
+  isExpanded?: boolean;
+  onToggleExpand?: (id: string) => void;
 }
 
 export interface StatusSelectorProps {
   currentStatus: SuperbillStatus;
   onStatusChange: (newStatus: SuperbillStatus) => void;
+}
+
+export interface ViewModeToggleProps {
+  isCompactView: boolean;
+  onToggle: () => void;
 }
