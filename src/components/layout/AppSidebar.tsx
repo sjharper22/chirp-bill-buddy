@@ -80,7 +80,7 @@ export function AppSidebar() {
                 side="right" 
                 sideOffset={20} 
                 align="start"
-                className="z-50 bg-popover font-medium shadow-lg"
+                className="z-[1000] bg-popover px-3 py-2 text-sm font-medium rounded-md text-foreground shadow-xl border border-border opacity-100"
               >
                 {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               </TooltipContent>
