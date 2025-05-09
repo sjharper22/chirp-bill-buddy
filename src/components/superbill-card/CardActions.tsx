@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 import { Edit, Eye, Trash2 } from "lucide-react";
 import { CardActionsProps } from "./types";
 
-export function CardActions({ superbillId, onDelete, isCollapsed, isExpanded }: CardActionsProps) {
+export function CardActions({ superbillId, onDelete, isCollapsed }: CardActionsProps) {
   return (
-    <div className={`border-t pt-4 pb-4 flex flex-wrap gap-2 p-4 ${isExpanded ? 'animate-fade-in' : ''}`}>
+    <div className="border-t pt-4 pb-4 flex flex-wrap gap-2 p-4">
       <Button 
         variant="outline" 
         size="sm" 

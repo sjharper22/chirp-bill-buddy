@@ -1,55 +1,60 @@
 
-// Function to determine badge variant based on status
-export function getStatusVariant(status: string): "default" | "info" | "success" | "warning" | "error" {
-  // Normalize status for consistent checks
-  const normalizedStatus = status.toLowerCase();
-  
-  // Map status to variant
-  if (normalizedStatus.includes('complet') || normalizedStatus === 'done') {
-    return 'success';
-  }
-  
-  if (normalizedStatus.includes('review')) {
-    return 'info';
-  }
-  
-  if (normalizedStatus.includes('progress') || normalizedStatus.includes('pending')) {
-    return 'warning';
-  }
-  
-  if (normalizedStatus.includes('error') || normalizedStatus.includes('fail')) {
-    return 'error';
-  }
-  
-  // Default for draft and other statuses
-  return 'default';
-}
+import { Visit } from "@/types/superbill";
+import { SuperbillStatus } from "@/types/superbill";
 
-// Function to format status for display
-export function statusToDisplay(status: string): string {
-  return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-}
-
-// Function to create an empty visit
-import { Visit } from '@/types/superbill';
-import { generateId } from './id-utils';
-
+// Create an empty visit with default values
 export function createEmptyVisit(): Visit {
   return {
-    id: generateId(),
+    id: crypto.randomUUID(),
     date: new Date(),
     icdCodes: [],
     cptCodes: [],
+    mainComplaints: [],
     fee: 0,
     notes: '',
-    mainComplaints: []
+    status: 'draft'
   };
 }
 
-// Function to duplicate a visit
+// Duplicate an existing visit
 export function duplicateVisit(visit: Visit): Visit {
   return {
     ...visit,
-    id: generateId()
+    id: crypto.randomUUID(),
   };
+}
+
+// Get the visual variant for a status
+export function getStatusVariant(status: SuperbillStatus | string): "default" | "success" | "warning" | "info" | "error" {
+  // Normalize the status string
+  const normalizedStatus = status.toLowerCase();
+  
+  switch (normalizedStatus) {
+    case 'completed':
+      return 'success';
+    case 'in_progress':
+      return 'warning';
+    case 'in_review':
+      return 'info';
+    case 'draft':
+      return 'default';
+    default:
+      return 'default';
+  }
+}
+
+// Convert a status to a display friendly format
+export function statusToDisplay(status: SuperbillStatus | string): string {
+  switch (status) {
+    case 'in_progress': 
+      return 'In Progress';
+    case 'in_review':
+      return 'In Review';
+    case 'completed':
+      return 'Completed';
+    case 'draft':
+      return 'Draft';
+    default:
+      return status;
+  }
 }

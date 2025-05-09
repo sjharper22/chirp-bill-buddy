@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from "react";
 import { Superbill } from "@/types/superbill";
 import { CardHeader } from "./CardHeader";
 import { PatientInfo } from "./PatientInfo";
@@ -18,11 +17,8 @@ export function SuperbillCard({
   onSelectPatient, 
   isPatientSelected,
   onStatusChange,
-  isCollapsed,
-  defaultExpanded = false
+  isCollapsed
 }: SuperbillCardProps) {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  
   // Calculate total fee from all visits
   const totalFee = superbill.visits.reduce((sum, visit) => sum + (visit.fee || 0), 0);
   
@@ -61,26 +57,17 @@ export function SuperbillCard({
   // Handle patient selection
   const handleSelectPatient = () => {
     if (onSelectPatient) {
-      onSelectPatient(
-        superbill.id, 
-        superbill.patientName, 
-        superbill.patientDob, 
-        !isPatientSelected
-      );
+      onSelectPatient(superbill.id);
     }
-  };
-  
-  // Toggle expanded state
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
   };
 
   // Get status variant and convert "error" to "danger" if needed for compatibility
   const statusVariant = getStatusVariant(superbill.status);
+  const convertedStatusVariant = statusVariant === "error" ? "danger" : statusVariant;
   
   return (
     <Card 
-      className={`hover:shadow-md transition-all duration-300 ${onClick && !onSelectPatient ? 'cursor-pointer' : ''} ${isExpanded ? 'shadow-md' : ''}`} 
+      className={`hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`} 
       onClick={onClick}
     >
       <div className="p-4 space-y-4">
@@ -99,17 +86,14 @@ export function SuperbillCard({
           patientName={superbill.patientName}
           issueDate={superbill.issueDate}
           status={formatStatus(superbill.status)}
-          statusVariant={statusVariant}
+          statusVariant={convertedStatusVariant}
           onStatusChange={onStatusChange ? handleStatusChange : undefined}
-          isExpanded={isExpanded}
-          onToggleExpand={toggleExpanded}
         />
         
         <PatientInfo 
           patientDob={superbill.patientDob}
           visitDates={{ earliestDate, latestDate }}
           complaints={allComplaints}
-          isExpanded={isExpanded}
         />
         
         <CardStats 
@@ -118,14 +102,11 @@ export function SuperbillCard({
         />
       </div>
       
-      {isExpanded && (
-        <CardActions 
-          superbillId={superbill.id} 
-          onDelete={onDelete}
-          isCollapsed={isCollapsed}
-          isExpanded={isExpanded}
-        />
-      )}
+      <CardActions 
+        superbillId={superbill.id} 
+        onDelete={onDelete}
+        isCollapsed={isCollapsed}
+      />
     </Card>
   );
 }

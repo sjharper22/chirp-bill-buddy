@@ -2,7 +2,7 @@
 import { formatDate } from "@/lib/utils/superbill-utils";
 import { PatientInfoProps } from "./types";
 
-export function PatientInfo({ patientDob, visitDates, complaints, isExpanded }: PatientInfoProps) {
+export function PatientInfo({ patientDob, visitDates, complaints }: PatientInfoProps) {
   const { earliestDate, latestDate } = visitDates;
   
   // Format dates properly, handling both string and Date objects
@@ -25,21 +25,15 @@ export function PatientInfo({ patientDob, visitDates, complaints, isExpanded }: 
   return (
     <div className="text-sm text-muted-foreground mb-4 space-y-1">
       <p>DOB: {formattedDob}</p>
-      
-      {/* Only show additional details if expanded */}
-      {isExpanded && (
-        <>
-          {earliestDate && latestDate && (
-            <p className="break-words animate-fade-in">
-              <span className="block sm:inline">Visit Period:</span> {formattedEarliestDate} to {formattedLatestDate}
-            </p>
-          )}
-          {complaintsDisplay && (
-            <p className="font-medium text-foreground break-words animate-fade-in">
-              <span className="block sm:inline">Primary Complaints:</span> {complaintsDisplay}
-            </p>
-          )}
-        </>
+      {earliestDate && latestDate && (
+        <p className="break-words">
+          <span className="block sm:inline">Visit Period:</span> {formattedEarliestDate} to {formattedLatestDate}
+        </p>
+      )}
+      {complaintsDisplay && (
+        <p className="font-medium text-foreground break-words">
+          <span className="block sm:inline">Primary Complaints:</span> {complaintsDisplay}
+        </p>
       )}
     </div>
   );

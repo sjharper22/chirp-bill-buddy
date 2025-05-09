@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { KanbanCardProps } from "./types";
@@ -18,7 +17,6 @@ export function KanbanCard({
   isCollapsed
 }: KanbanCardProps) {
   const navigate = useNavigate();
-  const [isExpanded, setIsExpanded] = useState(false);
   
   // Convert string to SuperbillStatus when needed
   const convertToSuperbillStatus = (status: string): SuperbillStatus => {

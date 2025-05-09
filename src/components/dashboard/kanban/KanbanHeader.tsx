@@ -1,76 +1,107 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Search, Plus, UserPlus, CheckSquare, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Search, UserPlus, Check, CheckSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { SuperbillStatus } from "@/types/superbill";
-import { SuperbillFilters } from "@/components/dashboard/filters/SuperbillFilters";
 import { KanbanHeaderProps } from "./types";
-import { CardViewToggle } from "./CardViewToggle";
+import { useState } from "react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { SuperbillStatus } from "@/types/superbill";
+import { StatusFilterSelector } from "@/components/visit/filters/StatusFilterSelector";
+import { SortOrderSelector } from "@/components/visit/filters/SortOrderSelector";
 
-export function KanbanHeader({
-  searchTerm,
-  onSearchChange,
-  selectionMode,
+export function KanbanHeader({ 
+  searchTerm, 
+  onSearchChange, 
+  selectionMode, 
   selectedCount,
+  toggleSelectionMode,
+  onAddSelectedToPatients,
   onFilterChange,
   onSortChange,
-  currentFilter,
-  currentSort,
-  viewMode,
-  onViewModeChange
+  currentFilter = "all",
+  currentSort = "desc"
 }: KanbanHeaderProps) {
   const navigate = useNavigate();
-  const [expandSearch, setExpandSearch] = useState(false);
-
+  const [filterOpen, setFilterOpen] = useState(false);
+  
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Superbills Board</h2>
-        {selectedCount !== undefined && selectedCount > 0 && (
-          <span className="bg-primary text-primary-foreground text-sm rounded-full px-2">
-            {selectedCount} selected
-          </span>
-        )}
-      </div>
-      
-      <div className="flex items-center flex-wrap gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
-        {/* Card View Toggle */}
-        {viewMode && onViewModeChange && (
-          <CardViewToggle
-            viewMode={viewMode}
-            onChange={onViewModeChange}
-          />
-        )}
-        
-        <div className={`relative transition-all ${expandSearch ? 'w-full sm:w-64' : 'w-10'}`}>
-          <Search 
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer z-10" 
-            onClick={() => setExpandSearch(true)}
-          />
-          <Input
-            placeholder="Search superbills..."
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onFocus={() => setExpandSearch(true)}
-            onBlur={() => searchTerm === '' && setExpandSearch(false)}
-            className={`transition-all pl-10 ${expandSearch ? 'opacity-100 w-full' : 'opacity-0 w-0 p-0 -ml-10 sm:ml-0'}`}
-          />
-        </div>
-        
-        <SuperbillFilters 
-          onStatusFilter={onFilterChange}
-          onSortChange={onSortChange}
-          currentStatus={currentFilter}
-          currentSort={currentSort}
-        />
         
         {!selectionMode && (
-          <Button onClick={() => navigate("/new")} className="whitespace-nowrap ml-auto sm:ml-0">
+          <Button onClick={() => navigate("/new")} size="sm" className="hidden sm:flex">
+            <Plus className="mr-2 h-4 w-4 shrink-0" />
             New Superbill
           </Button>
         )}
+      </div>
+      
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search superbills..."
+            value={searchTerm}
+            onChange={e => onSearchChange(e.target.value)}
+            className="pl-10 w-full"
+          />
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {onFilterChange && onSortChange && (
+            <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Filter className="h-4 w-4 shrink-0" />
+                  <span>Filters</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="end">
+                <div className="space-y-4">
+                  <StatusFilterSelector 
+                    selectedStatus={currentFilter} 
+                    onStatusChange={onFilterChange} 
+                  />
+                  <SortOrderSelector 
+                    sortOrder={currentSort} 
+                    onSortOrderChange={onSortChange} 
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+          
+          {toggleSelectionMode && (
+            <Button 
+              onClick={toggleSelectionMode} 
+              variant={selectionMode ? "secondary" : "outline"}
+              size="sm"
+              className="whitespace-nowrap"
+            >
+              <CheckSquare className="mr-2 h-4 w-4 shrink-0" />
+              {selectionMode ? "Cancel" : "Select"}
+            </Button>
+          )}
+
+          {selectionMode && selectedCount && selectedCount > 0 && onAddSelectedToPatients && (
+            <Button onClick={onAddSelectedToPatients} size="sm" className="whitespace-nowrap">
+              <UserPlus className="mr-2 h-4 w-4 shrink-0" />
+              Add {selectedCount}
+            </Button>
+          )}
+          
+          {!selectionMode && (
+            <Button onClick={() => navigate("/new")} size="sm" className="sm:hidden">
+              <Plus className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
