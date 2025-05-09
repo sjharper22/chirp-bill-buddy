@@ -13,7 +13,7 @@ export interface KanbanColumnProps {
   superbills: Superbill[];
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: SuperbillStatus) => void;
-  onSelectPatient?: (id: string) => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   selectedPatientIds?: string[];
   allColumns: {
     id: string;
@@ -32,7 +32,7 @@ export interface KanbanCardProps {
   superbill: Superbill;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: SuperbillStatus) => void;
-  onSelectPatient?: (id: string) => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   isPatientSelected?: boolean;
   onDragStart?: (e: React.DragEvent, id: string) => void;
   availableStatuses?: {
@@ -50,7 +50,7 @@ export interface KanbanBoardProps {
   onSearchChange: (value: string) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, newStatus: SuperbillStatus) => void;
-  onSelectPatient?: (id: string) => void;
+  onSelectPatient?: (id: string, name: string, dob: Date, selected: boolean) => void;
   selectedPatientIds?: string[];
   selectionMode?: boolean;
 }
@@ -62,10 +62,12 @@ export interface KanbanHeaderProps {
   selectedCount?: number;
   toggleSelectionMode?: () => void;
   onAddSelectedToPatients?: () => void;
-  onFilterChange?: (status: SuperbillStatus | "all") => void;
-  onSortChange?: (order: "asc" | "desc") => void;
-  currentFilter?: SuperbillStatus | "all";
-  currentSort?: "asc" | "desc";
+  onFilterChange: (status: SuperbillStatus | "all") => void;
+  onSortChange: (order: "asc" | "desc") => void;
+  currentFilter: SuperbillStatus | "all";
+  currentSort: "asc" | "desc";
+  viewMode?: "compact" | "detailed";
+  onViewModeChange?: (mode: "compact" | "detailed") => void;
 }
 
 export interface KanbanColumn {

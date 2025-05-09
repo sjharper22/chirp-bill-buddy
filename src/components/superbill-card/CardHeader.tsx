@@ -1,11 +1,11 @@
 
 import { formatDate } from "@/lib/utils/superbill-utils";
-import { GripHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { CardHeaderProps } from "./types";
-import { SuperbillStatus } from "@/types/superbill";
-import { StatusSelector } from "./StatusSelector";
+import { ChevronDown, ChevronUp, GripHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StatusSelector } from "./StatusSelector";
+import { getStatusVariant, statusToDisplay } from "@/lib/utils/visit-utils";
 
 export function CardHeader({ 
   patientName, 
@@ -16,88 +16,51 @@ export function CardHeader({
   isExpanded,
   onToggleExpand
 }: CardHeaderProps) {
-  // Enhanced color handling for status badges
-  let statusColor;
-  switch(status.toLowerCase()) {
-    case 'in_review':
-      statusColor = 'purple'; // In Review is purple
-      break;
-    case 'in_progress':
-      statusColor = 'amber'; // In Progress is amber/yellow
-      break;
-    case 'completed':
-      statusColor = 'green'; // Completed is green
-      break;
-    case 'draft':
-    default:
-      statusColor = 'blue'; // Draft is blue
-  }
+  // Format the date properly if it's a string or Date object
+  const formattedDate = typeof issueDate === 'string' ? 
+    formatDate(new Date(issueDate)) : 
+    formatDate(issueDate);
 
-  // Convert display status back to SuperbillStatus format
-  const getSuperbillStatus = (displayStatus: string): SuperbillStatus => {
-    const normalizedStatus = displayStatus.toLowerCase();
-    
-    if (normalizedStatus.includes('progress')) return 'in_progress';
-    if (normalizedStatus.includes('review')) return 'in_review';
-    if (normalizedStatus.includes('complet')) return 'completed';
-    return 'draft';
+  const handleToggleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleExpand();
   };
-
-  const currentStatus = getSuperbillStatus(status);
   
-  const handleStatusChange = (newStatus: SuperbillStatus) => {
-    if (onStatusChange) {
-      onStatusChange(newStatus);
-    }
-  };
-
-  // Convert issueDate to proper Date if it's a string
-  const formattedDate = typeof issueDate === 'string' 
-    ? formatDate(new Date(issueDate)) 
-    : formatDate(issueDate);
-
-  // Convert statusVariant to match the expected type (change "danger" to "error" if needed)
-  const convertedStatusVariant = statusVariant === "danger" ? "error" : statusVariant;
-
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2 items-start justify-between">
-        <div className="flex items-center gap-2">
-          <GripHorizontal className="h-4 w-4 text-muted-foreground drag-handle shrink-0" />
-          <h3 className="font-semibold text-lg break-words hyphens-auto">{patientName}</h3>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="text-sm bg-primary/10 text-primary font-medium px-2 py-0.5 rounded whitespace-nowrap">
-            {formattedDate}
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-6 w-6 p-0"
-            onClick={onToggleExpand}
+    <div className="flex justify-between items-start">
+      <div className="flex-grow">
+        <div className="flex items-center">
+          <GripHorizontal className="h-4 w-4 mr-2 text-muted-foreground drag-handle" />
+          <h3 className="font-semibold text-lg truncate max-w-[180px]">{patientName}</h3>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-0 ml-2"
+            onClick={handleToggleExpand}
           >
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
+            {isExpanded ? 
+              <ChevronUp className="h-4 w-4 text-muted-foreground" /> : 
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            }
           </Button>
+        </div>
+        
+        <div className="text-sm text-primary/90 font-medium mt-0.5">
+          {formattedDate}
         </div>
       </div>
       
-      <div className="flex flex-wrap items-start gap-2">
+      <div>
         {onStatusChange ? (
-          <div onClick={(e) => e.stopPropagation()}>
-            <StatusSelector 
-              currentStatus={currentStatus}
-              onStatusChange={handleStatusChange}
-            />
-          </div>
+          <StatusSelector 
+            currentStatus={status.toLowerCase() as any}
+            onStatusChange={onStatusChange}
+          />
         ) : (
           <StatusBadge 
             status={status} 
-            variant={convertedStatusVariant}
-            className="w-fit"
+            variant={statusVariant as "default" | "info" | "success" | "warning" | "error"}
           />
         )}
       </div>

@@ -39,9 +39,7 @@ export function KanbanCard({
           superbill={superbill}
           onDelete={onDelete}
           onClick={!onSelectPatient ? () => navigate(`/view/${superbill.id}`) : undefined}
-          onSelectPatient={onSelectPatient ? (id, name, dob, selected) => {
-            if (onSelectPatient) onSelectPatient(id, name, dob, selected);
-          } : undefined}
+          onSelectPatient={onSelectPatient}
           isPatientSelected={isPatientSelected}
           onStatusChange={onStatusChange}
           isCollapsed={isCollapsed}

@@ -71,14 +71,12 @@ export function SuperbillCard({
   };
   
   // Toggle expanded state
-  const toggleExpanded = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
 
   // Get status variant and convert "error" to "danger" if needed for compatibility
   const statusVariant = getStatusVariant(superbill.status);
-  const convertedStatusVariant = statusVariant === "error" ? "danger" : statusVariant;
   
   return (
     <Card 
@@ -101,7 +99,7 @@ export function SuperbillCard({
           patientName={superbill.patientName}
           issueDate={superbill.issueDate}
           status={formatStatus(superbill.status)}
-          statusVariant={convertedStatusVariant}
+          statusVariant={statusVariant}
           onStatusChange={onStatusChange ? handleStatusChange : undefined}
           isExpanded={isExpanded}
           onToggleExpand={toggleExpanded}

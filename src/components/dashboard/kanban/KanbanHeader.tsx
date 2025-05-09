@@ -18,7 +18,7 @@ export function KanbanHeader({
   onSortChange,
   currentFilter,
   currentSort,
-  viewMode = "detailed",
+  viewMode,
   onViewModeChange
 }: KanbanHeaderProps) {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export function KanbanHeader({
       
       <div className="flex items-center flex-wrap gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
         {/* Card View Toggle */}
-        {onViewModeChange && (
+        {viewMode && onViewModeChange && (
           <CardViewToggle
             viewMode={viewMode}
             onChange={onViewModeChange}

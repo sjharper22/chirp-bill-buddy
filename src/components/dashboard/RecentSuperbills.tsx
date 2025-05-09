@@ -74,20 +74,6 @@ export function RecentSuperbills({
     })
     .slice(0, 6); // Show only the most recent 6 superbills based on filters
   
-  // Helper function to adapt onSelectPatient to handle different signatures
-  const handleSelectPatient = onSelectPatient 
-    ? (id: string) => {
-        // Find the superbill to get patient name and DOB
-        const superbill = filteredSuperbills.find(bill => bill.id === id);
-        if (superbill) {
-          // Check if already selected
-          const isSelected = !(selectedPatientIds?.includes(id) || false);
-          // Call onSelectPatient with all required arguments
-          onSelectPatient(id, superbill.patientName, superbill.patientDob, isSelected);
-        }
-      }
-    : undefined;
-  
   return (
     <div className="mb-10">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -173,9 +159,7 @@ export function RecentSuperbills({
               superbill={superbill}
               onDelete={onDelete}
               onClick={!selectionMode ? () => navigate(`/view/${superbill.id}`) : undefined}
-              onSelectPatient={selectionMode && handleSelectPatient ? (id, name, dob, selected) => {
-                if (onSelectPatient) onSelectPatient(id, name, dob, selected);
-              } : undefined}
+              onSelectPatient={onSelectPatient}
               isPatientSelected={selectedPatientIds.includes(superbill.id)}
               onStatusChange={onStatusChange}
               defaultExpanded={viewMode === "detailed"}

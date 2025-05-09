@@ -1,6 +1,6 @@
 
 import { Visit, Superbill } from "@/types/superbill";
-import { createEmptyVisit, generateId } from "@/lib/utils/superbill-utils";
+import { generateId } from "@/lib/utils/id-utils";
 import { ReactStateUpdater } from "./types";
 
 /**
@@ -21,8 +21,16 @@ export function useVisitOperations(
   };
   
   const addVisit = () => {
-    // Use createEmptyVisit with correct arguments
-    const newVisit = createEmptyVisit();
+    // Create a new empty visit
+    const newVisit: Visit = {
+      id: generateId(),
+      date: new Date(),
+      icdCodes: [],
+      cptCodes: [],
+      fee: 0,
+      notes: '',
+      mainComplaints: []
+    };
     
     // If there are default main complaints, use the first one
     if (superbill.defaultMainComplaints && superbill.defaultMainComplaints.length > 0) {

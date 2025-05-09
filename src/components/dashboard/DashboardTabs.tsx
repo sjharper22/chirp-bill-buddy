@@ -39,11 +39,6 @@ export function DashboardTabs({
     bill.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     bill.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Helper function to adapt handleSelectPatient for the KanbanBoard component
-  const handleKanbanSelectPatient = (id: string, name: string, dob: Date, selected: boolean) => {
-    handleSelectPatient(id, name, dob, selected);
-  };
   
   return (
     <Tabs 
@@ -82,7 +77,7 @@ export function DashboardTabs({
           onSearchChange={onSearchChange}
           onDelete={onDelete}
           onStatusChange={onStatusChange}
-          onSelectPatient={selectionMode ? handleKanbanSelectPatient : undefined}
+          onSelectPatient={handleSelectPatient}
           selectedPatientIds={selectedPatientIds}
           selectionMode={selectionMode}
         />
