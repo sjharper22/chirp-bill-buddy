@@ -15,12 +15,13 @@ export function KanbanBoard({
   onDelete,
   onStatusChange,
   onSelectPatient,
-  selectedPatientIds,
-  selectionMode
+  selectedPatientIds = [],
+  selectionMode = false
 }: KanbanBoardProps) {
   const [draggedBillId, setDraggedBillId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [viewMode, setViewMode] = useState<"compact" | "detailed">("detailed");
   const { state: sidebarState } = useSidebar();
 
   // Filter superbills based on search term and status filter
@@ -87,6 +88,10 @@ export function KanbanBoard({
   const handleSortChange = (order: "asc" | "desc") => {
     setSortOrder(order);
   };
+  
+  const handleViewModeChange = (mode: "compact" | "detailed") => {
+    setViewMode(mode);
+  };
 
   return (
     <div className="space-y-6 w-full">
@@ -99,6 +104,8 @@ export function KanbanBoard({
         onSortChange={handleSortChange}
         currentFilter={statusFilter}
         currentSort={sortOrder}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
       />
 
       <div className={`overflow-x-auto pb-4 snap-x snap-mandatory ${sidebarState === "collapsed" ? "pr-0" : "pr-2"}`}>

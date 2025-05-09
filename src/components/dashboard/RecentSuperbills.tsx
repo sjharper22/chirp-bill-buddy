@@ -1,13 +1,15 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, UserPlus, CheckSquare } from "lucide-react";
+import { Search, Plus, UserPlus, CheckSquare, LayoutGrid, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuperbillCard } from "@/components/superbill-card/SuperbillCard";
 import { toast } from "@/components/ui/use-toast";
 import { SuperbillFilters } from "./filters/SuperbillFilters";
 import { filterSuperbills, sortSuperbillsByDate } from "@/lib/utils/superbill-filter-utils";
+import { Toggle } from "@/components/ui/toggle";
 
 interface RecentSuperbillsProps {
   filteredSuperbills: Superbill[];
@@ -40,6 +42,7 @@ export function RecentSuperbills({
   const [expandSearch, setExpandSearch] = useState(false);
   const [statusFilter, setStatusFilter] = useState<SuperbillStatus | "all">("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [viewMode, setViewMode] = useState<"compact" | "detailed">("detailed");
   
   // Define status priority for sorting (incomplete statuses first)
   const getStatusPriority = (status: SuperbillStatus): number => {
@@ -90,7 +93,29 @@ export function RecentSuperbills({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h2 className="text-xl font-semibold">Recent Superbills</h2>
         
-        <div className="flex items-center gap-4 mt-4 sm:mt-0 w-full sm:w-auto">
+        <div className="flex items-center gap-4 mt-4 sm:mt-0 w-full sm:w-auto flex-wrap">
+          {/* Card View Toggle */}
+          <div className="flex items-center border rounded-md overflow-hidden">
+            <Toggle
+              aria-label="Toggle compact view"
+              pressed={viewMode === "compact"}
+              onPressedChange={() => setViewMode("compact")}
+              className={`rounded-none rounded-l-md px-3 ${viewMode === "compact" ? "bg-muted" : ""}`}
+            >
+              <Menu className="h-4 w-4 mr-1" />
+              <span className="sr-only sm:not-sr-only sm:text-xs">Compact</span>
+            </Toggle>
+            <Toggle
+              aria-label="Toggle detailed view"
+              pressed={viewMode === "detailed"}
+              onPressedChange={() => setViewMode("detailed")}
+              className={`rounded-none rounded-r-md px-3 ${viewMode === "detailed" ? "bg-muted" : ""}`}
+            >
+              <LayoutGrid className="h-4 w-4 mr-1" />
+              <span className="sr-only sm:not-sr-only sm:text-xs">Detailed</span>
+            </Toggle>
+          </div>
+        
           <div className={`relative transition-all ${expandSearch ? 'w-full sm:w-64' : 'w-10'}`}>
             <Search 
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer z-10" 
@@ -148,9 +173,12 @@ export function RecentSuperbills({
               superbill={superbill}
               onDelete={onDelete}
               onClick={!selectionMode ? () => navigate(`/view/${superbill.id}`) : undefined}
-              onSelectPatient={selectionMode ? handleSelectPatient : undefined}
+              onSelectPatient={selectionMode && handleSelectPatient ? (id, name, dob, selected) => {
+                if (onSelectPatient) onSelectPatient(id, name, dob, selected);
+              } : undefined}
               isPatientSelected={selectedPatientIds.includes(superbill.id)}
               onStatusChange={onStatusChange}
+              defaultExpanded={viewMode === "detailed"}
             />
           ))
         ) : (

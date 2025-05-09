@@ -32,6 +32,7 @@ export function DashboardTabs({
   handleAddSelectedToPatients
 }: DashboardTabsProps) {
   const [activeTab, setActiveTab] = useState("board"); // Changed default from "list" to "board"
+  const [viewMode, setViewMode] = useState<"compact" | "detailed">("detailed");
   
   // Filter superbills based on search term
   const filteredSuperbills = superbills.filter(bill => 
@@ -40,15 +41,8 @@ export function DashboardTabs({
   );
 
   // Helper function to adapt handleSelectPatient for the KanbanBoard component
-  const handleKanbanSelectPatient = (id: string) => {
-    // Find the superbill to get patient name and DOB
-    const superbill = superbills.find(bill => bill.id === id);
-    if (superbill) {
-      // Check if already selected
-      const isSelected = !(selectedPatientIds?.includes(id) || false);
-      // Call handleSelectPatient with all required arguments
-      handleSelectPatient(id, superbill.patientName, superbill.patientDob, isSelected);
-    }
+  const handleKanbanSelectPatient = (id: string, name: string, dob: Date, selected: boolean) => {
+    handleSelectPatient(id, name, dob, selected);
   };
   
   return (

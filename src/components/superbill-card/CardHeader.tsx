@@ -1,17 +1,20 @@
 
 import { formatDate } from "@/lib/utils/superbill-utils";
-import { GripHorizontal } from "lucide-react";
+import { GripHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
 import { CardHeaderProps } from "./types";
 import { SuperbillStatus } from "@/types/superbill";
 import { StatusSelector } from "./StatusSelector";
+import { Button } from "@/components/ui/button";
 
 export function CardHeader({ 
   patientName, 
   issueDate, 
   status, 
   statusVariant, 
-  onStatusChange 
+  onStatusChange,
+  isExpanded,
+  onToggleExpand
 }: CardHeaderProps) {
   // Enhanced color handling for status badges
   let statusColor;
@@ -49,7 +52,9 @@ export function CardHeader({
   };
 
   // Convert issueDate to proper Date if it's a string
-  const formattedDate = typeof issueDate === 'string' ? formatDate(new Date(issueDate)) : formatDate(issueDate);
+  const formattedDate = typeof issueDate === 'string' 
+    ? formatDate(new Date(issueDate)) 
+    : formatDate(issueDate);
 
   // Convert statusVariant to match the expected type (change "danger" to "error" if needed)
   const convertedStatusVariant = statusVariant === "danger" ? "error" : statusVariant;
@@ -61,8 +66,22 @@ export function CardHeader({
           <GripHorizontal className="h-4 w-4 text-muted-foreground drag-handle shrink-0" />
           <h3 className="font-semibold text-lg break-words hyphens-auto">{patientName}</h3>
         </div>
-        <div className="text-sm bg-primary/10 text-primary font-medium px-2 py-0.5 rounded whitespace-nowrap">
-          {formattedDate}
+        <div className="flex items-center gap-2">
+          <div className="text-sm bg-primary/10 text-primary font-medium px-2 py-0.5 rounded whitespace-nowrap">
+            {formattedDate}
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6 p-0"
+            onClick={onToggleExpand}
+          >
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
       
