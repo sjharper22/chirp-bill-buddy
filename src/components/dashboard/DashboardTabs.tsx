@@ -2,7 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
-import { RecentSuperbills } from "./RecentSuperbills";
+import { RecentSuperbills } from "./recent-superbills/RecentSuperbills";
 import { KanbanBoard } from "./KanbanBoard";
 import { QuickActions } from "./QuickActions";
 
@@ -31,7 +31,7 @@ export function DashboardTabs({
   handleSelectPatient,
   handleAddSelectedToPatients
 }: DashboardTabsProps) {
-  const [activeTab, setActiveTab] = useState("board"); // Changed default from "list" to "board"
+  const [activeTab, setActiveTab] = useState("board"); 
   
   // Filter superbills based on search term
   const filteredSuperbills = superbills.filter(bill => 
@@ -53,7 +53,7 @@ export function DashboardTabs({
   
   return (
     <Tabs 
-      defaultValue="board" // Changed from "list" to "board"
+      defaultValue="board" 
       value={activeTab} 
       onValueChange={setActiveTab} 
       className="w-full mt-8"
