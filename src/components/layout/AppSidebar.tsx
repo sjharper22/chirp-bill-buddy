@@ -78,9 +78,8 @@ export function AppSidebar() {
               </TooltipTrigger>
               <TooltipContent 
                 side="right" 
-                sideOffset={30} 
-                align="center"
-                className="!z-[9999] bg-background px-3 py-2 text-sm font-bold rounded-md text-foreground shadow-xl border border-border"
+                sideOffset={8}
+                className="!z-[9999] bg-background px-3 py-1.5 text-sm font-medium"
               >
                 {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               </TooltipContent>
