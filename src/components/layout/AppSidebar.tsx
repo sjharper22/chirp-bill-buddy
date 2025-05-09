@@ -60,14 +60,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
-      <div className={`p-4 ${isCollapsed ? "flex justify-center" : ""}`}>
+      <div className={`px-4 py-4 ${isCollapsed ? "flex justify-center" : ""}`}>
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"}`}>
           {!isCollapsed && <PracticeLogo />}
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="ml-2">
-                  <SidebarTrigger className="hover:bg-sidebar-accent transition-all duration-300">
+                <div className={isCollapsed ? "flex justify-center" : "ml-auto"}>
+                  <SidebarTrigger className="hover:bg-sidebar-accent transition-all ease-in-out duration-300">
                     {isCollapsed ? (
                       <ChevronRight className="w-4 h-4 transition-transform duration-300" />
                     ) : (
@@ -147,3 +147,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
