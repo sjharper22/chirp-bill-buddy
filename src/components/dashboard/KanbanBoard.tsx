@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { toast } from "@/components/ui/use-toast";
@@ -102,22 +103,26 @@ export function KanbanBoard({
 
   // Toggle global compact view
   const handleViewModeToggle = () => {
-    const allIds = filteredSuperbills.map(bill => bill.id);
+    // Get all visible superbill IDs
+    const allVisibleIds = filteredSuperbills.map(bill => bill.id);
     
     if (isCompactView) {
-      // Expand all cards
-      setExpandedCardIds(allIds);
+      // Expand all cards - important to use ALL visible IDs
+      setExpandedCardIds(allVisibleIds);
+      toast({
+        description: "Expanded all cards",
+        duration: 2000,
+      });
     } else {
       // Collapse all cards
       setExpandedCardIds([]);
+      toast({
+        description: "Collapsed all cards",
+        duration: 2000,
+      });
     }
     
     setIsCompactView(!isCompactView);
-    
-    toast({
-      description: isCompactView ? "Expanded all cards" : "Collapsed all cards",
-      duration: 2000,
-    });
   };
 
   return (

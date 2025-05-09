@@ -8,7 +8,7 @@ export function ViewModeToggle({ isCompactView, onToggle }: ViewModeToggleProps)
     <Button
       variant="outline"
       size="sm"
-      onClick={() => onToggle()} // Ensure we call the function
+      onClick={() => onToggle()}
       className="whitespace-nowrap"
     >
       {isCompactView ? (

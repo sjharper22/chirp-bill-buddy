@@ -5,8 +5,13 @@ import { Edit, Eye, Trash2 } from "lucide-react";
 import { CardActionsProps } from "./types";
 
 export function CardActions({ superbillId, onDelete, isCollapsed, isExpanded }: CardActionsProps) {
+  // Only render content if expanded
+  if (!isExpanded) {
+    return null; // Don't render anything when not expanded
+  }
+  
   return (
-    <div className={`border-t pt-4 pb-4 flex flex-wrap gap-2 p-4 transition-all duration-300 ${isExpanded ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden border-transparent'}`}>
+    <div className="border-t pt-4 pb-4 flex flex-wrap gap-2 p-4">
       <Button 
         variant="outline" 
         size="sm" 

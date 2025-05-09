@@ -22,16 +22,20 @@ export function PatientInfo({ patientDob, visitDates, complaints, isExpanded }: 
         : complaints.join(", "))
     : null;
     
+  // Important: We always show the DOB, but the visit period and complaints only when expanded
   return (
-    <div className={`text-sm text-muted-foreground mb-4 space-y-1 transition-all duration-300 ${isExpanded ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden mb-0'}`}>
+    <div className="text-sm text-muted-foreground mb-4">
       <p>DOB: {formattedDob}</p>
-      {earliestDate && latestDate && isExpanded && (
-        <p className="break-words">
+      
+      {/* The following elements are conditionally rendered based on expansion state */}
+      {isExpanded && earliestDate && latestDate && (
+        <p className="break-words mt-1">
           <span className="block sm:inline">Visit Period:</span> {formattedEarliestDate} to {formattedLatestDate}
         </p>
       )}
-      {complaintsDisplay && isExpanded && (
-        <p className="font-medium text-foreground break-words">
+      
+      {isExpanded && complaintsDisplay && (
+        <p className="font-medium text-foreground break-words mt-1">
           <span className="block sm:inline">Primary Complaints:</span> {complaintsDisplay}
         </p>
       )}

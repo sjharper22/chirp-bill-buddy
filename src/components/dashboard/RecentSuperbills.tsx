@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
@@ -100,11 +101,12 @@ export function RecentSuperbills({
 
   // Toggle global compact view
   const handleViewModeToggle = () => {
-    const allIds = displaySuperbills.map(bill => bill.id);
+    // Get all visible superbill IDs
+    const allVisibleIds = displaySuperbills.map(bill => bill.id);
     
     if (isCompactView) {
-      // Expand all cards
-      setExpandedCardIds(allIds);
+      // Expand all cards - important to use ALL visible IDs
+      setExpandedCardIds(allVisibleIds);
       toast({
         description: "Expanded all cards",
         duration: 2000,
