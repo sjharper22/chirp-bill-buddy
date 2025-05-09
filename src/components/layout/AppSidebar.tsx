@@ -63,7 +63,7 @@ export function AppSidebar() {
       <div className={`px-4 py-4 ${isCollapsed ? "flex justify-center" : ""}`}>
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"}`}>
           {!isCollapsed && <PracticeLogo />}
-          <TooltipProvider delayDuration={300}>
+          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className={isCollapsed ? "flex justify-center" : "ml-auto"}>
@@ -78,9 +78,9 @@ export function AppSidebar() {
               </TooltipTrigger>
               <TooltipContent 
                 side="right" 
-                sideOffset={20} 
-                align="start"
-                className="z-[1000] bg-popover px-3 py-2 text-sm font-medium rounded-md text-foreground shadow-xl border border-border opacity-100"
+                sideOffset={30} 
+                align="center"
+                className="!z-[9999] bg-background px-3 py-2 text-sm font-bold rounded-md text-foreground shadow-xl border border-border"
               >
                 {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               </TooltipContent>
