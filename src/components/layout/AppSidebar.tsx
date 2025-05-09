@@ -24,11 +24,14 @@ import {
   Activity,
   Menu,
   LayoutTemplate,
-  UserCog
+  UserCog,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -60,7 +63,24 @@ export function AppSidebar() {
       <div className={`p-4 ${isCollapsed ? "flex justify-center" : ""}`}>
         <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"}`}>
           {!isCollapsed && <PracticeLogo />}
-          <SidebarTrigger className={isCollapsed ? "" : "ml-2"} />
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="ml-2">
+                  <SidebarTrigger className="hover:bg-sidebar-accent transition-all duration-300">
+                    {isCollapsed ? (
+                      <ChevronRight className="w-4 h-4 transition-transform duration-300" />
+                    ) : (
+                      <ChevronLeft className="w-4 h-4 transition-transform duration-300" />
+                    )}
+                  </SidebarTrigger>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
       <SidebarContent>
