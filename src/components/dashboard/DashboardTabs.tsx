@@ -78,6 +78,7 @@ export function DashboardTabs({
           onAddSelectedToPatients={handleAddSelectedToPatients}
         />
         
+        {/* Only show QuickActions in one place and when not in selection mode */}
         {!selectionMode && <QuickActions />}
       </TabsContent>
       

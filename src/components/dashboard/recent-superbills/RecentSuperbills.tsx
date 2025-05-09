@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Superbill, SuperbillStatus } from "@/types/superbill";
 import { toast } from "@/components/ui/use-toast";
-import { QuickActions } from "../QuickActions";
 import { Toolbar } from "./Toolbar";
 import { SuperbillsGrid } from "./SuperbillsGrid";
 import { ViewAllFooter } from "./ViewAllFooter";
@@ -146,7 +145,7 @@ export function RecentSuperbills({
         selectionMode={selectionMode}
       />
       
-      {!selectionMode && <QuickActions />}
+      {/* Removed the QuickActions component from here as it's already rendered in DashboardTabs */}
     </div>
   );
 }
