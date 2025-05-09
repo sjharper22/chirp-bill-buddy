@@ -76,7 +76,12 @@ export function AppSidebar() {
                   </SidebarTrigger>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={10} align="center">
+              <TooltipContent 
+                side="right" 
+                sideOffset={20} 
+                align="start"
+                className="z-50 bg-popover font-medium shadow-lg"
+              >
                 {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               </TooltipContent>
             </Tooltip>
