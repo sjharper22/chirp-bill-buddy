@@ -76,7 +76,7 @@ export function AppSidebar() {
                   </SidebarTrigger>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="right">
+              <TooltipContent side="right" sideOffset={10} align="center">
                 {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               </TooltipContent>
             </Tooltip>
@@ -147,4 +147,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
