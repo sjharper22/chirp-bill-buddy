@@ -74,8 +74,14 @@ export function RecentSuperbills({
   // Helper function to adapt onSelectPatient to handle different signatures
   const handleSelectPatient = onSelectPatient 
     ? (id: string) => {
-        // Call onSelectPatient with just the ID, since that's what the SuperbillCard expects
-        onSelectPatient(id);
+        // Find the superbill to get patient name and DOB
+        const superbill = filteredSuperbills.find(bill => bill.id === id);
+        if (superbill) {
+          // Check if already selected
+          const isSelected = !(selectedPatientIds?.includes(id) || false);
+          // Call onSelectPatient with all required arguments
+          onSelectPatient(id, superbill.patientName, superbill.patientDob, isSelected);
+        }
       }
     : undefined;
   

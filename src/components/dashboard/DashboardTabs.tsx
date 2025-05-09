@@ -38,6 +38,18 @@ export function DashboardTabs({
     bill.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     bill.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Helper function to adapt handleSelectPatient for the KanbanBoard component
+  const handleKanbanSelectPatient = (id: string) => {
+    // Find the superbill to get patient name and DOB
+    const superbill = superbills.find(bill => bill.id === id);
+    if (superbill) {
+      // Check if already selected
+      const isSelected = !(selectedPatientIds?.includes(id) || false);
+      // Call handleSelectPatient with all required arguments
+      handleSelectPatient(id, superbill.patientName, superbill.patientDob, isSelected);
+    }
+  };
   
   return (
     <Tabs 
@@ -76,7 +88,7 @@ export function DashboardTabs({
           onSearchChange={onSearchChange}
           onDelete={onDelete}
           onStatusChange={onStatusChange}
-          onSelectPatient={selectionMode ? handleSelectPatient : undefined}
+          onSelectPatient={selectionMode ? handleKanbanSelectPatient : undefined}
           selectedPatientIds={selectedPatientIds}
           selectionMode={selectionMode}
         />
