@@ -1,4 +1,3 @@
-
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getSelection, $isRangeSelection } from 'lexical';
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +49,8 @@ export function VariableInsertPlugin({ variables }: VariableInsertPluginProps) {
       if ($isRangeSelection(selection)) {
         const variableNode = $createVariableNode(variable);
         selection.insertNodes([variableNode]);
+        // Keep cursor position right after the variable node
+        selection.collapse();
       }
     });
     

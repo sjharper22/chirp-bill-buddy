@@ -13,7 +13,12 @@ export function TemplateContentPreview({ processedContent }: TemplateContentPrev
   return (
     <Card className="p-4">
       <div className="prose prose-sm max-w-none">
-        <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: processedContent.replace(/\n/g, '<br />') }} />
+        <div 
+          className="whitespace-pre-line" 
+          dangerouslySetInnerHTML={{ 
+            __html: processedContent 
+          }} 
+        />
       </div>
     </Card>
   );

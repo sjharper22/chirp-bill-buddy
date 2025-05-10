@@ -28,8 +28,8 @@ export class VariableNode extends TextNode {
   constructor(variableName: string, text?: string, key?: NodeKey) {
     super(text || `{{${variableName}}}`, key);
     this.__variableName = variableName;
-    // Make variable nodes immutable to prevent text editing issues
-    this.setMode('token'); // Changed from 'immutable' to 'token' which is a valid TextModeType
+    // Use 'segmented' mode instead of 'token' to allow typing after the node
+    this.setMode('segmented');
   }
 
   getVariableName(): string {
@@ -45,7 +45,7 @@ export class VariableNode extends TextNode {
     dom.style.margin = '0 2px';
     dom.style.color = 'rgb(37, 99, 235)';  // Blue text color
     dom.style.fontWeight = 'bold';
-    dom.style.cursor = 'default';
+    dom.style.display = 'inline-block';  // Make it inline-block to ensure text can flow around it
     dom.style.whiteSpace = 'nowrap';
     dom.setAttribute('data-variable', this.__variableName);
     return dom;
@@ -70,11 +70,6 @@ export class VariableNode extends TextNode {
       variableName: this.getVariableName(),
       type: 'variable'
     };
-  }
-  
-  // Add method to make VariableNodes non-mergeable to prevent content issues
-  canMergeWith(node: LexicalNode): boolean {
-    return false;
   }
 }
 

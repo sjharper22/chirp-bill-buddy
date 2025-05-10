@@ -18,8 +18,9 @@ export const generateHtmlContent = (state: EditorState): string => {
           
           // Handle different node types
           if (nodeType === 'paragraph') {
+            // Preserve empty paragraphs as they represent line breaks
             const text = node.getTextContent();
-            tempDiv.innerHTML += `<p>${text}</p>`;
+            tempDiv.innerHTML += `<p>${text || '&nbsp;'}</p>`;
           } 
           else if (nodeType === 'heading') {
             const tag = `h${node.getTag()}`;
@@ -47,7 +48,9 @@ export const generateHtmlContent = (state: EditorState): string => {
             const blockContent = node.getChildren()
               .map((child: any) => {
                 if (child.getType() === 'paragraph') {
-                  return `<p>${child.getTextContent()}</p>`;
+                  // Preserve empty paragraphs within blocks too
+                  const text = child.getTextContent();
+                  return `<p>${text || '&nbsp;'}</p>`;
                 } 
                 else if (child.getType() === 'heading') {
                   const headingTag = `h${child.getTag()}`;
