@@ -1,4 +1,3 @@
-
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useCallback } from 'react';
 import { $getSelection, $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical';
@@ -11,8 +10,8 @@ import {
   INSERT_UNORDERED_LIST_COMMAND,
   INSERT_CHECK_LIST_COMMAND
 } from '@lexical/list';
-// Fixed: Import the correct command from LexicalHorizontalRulePlugin
-import { $createHorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
+// Update: Import the correct command from our new HorizontalRulePlugin
+import { INSERT_HORIZONTAL_RULE_COMMAND } from './HorizontalRulePlugin';
 import { 
   Bold, 
   Italic, 
@@ -74,14 +73,9 @@ export function ToolbarPlugin() {
     });
   }, [editor]);
   
-  // Fixed: Create a proper insertHorizontalRule function that creates the node directly
+  // Updated: Use the INSERT_HORIZONTAL_RULE_COMMAND instead of directly creating the node
   const insertHorizontalRule = useCallback(() => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        selection.insertNodes([$createHorizontalRuleNode()]);
-      }
-    });
+    editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
   }, [editor]);
 
   return (

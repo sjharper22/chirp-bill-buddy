@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -22,6 +21,7 @@ import { VariablePlugin } from './plugins/VariablePlugin';
 import { BlockNode } from './nodes/BlockNode';
 import { BlockPlugin } from './plugins/BlockPlugin';
 import { ParagraphNode, TextNode } from 'lexical';
+import { HorizontalRulePlugin } from './plugins/HorizontalRulePlugin';
 
 interface RichTextEditorProps {
   content: string;
