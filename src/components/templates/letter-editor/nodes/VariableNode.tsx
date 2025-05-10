@@ -29,7 +29,7 @@ export class VariableNode extends TextNode {
     super(text || `{{${variableName}}}`, key);
     this.__variableName = variableName;
     // Make variable nodes immutable to prevent text editing issues
-    this.setMode('immutable');
+    this.setMode('token'); // Changed from 'immutable' to 'token' which is a valid TextModeType
   }
 
   getVariableName(): string {

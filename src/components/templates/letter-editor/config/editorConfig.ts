@@ -1,25 +1,10 @@
+
 import { EditorConfig } from 'lexical';
-import {
-  BoldTextPlugin,
-  ItalicTextPlugin,
-  UnderlineTextPlugin,
-  StrikethroughTextPlugin,
-  CodeTextPlugin,
-  SubscriptTextPlugin,
-  SuperscriptTextPlugin,
-  TextStylePlugin,
-} from '@lexical/react/LexicalRichTextPlugin';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
-import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
-import { ListPlugin } from '@lexical/react/LexicalListPlugin';
-import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
-import { BlockTypePlugin } from '../plugins/blocks/BlockTypePlugin';
-import { VariableNode } from '../nodes/VariableNode';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListItemNode, ListNode } from '@lexical/list';
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
+import { VariableNode } from '../nodes/VariableNode';
 
 export function createEditorConfig() {
   return {

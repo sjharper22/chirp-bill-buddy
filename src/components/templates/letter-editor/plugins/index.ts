@@ -6,7 +6,7 @@ export { BlockTypePlugin } from './blocks/BlockTypePlugin';
 // Formatting plugins
 export { HorizontalRulePlugin, INSERT_HORIZONTAL_RULE_COMMAND } from './formatting/HorizontalRulePlugin';
 
-// Variable plugins - now imported from the correct locations
+// Variable plugins
 export { VariablePlugin } from './variables/VariablePlugin';
 export { VariableInsertPlugin } from './variables/VariableInsertPlugin';
 

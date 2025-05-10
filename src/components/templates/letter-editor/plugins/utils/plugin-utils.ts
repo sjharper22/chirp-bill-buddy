@@ -1,29 +1,29 @@
 
-import { LexicalEditor, LexicalNode, Klass } from 'lexical';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useEffect } from 'react';
+import { LexicalNode, Klass } from 'lexical';
 
 /**
- * Ensures that required nodes are registered on the editor
+ * Validates that required node types are registered with the editor.
  * 
  * @param editor The Lexical editor instance
- * @param requiredNodes Array of node classes that should be registered
- * @param pluginName Name of the plugin (for error messages)
+ * @param nodeClasses Array of node classes that should be registered
+ * @param pluginName Name of the plugin for error logging
  */
 export function validateRequiredNodes(
-  editor: LexicalEditor, 
-  requiredNodes: Array<Klass<LexicalNode>>,
+  editor: ReturnType<typeof useLexicalComposerContext>[0],
+  nodeClasses: Klass<LexicalNode>[],
   pluginName: string
 ): void {
-  if (!editor.hasNodes(requiredNodes)) {
-    throw new Error(`${pluginName}: required nodes not registered on editor`);
-  }
-}
-
-/**
- * Safely gets a node's parent, checking for null
- * 
- * @param node The LexicalNode to get the parent from
- * @returns The parent node or null if it doesn't exist
- */
-export function getNodeParent(node: LexicalNode): LexicalNode | null {
-  return node.getParent();
+  // Validate if all required nodes are registered
+  nodeClasses.forEach(nodeClass => {
+    const nodeType = nodeClass.getType();
+    
+    if (!editor._nodes.has(nodeType)) {
+      console.warn(
+        `${pluginName}: ${nodeType} node is not registered! ` +
+        `Make sure to add it to the "nodes" array in your editor config.`
+      );
+    }
+  });
 }
