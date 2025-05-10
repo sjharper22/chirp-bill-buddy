@@ -1,10 +1,11 @@
 
 import { useEffect, useState } from 'react';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/RichTextPlugin';
-import { ContentEditable } from '@lexical/react/ContentEditable';
-import { HistoryPlugin } from '@lexical/react/HistoryPlugin';
-import { ListPlugin } from '@lexical/react/ListPlugin';
+import { LexicalComposer } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { ListItemNode, ListNode } from '@lexical/list';
 import { HeadingNode } from '@lexical/rich-text';
 import { EditorState } from 'lexical';
@@ -12,7 +13,7 @@ import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import { Card } from "@/components/ui/card";
 import { ToolbarPlugin } from './plugins/ToolbarPlugin';
 import { VariableInsertPlugin } from './plugins/VariableInsertPlugin';
-import { OnChangePlugin } from '@lexical/react/OnChangePlugin';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 
 interface RichTextEditorProps {
   content: string;
