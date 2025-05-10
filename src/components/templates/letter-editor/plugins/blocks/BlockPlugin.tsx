@@ -12,8 +12,9 @@ export function BlockPlugin(): null {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    const requiredNodes = [ParagraphNode, HeadingNode, QuoteNode, HorizontalRuleNode];
-    validateRequiredNodes(editor, requiredNodes, 'BlockPlugin');
+    // First check if the BlockNode is registered
+    const nodeList = [ParagraphNode, HeadingNode, QuoteNode, HorizontalRuleNode];
+    validateRequiredNodes(editor, nodeList, 'BlockPlugin');
     
     // Use mergeRegister to handle all transformations together
     const removeTransform = mergeRegister(
@@ -24,7 +25,11 @@ export function BlockPlugin(): null {
           parentNode && 
           parentNode.getType() === 'root'
         ) {
-          $wrapNodeInElement(node, () => $createBlockNode());
+          try {
+            $wrapNodeInElement(node, () => $createBlockNode());
+          } catch (error) {
+            console.error('Error wrapping node in BlockNode:', error);
+          }
         }
       }),
 
@@ -35,7 +40,11 @@ export function BlockPlugin(): null {
           parentNode && 
           parentNode.getType() === 'root'
         ) {
-          $wrapNodeInElement(node, () => $createBlockNode());
+          try {
+            $wrapNodeInElement(node, () => $createBlockNode());
+          } catch (error) {
+            console.error('Error wrapping node in BlockNode:', error);
+          }
         }
       }),
 
@@ -46,7 +55,11 @@ export function BlockPlugin(): null {
           parentNode && 
           parentNode.getType() === 'root'
         ) {
-          $wrapNodeInElement(node, () => $createBlockNode());
+          try {
+            $wrapNodeInElement(node, () => $createBlockNode());
+          } catch (error) {
+            console.error('Error wrapping node in BlockNode:', error);
+          }
         }
       }),
 
@@ -57,7 +70,11 @@ export function BlockPlugin(): null {
           parentNode && 
           parentNode.getType() === 'root'
         ) {
-          $wrapNodeInElement(node, () => $createBlockNode());
+          try {
+            $wrapNodeInElement(node, () => $createBlockNode());
+          } catch (error) {
+            console.error('Error wrapping node in BlockNode:', error);
+          }
         }
       })
     );

@@ -1,6 +1,5 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect } from 'react';
 import { LexicalNode, Klass } from 'lexical';
 
 /**
@@ -15,10 +14,17 @@ export function validateRequiredNodes(
   nodeClasses: Klass<LexicalNode>[],
   pluginName: string
 ): void {
-  // Validate if all required nodes are registered
+  // First check if the editor has the nodes registered using hasNodes
+  if (!editor.hasNodes(nodeClasses)) {
+    console.warn(
+      `${pluginName}: Some required nodes are not registered! ` +
+      `Make sure to add them to the "nodes" array in your editor config.`
+    );
+  }
+  
+  // Additional check for each specific node
   nodeClasses.forEach(nodeClass => {
     const nodeType = nodeClass.getType();
-    
     if (!editor._nodes.has(nodeType)) {
       console.warn(
         `${pluginName}: ${nodeType} node is not registered! ` +

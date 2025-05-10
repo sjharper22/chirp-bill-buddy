@@ -5,11 +5,13 @@ import { ListItemNode, ListNode } from '@lexical/list';
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
 import { VariableNode } from '../nodes/VariableNode';
+import { BlockNode } from '../nodes/BlockNode';
 
 export function createEditorConfig() {
   return {
     // Register all the nodes we are using
     nodes: [
+      BlockNode,
       VariableNode,
       HeadingNode,
       QuoteNode,
@@ -36,6 +38,10 @@ export function createEditorConfig() {
         ul: 'list-disc ml-6',
       },
       variable: 'variable-node',
+      block: {
+        container: 'py-1',
+        dragHandle: 'absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-50 cursor-grab'
+      }
     },
     onError: (error) => {
       console.error('Editor error:', error);
