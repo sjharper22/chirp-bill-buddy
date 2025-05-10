@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/auth-context";
 import { RichTextEditor } from './editor/RichTextEditor';
-import { TemplateCategory, TemplateVariable } from '@/types/template';
+import { TemplateCategory, ExtendedTemplateCategory, TemplateVariable } from '@/types/template';
 import {
   Dialog,
   DialogContent,
@@ -100,7 +101,7 @@ export function LetterTemplateEditor({
   const { toast } = useToast();
   const { user } = useAuth();
   const [title, setTitle] = useState("Out-of-Network Insurance Guide");
-  const [category, setCategory] = useState<TemplateCategory>("cover_letter");
+  const [category, setCategory] = useState<ExtendedTemplateCategory>("cover_letter");
   const [content, setContent] = useState(DEFAULT_TEMPLATE);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewContent, setPreviewContent] = useState("");
@@ -126,12 +127,18 @@ export function LetterTemplateEditor({
         throw new Error("You must be logged in to save templates");
       }
 
+      // Convert the extended category to a database-compatible category if needed
+      let dbCategory: TemplateCategory = "general";
+      if (category === "cover_letter" || category === "appeal_letter" || category === "general") {
+        dbCategory = category;
+      }
+
       const { error } = await supabase
         .from('letter_templates')
         .insert({
           title,
           content: { text: content },
-          category,
+          category: dbCategory,
           created_by: user.id,
           is_default: true
         });
@@ -179,7 +186,7 @@ export function LetterTemplateEditor({
           onChange={(e) => setTitle(e.target.value)}
           className="flex-1"
         />
-        <Select value={category} onValueChange={(value: any) => setCategory(value)}>
+        <Select value={category} onValueChange={(value: ExtendedTemplateCategory) => setCategory(value)}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select category" />
           </SelectTrigger>

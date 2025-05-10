@@ -1,18 +1,21 @@
-
 export type TemplateCategory = 
   | "cover_letter" 
+  | "appeal_letter" 
+  | "general";
+
+// We'll keep the extended type for UI purposes, but use the restricted type for DB operations
+export type ExtendedTemplateCategory = 
+  | TemplateCategory
   | "reimbursement_instructions" 
   | "referral_letter" 
   | "thank_you_note" 
-  | "reminder_message"
-  | "appeal_letter" 
-  | "general";
+  | "reminder_message";
 
 export interface LetterTemplate {
   id: string;
   title: string;
   content: { text: string };
-  category: TemplateCategory;
+  category: ExtendedTemplateCategory;
   created_by: string;
   is_default: boolean;
   created_at?: string;
