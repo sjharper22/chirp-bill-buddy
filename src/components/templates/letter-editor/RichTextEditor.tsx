@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useRef } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -15,13 +16,13 @@ import { VariableInsertPlugin } from './plugins/VariableInsertPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { DragDropPlugin } from './plugins/DragDropPlugin';
 import { BlockTypePlugin } from './plugins/BlockTypePlugin';
-// Fixed: Using only ListItemNode, removed CheckListItemNode which doesn't exist
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 import { VariableNode } from './nodes/VariableNode';
 import { VariablePlugin } from './plugins/VariablePlugin';
 import { BlockNode } from './nodes/BlockNode';
 import { BlockPlugin } from './plugins/BlockPlugin';
+import { ParagraphNode, TextNode } from 'lexical';
 
 interface RichTextEditorProps {
   content: string;
@@ -31,9 +32,13 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ content, onChange, placeholders = [] }: RichTextEditorProps) {
   const [editorState, setEditorState] = useState<string | null>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   
   const initialConfig = {
     namespace: 'TemplateEditor',
+    onError: (error: Error) => {
+      console.error('Lexical editor error:', error);
+    },
     theme: {
       root: 'p-0 min-h-[300px] focus:outline-none',
       link: 'cursor-pointer text-blue-500 underline',
@@ -69,10 +74,9 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
         dragHandle: 'absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab p-1 rounded hover:bg-gray-100',
       },
     },
-    onError: (error: Error) => {
-      console.error('Lexical editor error:', error);
-    },
     nodes: [
+      TextNode,
+      ParagraphNode,
       ListNode,
       ListItemNode,
       HeadingNode,
@@ -85,11 +89,11 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
 
   // Initialize the editor with the content when it mounts
   useEffect(() => {
-    if (editorState === null && content) {
+    if (content) {
       setEditorState(content);
     }
-  }, [content, editorState]);
-
+  }, []);
+  
   const handleEditorChange = (state: EditorState) => {
     state.read(() => {
       const json = JSON.stringify(state.toJSON());
@@ -148,6 +152,19 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
               const variableName = node.getVariableName();
               tempDiv.innerHTML += `<span class="variable">{{${variableName}}}</span>`;
             }
+            else if (nodeType === 'block') {
+              // For block nodes, extract their content
+              const blockContent = node.getChildren()
+                .map((child: any) => {
+                  if (child.getType() === 'paragraph') {
+                    return `<p>${child.getTextContent()}</p>`;
+                  } else {
+                    return child.getTextContent();
+                  }
+                })
+                .join('');
+              tempDiv.innerHTML += blockContent;
+            }
             else {
               // Default handling for other node types
               tempDiv.innerHTML += node.getTextContent();
@@ -164,33 +181,35 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
 
   return (
     <Card className="overflow-hidden">
-      <LexicalComposer initialConfig={initialConfig}>
-        <div className="border rounded-md">
-          <ToolbarPlugin />
-          
-          <div className="p-4 bg-background">
-            <RichTextPlugin
-              contentEditable={<ContentEditable className="outline-none min-h-[300px] pl-10" />}
-              placeholder={<div className="absolute top-[60px] left-14 text-muted-foreground">Start writing your template...</div>}
-              ErrorBoundary={LexicalErrorBoundary}
-            />
+      <div ref={editorRef}>
+        <LexicalComposer initialConfig={initialConfig}>
+          <div className="border rounded-md">
+            <ToolbarPlugin />
+            
+            <div className="p-4 bg-background">
+              <RichTextPlugin
+                contentEditable={<ContentEditable className="outline-none min-h-[300px] pl-10" />}
+                placeholder={<div className="absolute top-[60px] left-14 text-muted-foreground">Start writing your template...</div>}
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+            </div>
+            
+            <div className="border-t p-2 bg-muted/30">
+              <VariableInsertPlugin variables={placeholders} />
+            </div>
           </div>
           
-          <div className="border-t p-2 bg-muted/30">
-            <VariableInsertPlugin variables={placeholders} />
-          </div>
-        </div>
-        
-        <HistoryPlugin />
-        <ListPlugin />
-        <CheckListPlugin />
-        <HorizontalRulePlugin />
-        <BlockPlugin />
-        <DragDropPlugin />
-        <BlockTypePlugin />
-        <VariablePlugin />
-        <OnChangePlugin onChange={handleEditorChange} />
-      </LexicalComposer>
+          <HistoryPlugin />
+          <ListPlugin />
+          <CheckListPlugin />
+          <HorizontalRulePlugin />
+          <VariablePlugin />
+          <BlockPlugin />
+          <DragDropPlugin />
+          <BlockTypePlugin />
+          <OnChangePlugin onChange={handleEditorChange} />
+        </LexicalComposer>
+      </div>
     </Card>
   );
 }

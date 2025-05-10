@@ -32,7 +32,7 @@ export class BlockNode extends ElementNode {
     return new BlockNode(node.__blockType, node.__key);
   }
 
-  constructor(blockType: string, key?: NodeKey) {
+  constructor(blockType: string = 'default', key?: NodeKey) {
     super(key);
     this.__blockType = blockType || 'default';
   }
@@ -81,7 +81,6 @@ export class BlockNode extends ElementNode {
     };
   }
 
-  // Fixed: Changed exportDOM parameter type from EditorConfig to LexicalEditor
   exportDOM(editor: LexicalEditor): DOMExportOutput {
     const element = document.createElement('div');
     const children = this.getChildren();
@@ -115,6 +114,11 @@ export class BlockNode extends ElementNode {
   setBlockType(blockType: string): void {
     this.__blockType = blockType;
   }
+
+  // Add this method to correctly identify block nodes
+  is(type: string): boolean {
+    return type === 'block' || super.is(type);
+  }
 }
 
 function convertBlockElement(domNode: HTMLElement): DOMConversionOutput {
@@ -123,7 +127,7 @@ function convertBlockElement(domNode: HTMLElement): DOMConversionOutput {
   return { node };
 }
 
-export function $createBlockNode(blockType: string): BlockNode {
+export function $createBlockNode(blockType: string = 'default'): BlockNode {
   return new BlockNode(blockType);
 }
 
