@@ -14,7 +14,7 @@ export function TemplateContentPreview({ processedContent }: TemplateContentPrev
     <Card className="p-4">
       <div className="prose prose-sm max-w-none">
         <div 
-          className="whitespace-pre-line" 
+          className="whitespace-pre-wrap" 
           dangerouslySetInnerHTML={{ 
             __html: processedContent 
           }} 

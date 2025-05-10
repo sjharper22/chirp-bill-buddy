@@ -51,10 +51,9 @@ export function VariableInsertPlugin({ variables }: VariableInsertPluginProps) {
         const variableNode = $createVariableNode(variable);
         selection.insertNodes([variableNode]);
         
-        // Properly position the cursor after the variable node
-        // Instead of using 'collapse', we'll set the selection to be just after the node
-        selection.anchor.set(variableNode.getKey(), variableNode.getTextContent().length, 'text');
-        selection.focus.set(variableNode.getKey(), variableNode.getTextContent().length, 'text');
+        // We don't need to manually position the cursor - 
+        // with the variable node in segmented mode, the cursor should 
+        // naturally be positioned correctly after insertion
       }
     });
     
