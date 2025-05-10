@@ -17,7 +17,7 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 
 interface RichTextEditorProps {
   content: string;
-  onChange: (content: string) => void;
+  onChange: (content: string, htmlContent?: string) => void;
   placeholders?: Array<{ label: string; variable: string }>;
 }
 
@@ -60,8 +60,63 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
   const handleEditorChange = (state: EditorState) => {
     state.read(() => {
       const json = JSON.stringify(state.toJSON());
-      onChange(json);
+      
+      // Generate HTML representation for preview
+      const editorElement = document.createElement('div');
+      const htmlContent = generateHtmlContent(state);
+      
+      onChange(json, htmlContent);
     });
+  };
+  
+  // Function to generate HTML content from editor state
+  const generateHtmlContent = (state: EditorState): string => {
+    let htmlContent = '';
+    
+    state.read(() => {
+      // Create a temporary DOM element to render the content
+      const tempDiv = document.createElement('div');
+      const root = state._nodeMap.get('root');
+      
+      if (root && root.getChildren) {
+        const children = root.getChildren();
+        
+        children.forEach((node: any) => {
+          if (node.getType) {
+            const nodeType = node.getType();
+            
+            // Handle different node types
+            if (nodeType === 'paragraph') {
+              const text = node.getTextContent();
+              // Process variables in text
+              const processedText = text.replace(/\{\{([^}]+)\}\}/g, (match, variable) => {
+                return `<span class="variable">${match}</span>`;
+              });
+              
+              tempDiv.innerHTML += `<p>${processedText}</p>`;
+            } 
+            else if (nodeType === 'heading') {
+              const tag = `h${node.getTag()}`;
+              const text = node.getTextContent();
+              tempDiv.innerHTML += `<${tag}>${text}</${tag}>`;
+            }
+            else if (nodeType === 'list') {
+              const listType = node.getListType() === 'number' ? 'ol' : 'ul';
+              tempDiv.innerHTML += `<${listType}>${node.getChildren().map((li: any) => 
+                `<li>${li.getTextContent()}</li>`).join('')}</${listType}>`;
+            }
+            else {
+              // Default handling for other node types
+              tempDiv.innerHTML += node.getTextContent();
+            }
+          }
+        });
+      }
+      
+      htmlContent = tempDiv.innerHTML;
+    });
+    
+    return htmlContent;
   };
 
   return (

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -110,15 +109,85 @@ export function LetterTemplateEditor({
 
   // Initialize with a default template
   useEffect(() => {
-    // We're keeping the initial content as text for backward compatibility
-    setPreviewContent(content);
+    // Process the initial content for preview
+    processContentForPreview(content);
   }, []);
 
-  const handleContentChange = (newContent: string) => {
+  const handleContentChange = (newContent: string, htmlContent?: string) => {
     setContent(newContent);
-    // For preview, we'll use the raw content for now
-    // In a real implementation, you'd want to parse the Lexical JSON and render it as HTML
-    setPreviewContent(newContent);
+    
+    // If HTML content is provided, use it for preview
+    if (htmlContent) {
+      setPreviewContent(htmlContent);
+    } else {
+      // Otherwise process the raw content
+      processContentForPreview(newContent);
+    }
+  };
+  
+  // Process content for preview - converts JSON if needed or uses HTML
+  const processContentForPreview = (rawContent: string) => {
+    try {
+      // Check if content is JSON (Lexical format)
+      const parsedContent = JSON.parse(rawContent);
+      
+      // If it's JSON, convert it to a readable format
+      if (parsedContent && typeof parsedContent === 'object') {
+        // Create a simple HTML representation of the content
+        let previewHtml = '';
+        
+        try {
+          // Try to extract text content from the Lexical JSON structure
+          if (parsedContent.root && parsedContent.root.children) {
+            parsedContent.root.children.forEach((node: any) => {
+              if (node.type === 'paragraph') {
+                let text = '';
+                if (node.children) {
+                  node.children.forEach((child: any) => {
+                    if (child.type === 'text') {
+                      text += child.text;
+                    }
+                  });
+                }
+                previewHtml += `<p>${text}</p>`;
+              } else if (node.type === 'heading') {
+                const headingLevel = node.tag || 'h2';
+                let text = '';
+                if (node.children) {
+                  node.children.forEach((child: any) => {
+                    if (child.type === 'text') {
+                      text += child.text;
+                    }
+                  });
+                }
+                previewHtml += `<${headingLevel}>${text}</${headingLevel}>`;
+              }
+            });
+          }
+        } catch (parseError) {
+          // Fallback for simple display
+          previewHtml = `<p>${rawContent.substring(0, 100)}...</p>`;
+        }
+        
+        setPreviewContent(previewHtml);
+      } else {
+        // If not valid JSON, use as plain text
+        setPreviewContent(`<p>${rawContent}</p>`);
+      }
+    } catch (e) {
+      // Not JSON, treat as plain text
+      // Replace variables with styled spans
+      const formattedContent = rawContent.replace(/\{\{([^}]+)\}\}/g, 
+        (match) => `<span class="bg-blue-100 px-1 rounded">${match}</span>`);
+      
+      // Convert newlines to paragraph breaks
+      const htmlContent = formattedContent
+        .split('\n\n')
+        .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
+        .join('');
+      
+      setPreviewContent(htmlContent);
+    }
   };
 
   const handleSaveTemplate = async () => {
