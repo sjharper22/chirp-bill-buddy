@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
@@ -62,7 +61,6 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
       const json = JSON.stringify(state.toJSON());
       
       // Generate HTML representation for preview
-      const editorElement = document.createElement('div');
       const htmlContent = generateHtmlContent(state);
       
       onChange(json, htmlContent);

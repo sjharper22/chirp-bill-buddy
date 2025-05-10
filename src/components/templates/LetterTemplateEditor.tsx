@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RichTextEditor } from './editor/RichTextEditor';
+import { RichTextEditor } from './letter-editor/RichTextEditor';
 import { TemplateHeader } from './letter-editor/TemplateHeader';
 import { TemplateFooter } from './letter-editor/TemplateFooter';
 import { useTemplateEditor } from './letter-editor/useTemplateEditor';
