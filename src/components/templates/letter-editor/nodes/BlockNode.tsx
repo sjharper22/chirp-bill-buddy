@@ -115,7 +115,7 @@ export class BlockNode extends ElementNode {
     this.__blockType = blockType;
   }
 
-  // Fix the is() method to correctly handle parameters
+  // Properly implement the is method to satisfy both LexicalNode and ElementNode types
   is(object: LexicalNode | string): boolean {
     if (typeof object === 'string') {
       // Check if it's a type string

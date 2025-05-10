@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -16,7 +17,6 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { DragDropPlugin } from './plugins/DragDropPlugin';
 import { BlockTypePlugin } from './plugins/BlockTypePlugin';
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
-import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 import { VariableNode } from './nodes/VariableNode';
 import { VariablePlugin } from './plugins/VariablePlugin';
 import { BlockNode } from './nodes/BlockNode';
@@ -32,6 +32,7 @@ interface RichTextEditorProps {
 export function RichTextEditor({ content, onChange, placeholders = [] }: RichTextEditorProps) {
   const [editorState, setEditorState] = useState<string | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
+  const [isEditorInitialized, setIsEditorInitialized] = useState(false);
   
   const initialConfig = {
     namespace: 'TemplateEditor',
@@ -73,25 +74,31 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
         dragHandle: 'absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab p-1 rounded hover:bg-gray-100',
       },
     },
+    editable: true,
     nodes: [
-      ParagraphNode,
-      TextNode,
+      HeadingNode,
       ListNode,
       ListItemNode,
-      HeadingNode,
       QuoteNode,
+      ParagraphNode,
+      TextNode,
       HorizontalRuleNode,
       VariableNode,
-      BlockNode
+      BlockNode,
     ]
   };
 
   // Initialize the editor with the content when it mounts
   useEffect(() => {
-    if (content) {
-      setEditorState(content);
+    if (content && !isEditorInitialized) {
+      try {
+        setEditorState(content);
+        setIsEditorInitialized(true);
+      } catch (error) {
+        console.error('Error initializing editor with content:', error);
+      }
     }
-  }, []);
+  }, [content, isEditorInitialized]);
   
   const handleEditorChange = (state: EditorState) => {
     state.read(() => {
@@ -123,12 +130,7 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
             // Handle different node types
             if (nodeType === 'paragraph') {
               const text = node.getTextContent();
-              // Process variables in text
-              const processedText = text.replace(/\{\{([^}]+)\}\}/g, (match, variable) => {
-                return `<span class="variable">${match}</span>`;
-              });
-              
-              tempDiv.innerHTML += `<p>${processedText}</p>`;
+              tempDiv.innerHTML += `<p>${text}</p>`;
             } 
             else if (nodeType === 'heading') {
               const tag = `h${node.getTag()}`;
@@ -157,7 +159,16 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
                 .map((child: any) => {
                   if (child.getType() === 'paragraph') {
                     return `<p>${child.getTextContent()}</p>`;
-                  } else {
+                  } 
+                  else if (child.getType() === 'heading') {
+                    const headingTag = `h${child.getTag()}`;
+                    return `<${headingTag}>${child.getTextContent()}</${headingTag}>`;
+                  } 
+                  else if (child.getType() === 'variable') {
+                    const varName = child.getVariableName();
+                    return `<span class="variable">{{${varName}}}</span>`;
+                  }
+                  else {
                     return child.getTextContent();
                   }
                 })
@@ -206,7 +217,8 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
           <BlockPlugin />
           <DragDropPlugin />
           <BlockTypePlugin />
-          <OnChangePlugin onChange={handleEditorChange} />
+          {editorState && <OnChangePlugin onChange={handleEditorChange} />}
+          {!editorState && <OnChangePlugin onChange={handleEditorChange} />}
         </LexicalComposer>
       </div>
     </Card>

@@ -13,41 +13,51 @@ export function VariablePlugin(): null {
       throw new Error('VariablePlugin: VariableNode not registered on editor');
     }
 
-    // Detect and convert variables like {{variable.path}}
-    const variableTransform = editor.registerNodeTransform(TextNode, (textNode) => {
+    // Register a listener for variable format changes
+    const removeTransform = editor.registerNodeTransform(TextNode, (textNode) => {
       const textContent = textNode.getTextContent();
       const variableRegex = /\{\{([^}]+)\}\}/g;
+      
+      // If there are no variables in the text, we don't need to do anything
+      if (!variableRegex.test(textContent)) {
+        return;
+      }
+      
+      // Reset the regex lastIndex to ensure we catch all variables
+      variableRegex.lastIndex = 0;
+      
       let match;
       let lastIndex = 0;
       const nodes = [];
       
-      // Find all variable patterns in the text
+      // Find all variables in the text content
       while ((match = variableRegex.exec(textContent)) !== null) {
         const matchIndex = match.index;
         const variablePath = match[1];
         
-        // If there's text before the match, add it as a TextNode
+        // Add text before the variable
         if (matchIndex > lastIndex) {
           const textBefore = textContent.slice(lastIndex, matchIndex);
-          nodes.push(textNode.splitText(lastIndex, matchIndex)[0]);
+          const splitNode = textNode.splitText(lastIndex, matchIndex)[0];
+          nodes.push(splitNode);
         }
         
-        // Create a variable node for the match
+        // Create a variable node for the matched content
         const variableNode = $createVariableNode(variablePath);
         nodes.push(variableNode);
         
         lastIndex = matchIndex + match[0].length;
       }
       
-      // If there's text after the last match, add it as a TextNode
+      // Add any remaining text after the last variable
       if (lastIndex < textContent.length) {
         if (lastIndex === 0) {
-          // No variables were found
+          // If we didn't find any variables, there's nothing to do
           return;
         }
         
-        const textAfter = textContent.slice(lastIndex);
-        nodes.push(textNode.splitText(lastIndex)[1]);
+        const splitNode = textNode.splitText(lastIndex)[1];
+        nodes.push(splitNode);
       }
       
       // If we found variables, replace the current node
@@ -66,7 +76,7 @@ export function VariablePlugin(): null {
     });
 
     return () => {
-      variableTransform();
+      removeTransform();
     };
   }, [editor]);
 
