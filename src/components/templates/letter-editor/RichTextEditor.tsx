@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -75,8 +74,8 @@ export function RichTextEditor({ content, onChange, placeholders = [] }: RichTex
       },
     },
     nodes: [
-      TextNode,
       ParagraphNode,
+      TextNode,
       ListNode,
       ListItemNode,
       HeadingNode,

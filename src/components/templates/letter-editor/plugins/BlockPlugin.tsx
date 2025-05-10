@@ -22,7 +22,7 @@ export function BlockPlugin(): null {
         const parentNode = node.getParent();
         if (
           parentNode && 
-          !parentNode.__type === 'block' && 
+          parentNode.getType() !== 'block' && 
           parentNode.getType() === 'root'
         ) {
           $wrapNodeInElement(node, () => $createBlockNode());
@@ -34,7 +34,7 @@ export function BlockPlugin(): null {
         const parentNode = node.getParent();
         if (
           parentNode && 
-          !parentNode.__type === 'block' && 
+          parentNode.getType() !== 'block' && 
           parentNode.getType() === 'root'
         ) {
           $wrapNodeInElement(node, () => $createBlockNode());
@@ -46,7 +46,7 @@ export function BlockPlugin(): null {
         const parentNode = node.getParent();
         if (
           parentNode && 
-          !parentNode.__type === 'block' && 
+          parentNode.getType() !== 'block' && 
           parentNode.getType() === 'root'
         ) {
           $wrapNodeInElement(node, () => $createBlockNode());
@@ -58,7 +58,7 @@ export function BlockPlugin(): null {
         const parentNode = node.getParent();
         if (
           parentNode && 
-          !parentNode.__type === 'block' && 
+          parentNode.getType() !== 'block' && 
           parentNode.getType() === 'root'
         ) {
           $wrapNodeInElement(node, () => $createBlockNode());
