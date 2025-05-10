@@ -3,8 +3,8 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useEffect } from 'react';
 import { $createBlockNode } from '../nodes/BlockNode';
 import { $wrapNodeInElement } from '@lexical/utils';
-import { ParagraphNode, HeadingNode } from 'lexical';
-import { QuoteNode } from '@lexical/rich-text';
+import { ParagraphNode } from 'lexical';
+import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 
 export function BlockPlugin(): null {
