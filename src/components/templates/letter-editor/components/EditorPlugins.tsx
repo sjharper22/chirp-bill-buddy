@@ -3,13 +3,15 @@ import React from 'react';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
-import { HorizontalRulePlugin } from '../plugins/HorizontalRulePlugin';
-import { VariablePlugin } from '../plugins/VariablePlugin';
-import { BlockPlugin } from '../plugins/BlockPlugin';
-import { DragDropPlugin } from '../plugins/DragDropPlugin';
-import { BlockTypePlugin } from '../plugins/BlockTypePlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { EditorState } from 'lexical';
+import { 
+  BlockPlugin, 
+  BlockTypePlugin, 
+  DragDropPlugin,
+  HorizontalRulePlugin,
+  VariablePlugin
+} from '../plugins';
 
 interface EditorPluginsProps {
   editorState: string | null;
@@ -27,8 +29,7 @@ export function EditorPlugins({ editorState, onChange }: EditorPluginsProps) {
       <BlockPlugin />
       <DragDropPlugin />
       <BlockTypePlugin />
-      {editorState && <OnChangePlugin onChange={onChange} />}
-      {!editorState && <OnChangePlugin onChange={onChange} />}
+      <OnChangePlugin onChange={onChange} />
     </>
   );
 }

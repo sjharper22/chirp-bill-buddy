@@ -2,8 +2,7 @@
 import { useRef } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { Card } from "@/components/ui/card";
-import { ToolbarPlugin } from './plugins/ToolbarPlugin';
-import { VariableInsertPlugin } from './plugins/VariableInsertPlugin';
+import { ToolbarPlugin, VariableInsertPlugin } from './plugins';
 import { createEditorConfig } from './config/editorConfig';
 import { useEditorState } from './hooks/useEditorState';
 import { EditorContent } from './components/EditorContent';
