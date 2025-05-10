@@ -2,7 +2,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEffect } from 'react';
 import { TextNode } from 'lexical';
-import { $createVariableNode, VariableNode } from '../../nodes/VariableNode';
+import { $isVariableNode, $createVariableNode, VariableNode } from '../../nodes/VariableNode';
 import { validateRequiredNodes } from '../utils/plugin-utils';
 
 export function VariablePlugin(): null {
@@ -13,6 +13,11 @@ export function VariablePlugin(): null {
 
     // Register a listener for variable format changes
     const removeTransform = editor.registerNodeTransform(TextNode, (textNode) => {
+      // Skip transformation if this node is already being processed or is a child of a variable node
+      if (textNode.__isProcessing || $isVariableNode(textNode.getParent())) {
+        return;
+      }
+      
       const textContent = textNode.getTextContent();
       const variableRegex = /\{\{([^}]+)\}\}/g;
       
@@ -21,55 +26,54 @@ export function VariablePlugin(): null {
         return;
       }
       
-      // Reset the regex lastIndex to ensure we catch all variables
-      variableRegex.lastIndex = 0;
+      // Mark this node as being processed to prevent infinite loops
+      textNode.__isProcessing = true;
       
-      let match;
-      let lastIndex = 0;
-      const nodes = [];
-      
-      // Find all variables in the text content
-      while ((match = variableRegex.exec(textContent)) !== null) {
-        const matchIndex = match.index;
-        const variablePath = match[1];
+      try {
+        // Reset the regex lastIndex to ensure we catch all variables
+        variableRegex.lastIndex = 0;
         
-        // Add text before the variable
-        if (matchIndex > lastIndex) {
-          const textBefore = textContent.slice(lastIndex, matchIndex);
-          const splitNode = textNode.splitText(lastIndex, matchIndex)[0];
-          nodes.push(splitNode);
+        const matches: Array<{ index: number; match: string; variable: string }> = [];
+        let match;
+        
+        // Find all variables in the text content without splitting yet
+        while ((match = variableRegex.exec(textContent)) !== null) {
+          matches.push({
+            index: match.index,
+            match: match[0],
+            variable: match[1]
+          });
         }
         
-        // Create a variable node for the matched content
-        const variableNode = $createVariableNode(variablePath);
-        nodes.push(variableNode);
-        
-        lastIndex = matchIndex + match[0].length;
-      }
-      
-      // Add any remaining text after the last variable
-      if (lastIndex < textContent.length) {
-        if (lastIndex === 0) {
-          // If we didn't find any variables, there's nothing to do
-          return;
-        }
-        
-        const splitNode = textNode.splitText(lastIndex)[1];
-        nodes.push(splitNode);
-      }
-      
-      // If we found variables, replace the current node
-      if (nodes.length > 0) {
-        const parent = textNode.getParent();
-        if (parent) {
-          const index = textNode.getIndexWithinParent();
-          textNode.remove();
+        // If we found matches, process them from right to left to maintain correct indices
+        if (matches.length > 0) {
+          // Sort matches in reverse order to process from right to left
+          matches.sort((a, b) => b.index - a.index);
           
-          // Insert all our nodes at the right position
-          for (let i = 0; i < nodes.length; i++) {
-            parent.insertBefore(nodes[i], index + i >= parent.getChildrenSize() ? null : parent.getChildAtIndex(index + i));
+          let currentNode = textNode;
+          
+          for (const { index, match, variable } of matches) {
+            // Split the text at the variable position
+            if (index > 0) {
+              const [, rightPart] = currentNode.splitText(index);
+              currentNode = rightPart;
+            }
+            
+            // Split after the variable
+            if (index + match.length < currentNode.getTextContent().length) {
+              const [leftPart] = currentNode.splitText(match.length);
+              currentNode = leftPart;
+            }
+            
+            // Now currentNode contains only the variable text
+            // Replace it with a variable node
+            const variableNode = $createVariableNode(variable);
+            currentNode.replace(variableNode);
           }
         }
+      } finally {
+        // Clean up the processing flag
+        delete textNode.__isProcessing;
       }
     });
 

@@ -9,9 +9,9 @@ import {
   BlockPlugin, 
   BlockTypePlugin, 
   DragDropPlugin,
-  HorizontalRulePlugin,
-  VariablePlugin
+  HorizontalRulePlugin
 } from '../plugins';
+import { VariablePlugin } from '../plugins/variables/VariablePlugin';
 
 interface EditorPluginsProps {
   editorState: string | null;

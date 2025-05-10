@@ -22,6 +22,7 @@ interface VariableInsertPluginProps {
 export function VariableInsertPlugin({ variables }: VariableInsertPluginProps) {
   const [editor] = useLexicalComposerContext();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   
   // Group variables by their group property
   const groupedVariables = variables.reduce<Record<string, Array<{ label: string; variable: string }>>>(
@@ -40,15 +41,20 @@ export function VariableInsertPlugin({ variables }: VariableInsertPluginProps) {
   const groups = Object.keys(groupedVariables);
   
   const insertVariable = useCallback((variable: string) => {
+    // Focus the editor before inserting to ensure proper placement
+    editor.focus();
+    
     editor.update(() => {
       const selection = $getSelection();
       
       if ($isRangeSelection(selection)) {
-        // Insert the variable as a VariableNode
         const variableNode = $createVariableNode(variable);
         selection.insertNodes([variableNode]);
       }
     });
+    
+    // Close the popover after insertion
+    setIsOpen(false);
   }, [editor]);
 
   // Filter variables based on search query
@@ -65,7 +71,7 @@ export function VariableInsertPlugin({ variables }: VariableInsertPluginProps) {
 
   return (
     <div className="flex items-center">
-      <Popover>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="sm" className="flex items-center">
             <Variable className="h-4 w-4 mr-1" />
@@ -89,7 +95,7 @@ export function VariableInsertPlugin({ variables }: VariableInsertPluginProps) {
                   <Badge
                     key={item.variable}
                     variant="outline"
-                    className="cursor-pointer p-1.5 text-sm hover:bg-primary/10 mr-1 mb-1"
+                    className="cursor-pointer p-1.5 text-sm hover:bg-primary/10 mr-1 mb-1 inline-block"
                     onClick={() => {
                       insertVariable(item.variable);
                     }}
