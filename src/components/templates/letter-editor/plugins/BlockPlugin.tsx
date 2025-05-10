@@ -3,6 +3,9 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useEffect } from 'react';
 import { $createBlockNode } from '../nodes/BlockNode';
 import { $wrapNodeInElement } from '@lexical/utils';
+import { ParagraphNode, HeadingNode } from 'lexical';
+import { QuoteNode } from '@lexical/rich-text';
+import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 
 export function BlockPlugin(): null {
   const [editor] = useLexicalComposerContext();
@@ -11,8 +14,7 @@ export function BlockPlugin(): null {
     // Register a custom transformation to wrap paragraphs and headings
     // in block nodes for drag-and-drop functionality
     const removeTransform = editor.registerNodeTransform(
-      // Fixed: Added appropriate node types to transform as second argument
-      'paragraph', // First argument: node type to transform
+      ParagraphNode,
       (node) => {
         const parentNode = node.getParent();
         if (
@@ -20,15 +22,14 @@ export function BlockPlugin(): null {
           !parentNode.is('block') && 
           parentNode.getType() === 'root'
         ) {
-          // Fixed: Changed to wrap the node in a function that returns a block node
           $wrapNodeInElement(node, () => $createBlockNode(node.getType()));
         }
       }
     );
 
-    // Register transforms for other node types (heading, quote, horizontalrule)
+    // Register transforms for other node types
     const headingTransform = editor.registerNodeTransform(
-      'heading', 
+      HeadingNode, 
       (node) => {
         const parentNode = node.getParent();
         if (
@@ -42,7 +43,7 @@ export function BlockPlugin(): null {
     );
 
     const quoteTransform = editor.registerNodeTransform(
-      'quote',
+      QuoteNode,
       (node) => {
         const parentNode = node.getParent();
         if (
@@ -56,7 +57,7 @@ export function BlockPlugin(): null {
     );
 
     const hrTransform = editor.registerNodeTransform(
-      'horizontalrule',
+      HorizontalRuleNode,
       (node) => {
         const parentNode = node.getParent();
         if (
