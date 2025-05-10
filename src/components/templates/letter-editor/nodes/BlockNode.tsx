@@ -115,12 +115,14 @@ export class BlockNode extends ElementNode {
     this.__blockType = blockType;
   }
 
-  // Fix the is() method to match the expected signature
+  // Fix the is() method to correctly handle parameters
   is(object: LexicalNode | string): boolean {
     if (typeof object === 'string') {
-      return object === 'block' || super.is(object);
+      // Check if it's a type string
+      return object === 'block';
     }
-    return object instanceof BlockNode || super.is(object);
+    // Check if it's an instance
+    return object instanceof BlockNode;
   }
 }
 
