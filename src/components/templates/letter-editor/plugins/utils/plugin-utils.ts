@@ -1,5 +1,5 @@
 
-import { LexicalEditor, LexicalNode } from 'lexical';
+import { LexicalEditor, LexicalNode, Klass } from 'lexical';
 
 /**
  * Ensures that required nodes are registered on the editor
@@ -10,7 +10,7 @@ import { LexicalEditor, LexicalNode } from 'lexical';
  */
 export function validateRequiredNodes(
   editor: LexicalEditor, 
-  requiredNodes: Array<{ getType: () => string }>,
+  requiredNodes: Array<Klass<LexicalNode>>,
   pluginName: string
 ): void {
   if (!editor.hasNodes(requiredNodes)) {

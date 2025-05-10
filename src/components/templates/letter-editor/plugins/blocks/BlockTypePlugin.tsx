@@ -1,14 +1,18 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEffect } from 'react';
+import { validateRequiredNodes } from '../utils/plugin-utils';
+import { ParagraphNode } from 'lexical';
+import { HeadingNode } from '@lexical/rich-text';
 
 export function BlockTypePlugin(): null {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    // This plugin will handle keyboard shortcuts for block types
-    // For example, typing '# ' at the start of a line will convert it to a heading
+    // Optional: validate required nodes if needed
+    validateRequiredNodes(editor, [ParagraphNode, HeadingNode], 'BlockTypePlugin');
     
+    // This plugin will handle keyboard shortcuts for block types
     const removeListener = editor.registerTextContentListener((text) => {
       const lines = text.split('\n');
       const lastLine = lines[lines.length - 1];
