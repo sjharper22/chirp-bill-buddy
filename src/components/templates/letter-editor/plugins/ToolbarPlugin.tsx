@@ -11,7 +11,8 @@ import {
   INSERT_UNORDERED_LIST_COMMAND,
   INSERT_CHECK_LIST_COMMAND
 } from '@lexical/list';
-import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontalRulePlugin';
+// Fixed: Import the correct command from LexicalHorizontalRulePlugin
+import { $createHorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { 
   Bold, 
   Italic, 
@@ -73,8 +74,14 @@ export function ToolbarPlugin() {
     });
   }, [editor]);
   
+  // Fixed: Create a proper insertHorizontalRule function that creates the node directly
   const insertHorizontalRule = useCallback(() => {
-    editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined);
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        selection.insertNodes([$createHorizontalRuleNode()]);
+      }
+    });
   }, [editor]);
 
   return (

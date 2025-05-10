@@ -16,7 +16,7 @@ import { VariableInsertPlugin } from './plugins/VariableInsertPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { DragDropPlugin } from './plugins/DragDropPlugin';
 import { BlockTypePlugin } from './plugins/BlockTypePlugin';
-import { CheckListItemNode } from '@lexical/list';
+// Fixed: Using only ListItemNode, removed CheckListItemNode which doesn't exist
 import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 import { VariableNode } from './nodes/VariableNode';

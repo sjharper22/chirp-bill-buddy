@@ -4,6 +4,7 @@ import type {
   DOMConversionOutput,
   DOMExportOutput,
   EditorConfig,
+  LexicalEditor,
   LexicalNode,
   NodeKey,
   SerializedElementNode,
@@ -80,7 +81,8 @@ export class BlockNode extends ElementNode {
     };
   }
 
-  exportDOM(editor: EditorConfig): DOMExportOutput {
+  // Fixed: Changed exportDOM parameter type from EditorConfig to LexicalEditor
+  exportDOM(editor: LexicalEditor): DOMExportOutput {
     const element = document.createElement('div');
     const children = this.getChildren();
     for (let i = 0; i < children.length; i++) {

@@ -11,6 +11,7 @@ export function BlockPlugin(): null {
     // Register a custom transformation to wrap paragraphs and headings
     // in block nodes for drag-and-drop functionality
     const removeTransform = editor.registerNodeTransform(
+      // Fixed: Added the second argument with node types to transform
       (node) => {
         const parentNode = node.getParent();
         if (
@@ -22,8 +23,8 @@ export function BlockPlugin(): null {
            node.getType() === 'quote' ||
            node.getType() === 'horizontalrule')
         ) {
-          const blockNode = $createBlockNode(node.getType());
-          $wrapNodeInElement(node, blockNode);
+          // Fixed: Changed to wrap the node in a function that returns a block node
+          $wrapNodeInElement(node, () => $createBlockNode(node.getType()));
         }
       }
     );
