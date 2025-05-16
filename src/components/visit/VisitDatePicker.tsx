@@ -15,11 +15,11 @@ interface VisitDatePickerProps {
 
 export function VisitDatePicker({ visit, onVisitChange }: VisitDatePickerProps) {
   // Track the month to display when the calendar is opened
-  const [displayedMonth, setDisplayedMonth] = useState<Date | undefined>(visit.date);
+  const [calendarMonth, setCalendarMonth] = useState<Date | undefined>(visit.date);
   
-  // Update displayedMonth when visit.date changes
+  // Update the calendar month when the visit date changes
   useEffect(() => {
-    setDisplayedMonth(visit.date);
+    setCalendarMonth(visit.date);
   }, [visit.date]);
 
   const handleDateChange = (date: Date | undefined) => {
@@ -42,8 +42,8 @@ export function VisitDatePicker({ visit, onVisitChange }: VisitDatePickerProps) 
           selected={visit.date}
           onSelect={handleDateChange}
           initialFocus
-          month={displayedMonth}
-          defaultMonth={visit.date}
+          month={calendarMonth}
+          onMonthChange={setCalendarMonth}
           className={cn("p-3 pointer-events-auto")}
         />
       </PopoverContent>
