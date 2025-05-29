@@ -44,54 +44,56 @@ export function Preview({
   });
   
   return (
-    <div className="mt-4 p-6 border rounded-lg superbill-preview-content relative">
-      <div className="mb-4 flex justify-end">
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="cover-letter"
-            checked={displayCoverLetter}
-            onCheckedChange={setDisplayCoverLetter}
-          />
-          <Label htmlFor="cover-letter">Show Cover Letter</Label>
-        </div>
-      </div>
-      
-      {displayCoverLetter && (
-        <div className="page-break-after">
-          <CoverLetterPreview 
-            superbills={[superbill]}
-            selectedTemplateId={selectedTemplateId}
-            content={coverLetterContent}
-          />
-        </div>
-      )}
-      
-      <div className="no-page-break">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold">SUPERBILL</h2>
+    <>
+      <div className="mt-4 p-6 border rounded-lg superbill-preview-content relative">
+        <div className="mb-4 flex justify-end">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="cover-letter"
+              checked={displayCoverLetter}
+              onCheckedChange={setDisplayCoverLetter}
+            />
+            <Label htmlFor="cover-letter">Show Cover Letter</Label>
+          </div>
         </div>
         
-        <InfoSection 
-          superbill={superbill}
-          earliestDate={earliestDate}
-          latestDate={latestDate}
-        />
-        
-        {superbill.visits.length > 0 && (
-          <VisitSummary visits={superbill.visits} />
+        {displayCoverLetter && (
+          <div className="page-break-after">
+            <CoverLetterPreview 
+              superbills={[superbill]}
+              selectedTemplateId={selectedTemplateId}
+              content={coverLetterContent}
+            />
+          </div>
         )}
         
-        <ServicesTable visits={superbill.visits} />
-        
-        <NotesPreview visits={superbill.visits} />
-        
-        <Footer />
+        <div className="no-page-break">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold">SUPERBILL</h2>
+          </div>
+          
+          <InfoSection 
+            superbill={superbill}
+            earliestDate={earliestDate}
+            latestDate={latestDate}
+          />
+          
+          {superbill.visits.length > 0 && (
+            <VisitSummary visits={superbill.visits} />
+          )}
+          
+          <ServicesTable visits={superbill.visits} />
+          
+          <NotesPreview visits={superbill.visits} />
+          
+          <Footer />
+        </div>
       </div>
       
       <FloatingActionBar 
         superbill={superbill} 
         coverLetterContent={coverLetterContent}
       />
-    </div>
+    </>
   );
 }
