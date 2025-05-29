@@ -122,9 +122,24 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         .cover-letter {
           margin-bottom: 40px;
           padding-bottom: 30px;
+          orphans: 3;
+          widows: 3;
+        }
+        .cover-letter p:last-child,
+        .cover-letter div:last-child {
+          page-break-inside: avoid;
+          orphans: 2;
+          widows: 2;
+        }
+        /* Ensure signature blocks stay together */
+        .cover-letter p:nth-last-child(-n+3) {
+          page-break-inside: avoid;
+          break-inside: avoid;
         }
         p {
           margin: 0 0 12px 0;
+          orphans: 2;
+          widows: 2;
         }
         ol li, ul li {
           margin-bottom: 10px;
@@ -158,7 +173,31 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
             page-break-inside: avoid; 
           }
           .cover-letter { 
-            page-break-after: always; 
+            page-break-after: always;
+            orphans: 3;
+            widows: 3;
+          }
+          /* Keep the last few elements of cover letter together */
+          .cover-letter > *:nth-last-child(-n+3) {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            orphans: 2;
+            widows: 2;
+          }
+          /* Prevent single lines at the end of pages */
+          p, div {
+            orphans: 2;
+            widows: 2;
+          }
+          /* Keep signature blocks together */
+          .cover-letter p:contains("Warmly"),
+          .cover-letter p:contains("Sincerely"),
+          .cover-letter p:contains("Best regards"),
+          .cover-letter div:contains("Team") {
+            page-break-before: avoid;
+            page-break-inside: avoid;
+            orphans: 3;
+            widows: 3;
           }
           table {
             page-break-inside: auto;
