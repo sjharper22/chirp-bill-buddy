@@ -15,31 +15,31 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
   return `
     <p>Dear ${superbill.patientName},</p>
     
-    <p>Enclosed with this letter, you will find a superbill summarizing the chiropractic care you received at our office, along with individual invoices for your records. These documents are provided to assist you in submitting a reimbursement claim to your insurance provider for out-of-network services.</p>
+    <p>Enclosed you will find a superbill summarizing your chiropractic care at our office. This document is provided to assist you in submitting a reimbursement claim to your insurance provider for out-of-network services.</p>
     
-    <p>Below is a simple set of steps to help guide you through the process:</p>
+    <p>Below are the steps to help guide you through the reimbursement process:</p>
     
     <p><strong>1. Access Your Claim Form</strong><br>
-    Log in to your insurance provider's member portal or contact them directly to obtain their standard out-of-network reimbursement form.</p>
+    Log in to your insurance provider's member portal or contact them directly to obtain their out-of-network reimbursement form.</p>
     
-    <p><strong>2. Fill Out the Required Fields</strong><br>
-    Complete all necessary sections of the form, including your personal information and the dates of care.</p>
+    <p><strong>2. Complete the Form</strong><br>
+    Fill out all required sections, including your personal information and dates of care.</p>
     
-    <p><strong>3. Attach Supporting Documents</strong><br>
+    <p><strong>3. Attach Documentation</strong><br>
     Include the following with your submission:</p>
     <ul>
-      <li>The superbill we've provided</li>
-      <li>The attached invoices</li>
+      <li>The enclosed superbill</li>
       <li>Your completed claim form</li>
+      <li>Any additional requested documentation</li>
     </ul>
     
-    <p><strong>4. Submit to Your Insurance Provider</strong><br>
-    Most providers accept claims by mail, fax, or through a member portal. Be sure to keep a copy for your records.</p>
+    <p><strong>4. Submit Your Claim</strong><br>
+    Most providers accept claims by mail, fax, or through their member portal. Keep copies for your records.</p>
     
     <p><strong>5. Track Your Claim</strong><br>
-    After processing, your provider will issue an Explanation of Benefits (EOB) and, if approved, send your reimbursement.</p>
+    After processing, your provider will issue an Explanation of Benefits (EOB) and send your reimbursement if approved.</p>
     
-    <p>Thank you again for choosing ${superbill.clinicName}. We're honored to be part of your wellness journey.</p>
+    <p>Thank you for choosing ${superbill.clinicName}. We're honored to be part of your wellness journey.</p>
     
     <p>Warmly,</p>
     
