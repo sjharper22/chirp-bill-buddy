@@ -6,7 +6,7 @@ import { NotesPreview } from "./NotesPreview";
 import { Footer } from "./Footer";
 import { VisitSummary } from "@/components/summary/VisitSummary";
 import { CoverLetterPreview } from "@/components/cover-letter/CoverLetterPreview";
-import { FloatingActionBar } from "./FloatingActionBar";
+import { ActionButtons } from "./ActionButtons";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -45,6 +45,21 @@ export function Preview({
   
   return (
     <div className="relative">
+      {/* Top Action Bar */}
+      <div className="print:hidden mb-4 p-4 bg-gray-50 border rounded-lg">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="cover-letter-top"
+              checked={displayCoverLetter}
+              onCheckedChange={setDisplayCoverLetter}
+            />
+            <Label htmlFor="cover-letter-top">Show Cover Letter</Label>
+          </div>
+          <ActionButtons superbill={superbill} coverLetterContent={coverLetterContent} />
+        </div>
+      </div>
+
       <div className="mt-4 p-6 border rounded-lg superbill-preview-content">
         <div className="mb-4 flex justify-end">
           <div className="flex items-center space-x-2">
@@ -89,11 +104,13 @@ export function Preview({
           <Footer />
         </div>
       </div>
-      
-      <FloatingActionBar 
-        superbill={superbill} 
-        coverLetterContent={coverLetterContent}
-      />
+
+      {/* Bottom Action Bar */}
+      <div className="print:hidden mt-4 p-4 bg-gray-50 border rounded-lg">
+        <div className="flex justify-center">
+          <ActionButtons superbill={superbill} coverLetterContent={coverLetterContent} />
+        </div>
+      </div>
     </div>
   );
 }
