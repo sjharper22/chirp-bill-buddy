@@ -6,6 +6,7 @@ import { NotesPreview } from "./NotesPreview";
 import { Footer } from "./Footer";
 import { VisitSummary } from "@/components/summary/VisitSummary";
 import { CoverLetterPreview } from "@/components/cover-letter/CoverLetterPreview";
+import { FloatingActionBar } from "./FloatingActionBar";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -43,7 +44,7 @@ export function Preview({
   });
   
   return (
-    <div className="mt-4 p-6 border rounded-lg superbill-preview-content">
+    <div className="mt-4 p-6 border rounded-lg superbill-preview-content relative">
       <div className="mb-4 flex justify-end">
         <div className="flex items-center space-x-2">
           <Switch
@@ -86,6 +87,11 @@ export function Preview({
         
         <Footer />
       </div>
+      
+      <FloatingActionBar 
+        superbill={superbill} 
+        coverLetterContent={coverLetterContent}
+      />
     </div>
   );
 }

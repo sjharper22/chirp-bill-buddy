@@ -4,10 +4,8 @@ import { Superbill } from "@/types/superbill";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Preview } from "@/components/preview/Preview";
-import { ActionButtons } from "@/components/preview/ActionButtons";
 import { CoverLetterSelector } from "@/components/cover-letter/CoverLetterSelector";
 import { LetterTemplate } from "@/types/template";
-import { createContextFromSuperbill, processTemplate } from "@/lib/utils/template-utils";
 import { generatePatientReimbursementGuide } from "@/lib/utils/reimbursement-guide-template";
 
 interface SuperbillPreviewProps {
@@ -76,11 +74,6 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
           superbill={superbill} 
           selectedTemplateId={selectedTemplate?.id}
           showCoverLetter={true}
-          coverLetterContent={processedContent}
-        />
-        
-        <ActionButtons 
-          superbill={superbill} 
           coverLetterContent={processedContent}
         />
       </DialogContent>
