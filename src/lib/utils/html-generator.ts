@@ -25,45 +25,66 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
       <style>
         body {
           font-family: Arial, sans-serif;
-          margin: 20px;
+          margin: 0;
+          padding: 40px;
           color: #333;
           line-height: 1.6;
+          box-sizing: border-box;
         }
         .container {
-          max-width: 800px;
+          max-width: 100%;
           margin: 0 auto;
+          padding: 0;
         }
         .header {
           text-align: center;
-          margin-bottom: 20px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #eee;
+          margin-bottom: 30px;
+          padding-bottom: 15px;
+          border-bottom: 2px solid #eee;
+        }
+        .header h1 {
+          margin: 0;
+          font-size: 28px;
+          font-weight: bold;
         }
         .info-section {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 20px;
+          margin-bottom: 30px;
+          gap: 40px;
         }
         .info-block {
           width: 48%;
+          flex: 1;
         }
         .info-title {
           font-weight: bold;
-          margin-bottom: 10px;
-          font-size: 16px;
+          margin-bottom: 15px;
+          font-size: 18px;
+          color: #333;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 5px;
+        }
+        .info-block p {
+          margin: 8px 0;
+          font-size: 14px;
         }
         table {
           width: 100%;
           border-collapse: collapse;
-          margin-bottom: 20px;
+          margin-bottom: 30px;
+          page-break-inside: avoid;
         }
         th, td {
           border: 1px solid #ddd;
-          padding: 10px;
+          padding: 12px 8px;
           text-align: left;
+          font-size: 13px;
         }
         th {
-          background-color: #f2f2f2;
+          background-color: #f8f9fa;
+          font-weight: bold;
+          font-size: 14px;
         }
         tr:nth-child(even) {
           background-color: #f9f9f9;
@@ -71,41 +92,87 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         .total-row {
           font-weight: bold;
           background-color: #f2f2f2;
+          font-size: 14px;
         }
         .notes {
           border: 1px solid #ddd;
-          padding: 15px;
-          min-height: 80px;
-          margin-bottom: 20px;
+          padding: 20px;
+          min-height: 100px;
+          margin-bottom: 30px;
           background-color: #fcfcfc;
+          page-break-inside: avoid;
+        }
+        .notes-title {
+          font-weight: bold;
+          margin-bottom: 15px;
+          font-size: 18px;
+          color: #333;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 5px;
         }
         .footer {
           text-align: center;
           font-size: 12px;
           color: #666;
-          margin-top: 30px;
-          padding-top: 15px;
+          margin-top: 40px;
+          padding-top: 20px;
           border-top: 1px solid #ddd;
+          page-break-inside: avoid;
         }
         .cover-letter {
-          margin-bottom: 30px;
-          padding-bottom: 20px;
+          margin-bottom: 40px;
+          padding-bottom: 30px;
         }
         p {
-          margin: 0 0 10px 0;
+          margin: 0 0 12px 0;
         }
         ol li, ul li {
-          margin-bottom: 8px;
+          margin-bottom: 10px;
         }
         ol, ul {
           padding-left: 25px;
         }
+        .services-section {
+          margin-bottom: 30px;
+        }
+        .services-title {
+          font-weight: bold;
+          margin-bottom: 15px;
+          font-size: 18px;
+          color: #333;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 5px;
+        }
         @media print {
-          body { margin: 0; padding: 20px; }
-          button { display: none; }
-          .page-break-after { page-break-after: always; }
-          .no-page-break { page-break-inside: avoid; }
-          .cover-letter { page-break-after: always; }
+          body { 
+            margin: 0; 
+            padding: 40px;
+          }
+          button { 
+            display: none; 
+          }
+          .page-break-after { 
+            page-break-after: always; 
+          }
+          .no-page-break { 
+            page-break-inside: avoid; 
+          }
+          .cover-letter { 
+            page-break-after: always; 
+          }
+          table {
+            page-break-inside: auto;
+          }
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+          thead {
+            display: table-header-group;
+          }
+          .info-section {
+            page-break-inside: avoid;
+          }
         }
       </style>
     </head>
@@ -121,34 +188,34 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           <div class="info-section">
             <div class="info-block">
               <div class="info-title">Patient Information</div>
-              <p style="margin: 5px 0;">Name: ${superbill.patientName}</p>
-              <p style="margin: 5px 0;">DOB: ${formatDate(superbill.patientDob)}</p>
-              <p style="margin: 5px 0;">Date: ${formatDate(superbill.issueDate)}</p>
-              ${visitDates.length > 0 ? `<p style="margin: 5px 0;">Visit Period: ${formatDate(earliestDate)} to ${formatDate(latestDate)}</p>` : ''}
+              <p><strong>Name:</strong> ${superbill.patientName}</p>
+              <p><strong>DOB:</strong> ${formatDate(superbill.patientDob)}</p>
+              <p><strong>Date:</strong> ${formatDate(superbill.issueDate)}</p>
+              ${visitDates.length > 0 ? `<p><strong>Visit Period:</strong> ${formatDate(earliestDate)} to ${formatDate(latestDate)}</p>` : ''}
             </div>
             
             <div class="info-block">
               <div class="info-title">Provider Information</div>
-              <p style="margin: 5px 0;">Provider: ${superbill.providerName}</p>
-              <p style="margin: 5px 0;">${superbill.clinicName}</p>
-              <p style="margin: 5px 0;">${superbill.clinicAddress}</p>
-              <p style="margin: 5px 0;">Phone: ${superbill.clinicPhone}</p>
-              <p style="margin: 5px 0;">Email: ${superbill.clinicEmail}</p>
-              <p style="margin: 5px 0;">EIN: ${superbill.ein}</p>
-              <p style="margin: 5px 0;">NPI #: ${superbill.npi}</p>
+              <p><strong>Provider:</strong> ${superbill.providerName}</p>
+              <p>${superbill.clinicName}</p>
+              <p>${superbill.clinicAddress}</p>
+              <p><strong>Phone:</strong> ${superbill.clinicPhone}</p>
+              <p><strong>Email:</strong> ${superbill.clinicEmail}</p>
+              <p><strong>EIN:</strong> ${superbill.ein}</p>
+              <p><strong>NPI #:</strong> ${superbill.npi}</p>
             </div>
           </div>
         </div>
         
-        <div class="no-page-break">
-          <div class="info-title">Services</div>
+        <div class="services-section">
+          <div class="services-title">Services</div>
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>ICD-10 Codes</th>
-                <th>CPT Codes</th>
-                <th style="text-align: right;">Fee</th>
+                <th style="width: 15%;">Date</th>
+                <th style="width: 30%;">ICD-10 Codes</th>
+                <th style="width: 30%;">CPT Codes</th>
+                <th style="width: 15%; text-align: right;">Fee</th>
               </tr>
             </thead>
             <tbody>
@@ -161,15 +228,15 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
                 </tr>
               `).join("")}
               <tr class="total-row">
-                <td colspan="3" style="text-align: right;">Total:</td>
-                <td style="text-align: right;">${formatCurrency(superbill.visits.reduce((total, visit) => total + (visit.fee || 0), 0))}</td>
+                <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
+                <td style="text-align: right;"><strong>${formatCurrency(superbill.visits.reduce((total, visit) => total + (visit.fee || 0), 0))}</strong></td>
               </tr>
             </tbody>
           </table>
         </div>
         
         <div class="no-page-break">
-          <div class="info-title">Notes</div>
+          <div class="notes-title">Notes</div>
           <div class="notes">
             ${superbill.visits.some(v => v.notes || (v.mainComplaints && v.mainComplaints.length > 0)) 
               ? superbill.visits.map(visit => {
@@ -179,6 +246,7 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
                     <p><strong>${formatDate(visit.date)}:</strong></p>
                     ${visit.mainComplaints && visit.mainComplaints.length > 0 ? `<p><em>Main Complaints:</em> ${visit.mainComplaints.join(', ')}</p>` : ""}
                     ${visit.notes ? `<p>${visit.notes}</p>` : ""}
+                    <br>
                   `;
                 }).join("")
               : "<p><em>No notes</em></p>"

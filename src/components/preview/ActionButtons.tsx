@@ -45,52 +45,81 @@ export function ActionButtons({ superbill, coverLetterContent }: ActionButtonsPr
       description: "Preparing PDF download...",
     });
     
-    const tempContainer = document.createElement("div");
-    tempContainer.style.position = "absolute";
-    tempContainer.style.left = "-9999px";
-    tempContainer.style.top = "-9999px";
-    tempContainer.innerHTML = generatePrintableHTML(superbill, coverLetterContent);
-    document.body.appendChild(tempContainer);
-    
     try {
+      // Create a temporary container for HTML content
+      const tempContainer = document.createElement("div");
+      tempContainer.style.position = "absolute";
+      tempContainer.style.left = "-9999px";
+      tempContainer.style.top = "-9999px";
+      tempContainer.style.width = "800px"; // Set a fixed width to ensure proper rendering
+      tempContainer.style.backgroundColor = "#ffffff";
+      
+      // Generate HTML with cover letter if available
+      tempContainer.innerHTML = generatePrintableHTML(superbill, coverLetterContent);
+      document.body.appendChild(tempContainer);
+      
+      // Use html2canvas to capture the preview as an image
       const canvas = await html2canvas(tempContainer, {
-        scale: 2,
+        scale: 2, // Higher scale for better quality
         useCORS: true,
         logging: false,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
+        width: 800, // Match the container width
+        height: tempContainer.offsetHeight,
+        onclone: (clonedDoc) => {
+          // Ensure all content is visible in the cloned document
+          const clonedContainer = clonedDoc.body.querySelector('div');
+          if (clonedContainer) {
+            clonedContainer.style.position = 'static';
+            clonedContainer.style.transform = 'none';
+            clonedContainer.style.width = '800px';
+            clonedContainer.style.margin = '0';
+          }
+        }
       });
       
+      // Create PDF with appropriate page size and margins
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4"
       });
       
-      const imgWidth = 210;
-      const pageHeight = 295; // A4 height in mm (297mm) minus margins
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // Calculate dimensions to fit content properly with margins
+      const pageWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const margin = 20; // 20mm margin on all sides
+      const contentWidth = pageWidth - (margin * 2); // 170mm
+      const contentHeight = pageHeight - (margin * 2); // 257mm
+      
+      const imgHeight = (canvas.height * contentWidth) / canvas.width;
       
       // Add the image to the PDF with multi-page support
       let heightLeft = imgHeight;
       let position = 0;
       let pageNumber = 1;
       
-      // Add first page
-      pdf.addImage(canvas, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Add first page with margins
+      pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
+      heightLeft -= contentHeight;
       
       // Add additional pages if content overflows
       while (heightLeft > 0) {
-        position = -pageHeight * pageNumber;
+        position = -contentHeight * pageNumber;
         pdf.addPage();
-        pdf.addImage(canvas, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
+        heightLeft -= contentHeight;
         pageNumber++;
       }
       
+      // Generate a filename based on the patient name and date
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       
+      // Save the PDF
       pdf.save(fileName);
+      
+      // Clean up
+      document.body.removeChild(tempContainer);
       
       toast({
         title: "PDF Downloaded",
@@ -104,7 +133,6 @@ export function ActionButtons({ superbill, coverLetterContent }: ActionButtonsPr
         variant: "destructive"
       });
     } finally {
-      document.body.removeChild(tempContainer);
       setIsGeneratingPDF(false);
     }
   };

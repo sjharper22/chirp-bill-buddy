@@ -1,4 +1,3 @@
-
 import { Superbill } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, Copy, Send } from "lucide-react";
@@ -45,19 +44,34 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
       description: "Preparing PDF download...",
     });
     
-    const tempContainer = document.createElement("div");
-    tempContainer.style.position = "absolute";
-    tempContainer.style.left = "-9999px";
-    tempContainer.style.top = "-9999px";
-    tempContainer.innerHTML = generatePrintableHTML(superbill);
-    document.body.appendChild(tempContainer);
-    
     try {
+      // Create a temporary container for HTML content
+      const tempContainer = document.createElement("div");
+      tempContainer.style.position = "absolute";
+      tempContainer.style.left = "-9999px";
+      tempContainer.style.top = "-9999px";
+      tempContainer.style.width = "800px";
+      tempContainer.style.backgroundColor = "#ffffff";
+      
+      tempContainer.innerHTML = generatePrintableHTML(superbill);
+      document.body.appendChild(tempContainer);
+      
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
+        width: 800,
+        height: tempContainer.offsetHeight,
+        onclone: (clonedDoc) => {
+          const clonedContainer = clonedDoc.body.querySelector('div');
+          if (clonedContainer) {
+            clonedContainer.style.position = 'static';
+            clonedContainer.style.transform = 'none';
+            clonedContainer.style.width = '800px';
+            clonedContainer.style.margin = '0';
+          }
+        }
       });
       
       const pdf = new jsPDF({
@@ -66,31 +80,39 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
         format: "a4"
       });
       
-      const imgWidth = 210;
-      const pageHeight = 295; // A4 height in mm (297mm) minus margins
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // Calculate dimensions with proper margins
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
+      const contentHeight = pageHeight - (margin * 2);
       
-      // Add the image to the PDF with multi-page support
+      const imgHeight = (canvas.height * contentWidth) / canvas.width;
+      
+      // Add the image to the PDF with multi-page support and margins
       let heightLeft = imgHeight;
       let position = 0;
       let pageNumber = 1;
       
-      // Add first page
-      pdf.addImage(canvas, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Add first page with margins
+      pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
+      heightLeft -= contentHeight;
       
       // Add additional pages if content overflows
       while (heightLeft > 0) {
-        position = -pageHeight * pageNumber;
+        position = -contentHeight * pageNumber;
         pdf.addPage();
-        pdf.addImage(canvas, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
+        heightLeft -= contentHeight;
         pageNumber++;
       }
       
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       
       pdf.save(fileName);
+      
+      // Clean up
+      document.body.removeChild(tempContainer);
       
       toast({
         title: "PDF Downloaded",
@@ -104,7 +126,6 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
         variant: "destructive"
       });
     } finally {
-      document.body.removeChild(tempContainer);
       setIsGeneratingPDF(false);
     }
   };
