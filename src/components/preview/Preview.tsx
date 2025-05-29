@@ -45,8 +45,8 @@ export function Preview({
   
   return (
     <div className="relative">
-      {/* Top Action Bar */}
-      <div className="print:hidden mb-4 p-4 bg-gray-50 border rounded-lg">
+      {/* Top Action Bar - Always visible on screen */}
+      <div className="mb-4 p-4 bg-gray-50 border rounded-lg print:hidden">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Switch
@@ -60,8 +60,8 @@ export function Preview({
         </div>
       </div>
 
-      <div className="mt-4 p-6 border rounded-lg superbill-preview-content">
-        <div className="mb-4 flex justify-end">
+      <div className="p-6 border rounded-lg superbill-preview-content">
+        <div className="mb-4 flex justify-end print:hidden">
           <div className="flex items-center space-x-2">
             <Switch
               id="cover-letter"
@@ -105,8 +105,8 @@ export function Preview({
         </div>
       </div>
 
-      {/* Bottom Action Bar */}
-      <div className="print:hidden mt-4 p-4 bg-gray-50 border rounded-lg">
+      {/* Bottom Action Bar - Always visible on screen */}
+      <div className="mt-4 p-4 bg-gray-50 border rounded-lg print:hidden">
         <div className="flex justify-center">
           <ActionButtons superbill={superbill} coverLetterContent={coverLetterContent} />
         </div>
