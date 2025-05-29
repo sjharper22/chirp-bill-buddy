@@ -9,7 +9,6 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
   
   let coverLetterHTML = '';
   if (coverLetterContent && coverLetterContent.trim() !== '') {
-    // Make sure the cover letter has proper page break after it
     coverLetterHTML = `
       <div class="cover-letter">
         ${coverLetterContent}
@@ -73,7 +72,6 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           width: 100%;
           border-collapse: collapse;
           margin-bottom: 30px;
-          page-break-inside: avoid;
         }
         th, td {
           border: 1px solid #ddd;
@@ -100,7 +98,6 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           min-height: 100px;
           margin-bottom: 30px;
           background-color: #fcfcfc;
-          page-break-inside: avoid;
         }
         .notes-title {
           font-weight: bold;
@@ -117,29 +114,13 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           margin-top: 40px;
           padding-top: 20px;
           border-top: 1px solid #ddd;
-          page-break-inside: avoid;
         }
         .cover-letter {
           margin-bottom: 40px;
           padding-bottom: 30px;
-          orphans: 3;
-          widows: 3;
-        }
-        .cover-letter p:last-child,
-        .cover-letter div:last-child {
-          page-break-inside: avoid;
-          orphans: 2;
-          widows: 2;
-        }
-        /* Ensure signature blocks stay together */
-        .cover-letter p:nth-last-child(-n+3) {
-          page-break-inside: avoid;
-          break-inside: avoid;
         }
         p {
           margin: 0 0 12px 0;
-          orphans: 2;
-          widows: 2;
         }
         ol li, ul li {
           margin-bottom: 10px;
@@ -161,44 +142,28 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
         @media print {
           body { 
             margin: 0; 
-            padding: 40px;
+            padding: 20px;
           }
           button { 
             display: none; 
           }
-          .page-break-after { 
-            page-break-after: always; 
-          }
-          .no-page-break { 
-            page-break-inside: avoid; 
-          }
+          /* Remove all forced page breaks and spacing controls */
           .cover-letter { 
             page-break-after: always;
-            orphans: 3;
-            widows: 3;
+            margin-bottom: 0;
+            padding-bottom: 0;
           }
-          /* Keep the last few elements of cover letter together */
-          .cover-letter > *:nth-last-child(-n+3) {
+          /* Allow natural flow for all other elements */
+          .header,
+          .info-section,
+          .services-section,
+          .notes,
+          .footer {
             page-break-inside: avoid;
-            break-inside: avoid;
-            orphans: 2;
-            widows: 2;
+            page-break-before: auto;
+            page-break-after: auto;
           }
-          /* Prevent single lines at the end of pages */
-          p, div {
-            orphans: 2;
-            widows: 2;
-          }
-          /* Keep signature blocks together */
-          .cover-letter p:contains("Warmly"),
-          .cover-letter p:contains("Sincerely"),
-          .cover-letter p:contains("Best regards"),
-          .cover-letter div:contains("Team") {
-            page-break-before: avoid;
-            page-break-inside: avoid;
-            orphans: 3;
-            widows: 3;
-          }
+          /* Only break tables if absolutely necessary */
           table {
             page-break-inside: auto;
           }
@@ -209,8 +174,31 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           thead {
             display: table-header-group;
           }
+          /* Remove orphan/widow controls that create spacing */
+          p, div, h1, h2, h3, h4, h5, h6 {
+            orphans: 1;
+            widows: 1;
+          }
+          /* Minimize margins in print */
+          .container {
+            margin: 0;
+            padding: 0;
+          }
+          .header {
+            margin-bottom: 20px;
+          }
           .info-section {
-            page-break-inside: avoid;
+            margin-bottom: 20px;
+          }
+          .services-section {
+            margin-bottom: 20px;
+          }
+          .notes {
+            margin-bottom: 20px;
+            min-height: auto;
+          }
+          .footer {
+            margin-top: 20px;
           }
         }
       </style>
@@ -219,30 +207,28 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
       <div class="container">
         ${coverLetterHTML}
         
-        <div class="no-page-break">
-          <div class="header">
-            <h1>SUPERBILL</h1>
+        <div class="header">
+          <h1>SUPERBILL</h1>
+        </div>
+        
+        <div class="info-section">
+          <div class="info-block">
+            <div class="info-title">Patient Information</div>
+            <p><strong>Name:</strong> ${superbill.patientName}</p>
+            <p><strong>DOB:</strong> ${formatDate(superbill.patientDob)}</p>
+            <p><strong>Date:</strong> ${formatDate(superbill.issueDate)}</p>
+            ${visitDates.length > 0 ? `<p><strong>Visit Period:</strong> ${formatDate(earliestDate)} to ${formatDate(latestDate)}</p>` : ''}
           </div>
           
-          <div class="info-section">
-            <div class="info-block">
-              <div class="info-title">Patient Information</div>
-              <p><strong>Name:</strong> ${superbill.patientName}</p>
-              <p><strong>DOB:</strong> ${formatDate(superbill.patientDob)}</p>
-              <p><strong>Date:</strong> ${formatDate(superbill.issueDate)}</p>
-              ${visitDates.length > 0 ? `<p><strong>Visit Period:</strong> ${formatDate(earliestDate)} to ${formatDate(latestDate)}</p>` : ''}
-            </div>
-            
-            <div class="info-block">
-              <div class="info-title">Provider Information</div>
-              <p><strong>Provider:</strong> ${superbill.providerName}</p>
-              <p>${superbill.clinicName}</p>
-              <p>${superbill.clinicAddress}</p>
-              <p><strong>Phone:</strong> ${superbill.clinicPhone}</p>
-              <p><strong>Email:</strong> ${superbill.clinicEmail}</p>
-              <p><strong>EIN:</strong> ${superbill.ein}</p>
-              <p><strong>NPI #:</strong> ${superbill.npi}</p>
-            </div>
+          <div class="info-block">
+            <div class="info-title">Provider Information</div>
+            <p><strong>Provider:</strong> ${superbill.providerName}</p>
+            <p>${superbill.clinicName}</p>
+            <p>${superbill.clinicAddress}</p>
+            <p><strong>Phone:</strong> ${superbill.clinicPhone}</p>
+            <p><strong>Email:</strong> ${superbill.clinicEmail}</p>
+            <p><strong>EIN:</strong> ${superbill.ein}</p>
+            <p><strong>NPI #:</strong> ${superbill.npi}</p>
           </div>
         </div>
         
@@ -274,28 +260,26 @@ export function generatePrintableHTML(superbill: Superbill, coverLetterContent?:
           </table>
         </div>
         
-        <div class="no-page-break">
-          <div class="notes-title">Notes</div>
-          <div class="notes">
-            ${superbill.visits.some(v => v.notes || (v.mainComplaints && v.mainComplaints.length > 0)) 
-              ? superbill.visits.map(visit => {
-                  const hasContent = visit.notes || (visit.mainComplaints && visit.mainComplaints.length > 0);
-                  if (!hasContent) return "";
-                  return `
-                    <p><strong>${formatDate(visit.date)}:</strong></p>
-                    ${visit.mainComplaints && visit.mainComplaints.length > 0 ? `<p><em>Main Complaints:</em> ${visit.mainComplaints.join(', ')}</p>` : ""}
-                    ${visit.notes ? `<p>${visit.notes}</p>` : ""}
-                    <br>
-                  `;
-                }).join("")
-              : "<p><em>No notes</em></p>"
-            }
-          </div>
-          
-          <div class="footer">
-            <p>This is a superbill for services rendered. It is not a bill.</p>
-            <p>Please submit to your insurance company for reimbursement.</p>
-          </div>
+        <div class="notes-title">Notes</div>
+        <div class="notes">
+          ${superbill.visits.some(v => v.notes || (v.mainComplaints && v.mainComplaints.length > 0)) 
+            ? superbill.visits.map(visit => {
+                const hasContent = visit.notes || (visit.mainComplaints && visit.mainComplaints.length > 0);
+                if (!hasContent) return "";
+                return `
+                  <p><strong>${formatDate(visit.date)}:</strong></p>
+                  ${visit.mainComplaints && visit.mainComplaints.length > 0 ? `<p><em>Main Complaints:</em> ${visit.mainComplaints.join(', ')}</p>` : ""}
+                  ${visit.notes ? `<p>${visit.notes}</p>` : ""}
+                  <br>
+                `;
+              }).join("")
+            : "<p><em>No notes</em></p>"
+          }
+        </div>
+        
+        <div class="footer">
+          <p>This is a superbill for services rendered. It is not a bill.</p>
+          <p>Please submit to your insurance company for reimbursement.</p>
         </div>
       </div>
     </body>
