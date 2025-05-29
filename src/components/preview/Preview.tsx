@@ -44,8 +44,8 @@ export function Preview({
   });
   
   return (
-    <>
-      <div className="mt-4 p-6 border rounded-lg superbill-preview-content relative">
+    <div className="relative">
+      <div className="mt-4 p-6 border rounded-lg superbill-preview-content">
         <div className="mb-4 flex justify-end">
           <div className="flex items-center space-x-2">
             <Switch
@@ -94,6 +94,6 @@ export function Preview({
         superbill={superbill} 
         coverLetterContent={coverLetterContent}
       />
-    </>
+    </div>
   );
 }
