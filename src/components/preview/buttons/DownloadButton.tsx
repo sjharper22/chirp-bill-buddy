@@ -31,10 +31,11 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       iframe.style.position = 'absolute';
       iframe.style.left = '-9999px';
       iframe.style.top = '-9999px';
-      iframe.style.width = '800px';
-      iframe.style.height = '1200px';
+      iframe.style.width = '210mm'; // A4 width
+      iframe.style.height = '297mm'; // A4 height
       iframe.style.border = 'none';
       iframe.style.backgroundColor = '#ffffff';
+      iframe.style.zoom = '1';
       
       document.body.appendChild(iframe);
       
@@ -57,43 +58,51 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       iframeDoc.write(htmlContent);
       iframeDoc.close();
       
-      // Wait for content to render
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Wait for content to render and fonts to load
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Force a reflow to ensure all content is rendered
+      // Force layout recalculation
       const body = iframeDoc.body;
       if (body) {
-        body.style.display = 'none';
+        body.style.transform = 'scale(1)';
         body.offsetHeight; // Trigger reflow
-        body.style.display = 'block';
         
         // Wait a bit more after reflow
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
-      // Capture the content with html2canvas
+      // Capture the content with html2canvas using higher quality settings
       const canvas = await html2canvas(body, {
-        scale: 1.5,
+        scale: 2, // Higher scale for better text clarity
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
-        width: 800,
+        width: body.scrollWidth,
         height: body.scrollHeight,
-        windowWidth: 800,
-        windowHeight: body.scrollHeight,
         allowTaint: false,
-        foreignObjectRendering: false,
+        foreignObjectRendering: true, // Better for text rendering
         removeContainer: false,
-        imageTimeout: 0,
+        imageTimeout: 15000,
+        letterRendering: true, // Better text rendering
         onclone: (clonedDoc) => {
           // Ensure proper styling in cloned document
           const clonedBody = clonedDoc.body;
           if (clonedBody) {
-            clonedBody.style.width = '800px';
+            clonedBody.style.width = '210mm';
             clonedBody.style.margin = '0';
-            clonedBody.style.padding = '40px';
+            clonedBody.style.padding = '15mm';
             clonedBody.style.backgroundColor = '#ffffff';
             clonedBody.style.fontFamily = 'Arial, sans-serif';
+            clonedBody.style.fontSize = '12px';
+            clonedBody.style.lineHeight = '1.4';
+            clonedBody.style.color = '#000000';
+            
+            // Ensure all text is crisp
+            const allElements = clonedBody.querySelectorAll('*');
+            allElements.forEach((el: any) => {
+              el.style.webkitFontSmoothing = 'antialiased';
+              el.style.mozOsxFontSmoothing = 'grayscale';
+            });
           }
         }
       });
@@ -101,38 +110,54 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       // Clean up iframe
       document.body.removeChild(iframe);
       
-      // Create PDF with proper dimensions
+      // Create PDF with exact A4 dimensions
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: "a4"
+        format: "a4",
+        compress: false // Disable compression for better quality
       });
       
       const pageWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
-      const margin = 15; // 15mm margin
-      const contentWidth = pageWidth - (margin * 2);
-      const contentHeight = pageHeight - (margin * 2);
       
-      // Calculate the height of the image when scaled to fit the page width
-      const imgWidth = contentWidth;
-      const imgHeight = (canvas.height * contentWidth) / canvas.width;
+      // Calculate scaling to fit the canvas exactly to A4 size
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
       
       // Split content across multiple pages if needed
       let heightLeft = imgHeight;
       let position = 0;
       let pageNumber = 1;
       
-      // Add first page
-      pdf.addImage(canvas.toDataURL('image/png'), "PNG", margin, margin + position, imgWidth, imgHeight);
-      heightLeft -= contentHeight;
+      // Add first page with full page coverage
+      pdf.addImage(
+        canvas.toDataURL('image/png', 1.0), // Maximum quality
+        "PNG", 
+        0, // No margin - full page
+        position, 
+        imgWidth, 
+        imgHeight,
+        undefined,
+        'FAST' // Use FAST compression for better quality
+      );
+      heightLeft -= pageHeight;
       
       // Add additional pages if needed
       while (heightLeft > 0) {
-        position = -contentHeight * pageNumber;
+        position = -pageHeight * pageNumber;
         pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/png'), "PNG", margin, margin + position, imgWidth, imgHeight);
-        heightLeft -= contentHeight;
+        pdf.addImage(
+          canvas.toDataURL('image/png', 1.0), // Maximum quality
+          "PNG", 
+          0, // No margin - full page
+          position, 
+          imgWidth, 
+          imgHeight,
+          undefined,
+          'FAST' // Use FAST compression for better quality
+        );
+        heightLeft -= pageHeight;
         pageNumber++;
       }
       
