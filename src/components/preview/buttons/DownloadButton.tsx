@@ -26,64 +26,72 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     });
     
     try {
-      // Create a temporary container for HTML content
-      const tempContainer = document.createElement("div");
-      tempContainer.style.position = "absolute";
-      tempContainer.style.left = "-9999px";
-      tempContainer.style.top = "-9999px";
-      tempContainer.style.width = "800px"; // Set a fixed width to ensure proper rendering
-      tempContainer.style.backgroundColor = "#ffffff";
+      // Create a new window for rendering
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Failed to open print window');
+      }
       
-      // Generate HTML with cover letter if available
-      tempContainer.innerHTML = generatePrintableHTML(superbill, coverLetterContent);
-      document.body.appendChild(tempContainer);
+      // Generate the complete HTML document
+      const htmlContent = generatePrintableHTML(superbill, coverLetterContent);
       
-      // Use html2canvas to capture the preview as an image
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2, // Higher scale for better quality
+      // Write the HTML to the new window
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for the document to load completely
+      await new Promise((resolve) => {
+        printWindow.onload = resolve;
+        // Fallback timeout
+        setTimeout(resolve, 2000);
+      });
+      
+      // Wait a bit more for fonts and images to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Capture the content from the print window
+      const canvas = await html2canvas(printWindow.document.body, {
+        scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
-        width: 800, // Match the container width
-        height: tempContainer.offsetHeight,
-        onclone: (clonedDoc) => {
-          // Ensure all content is visible in the cloned document
-          const clonedContainer = clonedDoc.body.querySelector('div');
-          if (clonedContainer) {
-            clonedContainer.style.position = 'static';
-            clonedContainer.style.transform = 'none';
-            clonedContainer.style.width = '800px';
-            clonedContainer.style.margin = '0';
-          }
-        }
+        width: 800,
+        height: printWindow.document.body.scrollHeight,
+        windowWidth: 800,
+        windowHeight: printWindow.document.body.scrollHeight,
+        allowTaint: false,
+        foreignObjectRendering: false,
+        removeContainer: true
       });
       
-      // Create PDF with appropriate page size and margins
+      // Close the print window
+      printWindow.close();
+      
+      // Create PDF with proper dimensions
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4"
       });
       
-      // Calculate dimensions to fit content properly with margins
       const pageWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
-      const margin = 20; // 20mm margin on all sides
-      const contentWidth = pageWidth - (margin * 2); // 170mm
-      const contentHeight = pageHeight - (margin * 2); // 257mm
+      const margin = 15; // 15mm margin
+      const contentWidth = pageWidth - (margin * 2);
+      const contentHeight = pageHeight - (margin * 2);
       
+      // Calculate the height of the image when scaled to fit the page width
       const imgHeight = (canvas.height * contentWidth) / canvas.width;
       
-      // Add the image to the PDF with multi-page support
       let heightLeft = imgHeight;
       let position = 0;
       let pageNumber = 1;
       
-      // Add first page with margins
+      // Add first page
       pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
       heightLeft -= contentHeight;
       
-      // Add additional pages if content overflows
+      // Add additional pages if needed
       while (heightLeft > 0) {
         position = -contentHeight * pageNumber;
         pdf.addPage();
@@ -92,14 +100,11 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         pageNumber++;
       }
       
-      // Generate a filename based on the patient name and date
+      // Generate filename
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       
       // Save the PDF
       pdf.save(fileName);
-      
-      // Clean up
-      document.body.removeChild(tempContainer);
       
       toast({
         title: "PDF Downloaded",
