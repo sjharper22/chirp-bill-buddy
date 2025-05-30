@@ -31,8 +31,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       tempContainer.style.position = 'absolute';
       tempContainer.style.left = '-10000px';
       tempContainer.style.top = '0';
-      tempContainer.style.width = '794px'; // A4 width at 96 DPI (210mm)
-      tempContainer.style.minHeight = '1123px'; // A4 height at 96 DPI (297mm)
+      tempContainer.style.width = '794px'; // A4 width at 96 DPI
       tempContainer.style.backgroundColor = '#ffffff';
       tempContainer.style.fontFamily = 'Arial, sans-serif';
       tempContainer.style.fontSize = '12px';
@@ -41,19 +40,231 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       tempContainer.style.padding = '40px';
       tempContainer.style.boxSizing = 'border-box';
       
-      // Generate and insert the HTML content
+      // Enhanced CSS for better pagination and spacing
+      const enhancedCSS = `
+        <style>
+          @page {
+            margin: 0.5in;
+            size: A4;
+          }
+          
+          body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.3;
+            color: #000;
+            margin: 0;
+            padding: 0;
+          }
+          
+          .container {
+            width: 100%;
+            max-width: 714px; /* Account for margins */
+          }
+          
+          /* Cover letter page break */
+          .cover-letter {
+            page-break-after: always;
+            margin-bottom: 0;
+            padding-bottom: 20px;
+          }
+          
+          /* Header styling */
+          .header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+            page-break-inside: avoid;
+          }
+          
+          .header h1 {
+            font-size: 20px;
+            margin: 0;
+            text-align: center;
+            font-weight: bold;
+          }
+          
+          /* Info section - prevent breaking */
+          .info-section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+          }
+          
+          .info-block {
+            margin-bottom: 15px;
+            width: 48%;
+            display: inline-block;
+            vertical-align: top;
+          }
+          
+          .info-block:first-child {
+            margin-right: 4%;
+          }
+          
+          .info-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #ccc;
+          }
+          
+          .info-block p {
+            margin: 2px 0;
+            font-size: 11px;
+          }
+          
+          /* Services section with page break control */
+          .services-section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+          }
+          
+          .services-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #ccc;
+            page-break-after: avoid;
+          }
+          
+          /* Table with enhanced pagination */
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 10px;
+            page-break-inside: auto;
+          }
+          
+          thead {
+            display: table-header-group;
+            page-break-inside: avoid;
+            page-break-after: avoid;
+          }
+          
+          tbody {
+            display: table-row-group;
+            page-break-inside: auto;
+          }
+          
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+          
+          th, td {
+            border: 1px solid #333;
+            padding: 6px 4px;
+            text-align: left;
+            font-size: 10px;
+          }
+          
+          th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            font-size: 11px;
+          }
+          
+          .total-row {
+            font-weight: bold;
+            background-color: #f5f5f5;
+            font-size: 11px;
+            page-break-inside: avoid;
+          }
+          
+          /* Notes section with page break control */
+          .notes-section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+          }
+          
+          .notes-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #ccc;
+            page-break-after: avoid;
+          }
+          
+          .notes {
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 30px;
+            background-color: #fafafa;
+            page-break-inside: avoid;
+          }
+          
+          /* Footer */
+          .footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            font-size: 9px;
+            text-align: center;
+            page-break-inside: avoid;
+          }
+          
+          /* Paragraph and list styling */
+          p {
+            margin: 0 0 4px 0;
+          }
+          
+          ol, ul {
+            margin: 6px 0;
+            padding-left: 20px;
+          }
+          
+          ol li, ul li {
+            margin-bottom: 4px;
+            line-height: 1.2;
+          }
+          
+          /* Strong text */
+          strong {
+            font-weight: bold;
+          }
+          
+          /* Prevent orphaned headers */
+          h1, h2, h3, h4, h5, h6 {
+            page-break-after: avoid;
+            margin: 6px 0;
+            line-height: 1.2;
+          }
+          
+          /* Specific spacing adjustments */
+          .no-break {
+            page-break-inside: avoid;
+          }
+          
+          /* Reduce excessive white space */
+          * {
+            box-sizing: border-box;
+          }
+        </style>
+      `;
+      
+      // Generate and insert the HTML content with enhanced CSS
       const htmlContent = generatePrintableHTML(superbill, coverLetterContent);
       
-      // Create a wrapper div to ensure proper styling
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = htmlContent;
-      wrapper.style.width = '100%';
-      wrapper.style.fontFamily = 'Arial, sans-serif';
-      wrapper.style.fontSize = '12px';
-      wrapper.style.lineHeight = '1.4';
-      wrapper.style.color = '#000000';
+      // Wrap content with enhanced CSS
+      const wrappedContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Superbill</title>
+          ${enhancedCSS}
+        </head>
+        <body>
+          ${htmlContent.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/, '').replace(/<\/body>[\s\S]*?<\/html>/, '')}
+        </body>
+        </html>
+      `;
       
-      tempContainer.appendChild(wrapper);
+      tempContainer.innerHTML = wrappedContent;
       document.body.appendChild(tempContainer);
       
       // Wait for fonts and content to load
@@ -62,16 +273,16 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       // Force a layout recalculation
       tempContainer.offsetHeight;
       
-      // Use html2canvas with optimized settings for text quality
+      // Use html2canvas with optimized settings
       const canvas = await html2canvas(tempContainer, {
-        scale: 3, // Higher scale for crisp text
+        scale: 2.5, // High quality but manageable file size
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
-        width: 794, // Fixed width
+        width: 794,
         height: tempContainer.scrollHeight,
         logging: false,
-        foreignObjectRendering: false, // Disable for better text rendering
+        foreignObjectRendering: false,
         removeContainer: false,
         imageTimeout: 30000,
         onclone: (clonedDoc) => {
@@ -93,7 +304,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
               if (el.style) {
                 el.style.webkitFontSmoothing = 'antialiased';
                 el.style.mozOsxFontSmoothing = 'grayscale';
-                el.style.textRendering = 'geometricPrecision';
+                el.style.textRendering = 'optimizeLegibility';
               }
             });
           }
@@ -103,7 +314,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       // Clean up the temporary container
       document.body.removeChild(tempContainer);
       
-      // Create PDF with high quality settings
+      // Create PDF with optimized pagination
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -114,12 +325,15 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       
       const pageWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
+      const margin = 12.7; // 0.5 inch margins
+      const contentWidth = pageWidth - (margin * 2);
+      const contentHeight = pageHeight - (margin * 2);
       
-      // Calculate the image dimensions to fit A4
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      // Calculate scaling to fit content properly
+      const imgWidth = contentWidth;
+      const imgHeight = (canvas.height * contentWidth) / canvas.width;
       
-      // Add the image to PDF with proper quality
+      // Add pages with proper pagination
       let remainingHeight = imgHeight;
       let yPosition = 0;
       let pageCount = 0;
@@ -129,22 +343,26 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
           pdf.addPage();
         }
         
-        const currentPageHeight = Math.min(remainingHeight, pageHeight);
+        const currentPageHeight = Math.min(remainingHeight, contentHeight);
         
+        // Add image with margins
         pdf.addImage(
-          canvas.toDataURL('image/jpeg', 0.98), // High quality JPEG
-          'JPEG',
-          0,
-          yPosition,
+          canvas.toDataURL('image/png', 1.0), // Use PNG for better text quality
+          'PNG',
+          margin,
+          margin + yPosition,
           imgWidth,
           imgHeight,
           undefined,
-          'MEDIUM' // Medium compression for balance of quality and size
+          'MEDIUM'
         );
         
-        remainingHeight -= pageHeight;
-        yPosition -= pageHeight;
+        remainingHeight -= contentHeight;
+        yPosition -= contentHeight;
         pageCount++;
+        
+        // Prevent infinite loops
+        if (pageCount > 20) break;
       }
       
       // Generate filename and save
