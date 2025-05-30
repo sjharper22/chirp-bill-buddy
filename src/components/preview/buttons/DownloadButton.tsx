@@ -26,144 +26,129 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     });
     
     try {
-      // Create an iframe for isolated rendering
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'absolute';
-      iframe.style.left = '-9999px';
-      iframe.style.top = '-9999px';
-      iframe.style.width = '210mm'; // A4 width
-      iframe.style.height = '297mm'; // A4 height
-      iframe.style.border = 'none';
-      iframe.style.backgroundColor = '#ffffff';
-      iframe.style.zoom = '1';
+      // Create a temporary container with exact print dimensions
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-10000px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '794px'; // A4 width at 96 DPI (210mm)
+      tempContainer.style.minHeight = '1123px'; // A4 height at 96 DPI (297mm)
+      tempContainer.style.backgroundColor = '#ffffff';
+      tempContainer.style.fontFamily = 'Arial, sans-serif';
+      tempContainer.style.fontSize = '12px';
+      tempContainer.style.lineHeight = '1.4';
+      tempContainer.style.color = '#000000';
+      tempContainer.style.padding = '40px';
+      tempContainer.style.boxSizing = 'border-box';
       
-      document.body.appendChild(iframe);
-      
-      // Wait for iframe to be ready
-      await new Promise((resolve) => {
-        iframe.onload = resolve;
-        setTimeout(resolve, 100); // Fallback
-      });
-      
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) {
-        throw new Error('Could not access iframe document');
-      }
-      
-      // Generate the complete HTML document
+      // Generate and insert the HTML content
       const htmlContent = generatePrintableHTML(superbill, coverLetterContent);
       
-      // Write HTML to iframe
-      iframeDoc.open();
-      iframeDoc.write(htmlContent);
-      iframeDoc.close();
+      // Create a wrapper div to ensure proper styling
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = htmlContent;
+      wrapper.style.width = '100%';
+      wrapper.style.fontFamily = 'Arial, sans-serif';
+      wrapper.style.fontSize = '12px';
+      wrapper.style.lineHeight = '1.4';
+      wrapper.style.color = '#000000';
       
-      // Wait for content to render and fonts to load
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      tempContainer.appendChild(wrapper);
+      document.body.appendChild(tempContainer);
       
-      // Force layout recalculation
-      const body = iframeDoc.body;
-      if (body) {
-        body.style.transform = 'scale(1)';
-        body.offsetHeight; // Trigger reflow
-        
-        // Wait a bit more after reflow
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+      // Wait for fonts and content to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Capture the content with html2canvas using higher quality settings
-      const canvas = await html2canvas(body, {
-        scale: 2, // Higher scale for better text clarity
+      // Force a layout recalculation
+      tempContainer.offsetHeight;
+      
+      // Use html2canvas with optimized settings for text quality
+      const canvas = await html2canvas(tempContainer, {
+        scale: 3, // Higher scale for crisp text
         useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: body.scrollWidth,
-        height: body.scrollHeight,
         allowTaint: false,
-        foreignObjectRendering: true, // Better for text rendering
+        backgroundColor: '#ffffff',
+        width: 794, // Fixed width
+        height: tempContainer.scrollHeight,
+        logging: false,
+        foreignObjectRendering: false, // Disable for better text rendering
         removeContainer: false,
-        imageTimeout: 15000,
+        imageTimeout: 30000,
         onclone: (clonedDoc) => {
-          // Ensure proper styling in cloned document
-          const clonedBody = clonedDoc.body;
-          if (clonedBody) {
-            clonedBody.style.width = '210mm';
-            clonedBody.style.margin = '0';
-            clonedBody.style.padding = '15mm';
-            clonedBody.style.backgroundColor = '#ffffff';
-            clonedBody.style.fontFamily = 'Arial, sans-serif';
-            clonedBody.style.fontSize = '12px';
-            clonedBody.style.lineHeight = '1.4';
-            clonedBody.style.color = '#000000';
+          // Ensure the cloned document has proper styling
+          const clonedContainer = clonedDoc.querySelector('div');
+          if (clonedContainer) {
+            clonedContainer.style.position = 'static';
+            clonedContainer.style.left = 'auto';
+            clonedContainer.style.width = '794px';
+            clonedContainer.style.fontFamily = 'Arial, sans-serif';
+            clonedContainer.style.fontSize = '12px';
+            clonedContainer.style.lineHeight = '1.4';
+            clonedContainer.style.color = '#000000';
+            clonedContainer.style.backgroundColor = '#ffffff';
             
-            // Ensure all text is crisp
-            const allElements = clonedBody.querySelectorAll('*');
+            // Ensure all text elements have proper anti-aliasing
+            const allElements = clonedContainer.querySelectorAll('*');
             allElements.forEach((el: any) => {
-              el.style.webkitFontSmoothing = 'antialiased';
-              el.style.mozOsxFontSmoothing = 'grayscale';
+              if (el.style) {
+                el.style.webkitFontSmoothing = 'antialiased';
+                el.style.mozOsxFontSmoothing = 'grayscale';
+                el.style.textRendering = 'geometricPrecision';
+              }
             });
           }
         }
       });
       
-      // Clean up iframe
-      document.body.removeChild(iframe);
+      // Clean up the temporary container
+      document.body.removeChild(tempContainer);
       
-      // Create PDF with exact A4 dimensions
+      // Create PDF with high quality settings
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4",
-        compress: false // Disable compression for better quality
+        compress: true,
+        precision: 2
       });
       
       const pageWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
       
-      // Calculate scaling to fit the canvas exactly to A4 size
+      // Calculate the image dimensions to fit A4
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * pageWidth) / canvas.width;
       
-      // Split content across multiple pages if needed
-      let heightLeft = imgHeight;
-      let position = 0;
-      let pageNumber = 1;
+      // Add the image to PDF with proper quality
+      let remainingHeight = imgHeight;
+      let yPosition = 0;
+      let pageCount = 0;
       
-      // Add first page with full page coverage
-      pdf.addImage(
-        canvas.toDataURL('image/png', 1.0), // Maximum quality
-        "PNG", 
-        0, // No margin - full page
-        position, 
-        imgWidth, 
-        imgHeight,
-        undefined,
-        'FAST' // Use FAST compression for better quality
-      );
-      heightLeft -= pageHeight;
-      
-      // Add additional pages if needed
-      while (heightLeft > 0) {
-        position = -pageHeight * pageNumber;
-        pdf.addPage();
+      while (remainingHeight > 0) {
+        if (pageCount > 0) {
+          pdf.addPage();
+        }
+        
+        const currentPageHeight = Math.min(remainingHeight, pageHeight);
+        
         pdf.addImage(
-          canvas.toDataURL('image/png', 1.0), // Maximum quality
-          "PNG", 
-          0, // No margin - full page
-          position, 
-          imgWidth, 
+          canvas.toDataURL('image/jpeg', 0.98), // High quality JPEG
+          'JPEG',
+          0,
+          yPosition,
+          imgWidth,
           imgHeight,
           undefined,
-          'FAST' // Use FAST compression for better quality
+          'MEDIUM' // Medium compression for balance of quality and size
         );
-        heightLeft -= pageHeight;
-        pageNumber++;
+        
+        remainingHeight -= pageHeight;
+        yPosition -= pageHeight;
+        pageCount++;
       }
       
-      // Generate filename
+      // Generate filename and save
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
-      
-      // Save the PDF
       pdf.save(fileName);
       
       toast({
