@@ -108,7 +108,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
         <div style="margin-bottom: 40px; page-break-inside: avoid;">
           <p style="margin-bottom: 5px;">Warmly,</p>
           <div style="margin: 15px 0;">
-            <img src="/lovable-uploads/b15651e0-6419-4c8e-ad37-b0626c692134.png" alt="Digital Signature" style="height: 80px;" />
+            <img src="/lovable-uploads/b15651e0-6419-4c8e-ad37-b0626c692134.png" alt="Digital Signature" style="height: 100px;" />
           </div>
           <p style="margin: 0; font-weight: bold;">Jordan Harper</p>
           <p style="margin: 0; color: #666;">Office Manager</p>
