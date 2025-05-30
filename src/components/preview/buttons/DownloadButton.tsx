@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +54,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         const fontSize = options.fontSize || 10;
         const maxWidth = options.maxWidth || contentWidth;
         const lineHeight = options.lineHeight || fontSize * 0.35;
+        const align = options.align || 'left';
         
         pdf.setFontSize(fontSize);
         if (options.bold) pdf.setFont("helvetica", "bold");
@@ -63,12 +63,21 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         const lines = pdf.splitTextToSize(text, maxWidth);
         
         lines.forEach((line: string, index: number) => {
-          if (y + (index * lineHeight) > pageHeight - margin) {
+          const lineY = y + (index * lineHeight);
+          if (lineY > pageHeight - margin) {
             pdf.addPage();
             currentY = margin;
-            y = currentY;
+            return margin + (index * lineHeight);
           }
-          pdf.text(line, x, y + (index * lineHeight));
+          
+          let lineX = x;
+          if (align === 'center') {
+            lineX = x - (pdf.getTextWidth(line) / 2);
+          } else if (align === 'right') {
+            lineX = x - pdf.getTextWidth(line);
+          }
+          
+          pdf.text(line, lineX, lineY);
         });
         
         return y + (lines.length * lineHeight);
@@ -92,12 +101,13 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       // SUPERBILL HEADER
       currentY = addText("SUPERBILL", pageWidth / 2, currentY, {
         fontSize: 18,
-        bold: true
+        bold: true,
+        align: 'center'
       });
       currentY += 15;
       
-      // Check page break before patient info
-      checkPageBreak(40);
+      // Check page break before patient info (ensure we have space for both boxes)
+      checkPageBreak(45);
       
       // PATIENT INFORMATION SECTION
       const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
@@ -185,7 +195,12 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       currentY += 20;
       
       // SERVICES TABLE
-      checkPageBreak(50);
+      // Check if we have enough space for table header + at least 2 rows
+      const tableHeaderHeight = 15;
+      const rowHeight = 8;
+      const minTableSpace = tableHeaderHeight + (rowHeight * Math.min(3, superbill.visits.length + 1)); // header + 2 data rows + total
+      
+      checkPageBreak(minTableSpace);
       
       currentY = addText("SERVICES", margin, currentY, {
         fontSize: 14,
@@ -202,7 +217,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       pdf.rect(margin, currentY, contentWidth, 8);
       
       // Vertical lines for table
-      colX.slice(1).forEach((x, index) => {
+      colX.slice(1).forEach((x) => {
         pdf.line(x, currentY, x, currentY + 8);
       });
       
@@ -216,11 +231,38 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       
       currentY += 4;
       
-      // Table rows
+      // Table rows - check space for each row individually
       let totalFee = 0;
       superbill.visits.forEach((visit, index) => {
-        // Check if we need a new page for this row
-        checkPageBreak(8);
+        // Always keep row + total row together (need space for at least 2 rows)
+        const spaceNeeded = rowHeight * 2; // current row + total row
+        if (checkPageBreak(spaceNeeded)) {
+          // If we added a new page, redraw table header
+          currentY = addText("SERVICES (continued)", margin, currentY, {
+            fontSize: 14,
+            bold: true
+          });
+          currentY += 8;
+          
+          // Redraw table header
+          pdf.setFillColor(240, 240, 240);
+          pdf.rect(margin, currentY, contentWidth, 8, 'F');
+          pdf.rect(margin, currentY, contentWidth, 8);
+          
+          colX.slice(1).forEach((x) => {
+            pdf.line(x, currentY, x, currentY + 8);
+          });
+          
+          currentY += 6;
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "bold");
+          pdf.text("Date", colX[0] + 1, currentY);
+          pdf.text("ICD-10 Codes", colX[1] + 1, currentY);
+          pdf.text("CPT Codes", colX[2] + 1, currentY);
+          pdf.text("Fee", colX[3] + 1, currentY);
+          
+          currentY += 4;
+        }
         
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(9);
@@ -250,8 +292,6 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       });
       
       // Total row
-      checkPageBreak(8);
-      
       pdf.setFillColor(245, 245, 245);
       pdf.rect(margin, currentY, contentWidth, 8, 'F');
       pdf.rect(margin, currentY, contentWidth, 8);
@@ -269,7 +309,8 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       currentY += 15;
       
       // NOTES SECTION
-      checkPageBreak(30);
+      const notesHeaderHeight = 15;
+      checkPageBreak(notesHeaderHeight);
       
       currentY = addText("NOTES", margin, currentY, {
         fontSize: 14,
