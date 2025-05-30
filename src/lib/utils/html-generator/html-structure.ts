@@ -1,4 +1,3 @@
-
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "../superbill-utils";
 
@@ -89,7 +88,7 @@ export function generateNotesSection(superbill: Superbill): string {
 
 export function generateFooter(): string {
   return `
-    <div class="footer">
+    <div class="footer" style="margin-top: 40px; padding-top: 10px; border-top: 1px solid #ccc; font-size: 12px; text-align: center; page-break-inside: avoid;">
       <p>This is a superbill for services rendered. It is not a bill.</p>
       <p>Please submit to your insurance company for reimbursement.</p>
     </div>

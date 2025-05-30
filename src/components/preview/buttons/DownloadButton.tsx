@@ -18,6 +18,40 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   
+  const renderSection = async (html: string): Promise<HTMLCanvasElement> => {
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    container.style.position = "absolute";
+    container.style.left = "-9999px";
+    container.style.width = "794px"; // A4 width at 96DPI for optimal quality
+    container.style.backgroundColor = "#ffffff";
+    document.body.appendChild(container);
+    
+    // Wait for DOM rendering and fonts to load
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const canvas = await html2canvas(container, {
+      scale: 2.5, // Higher scale for better text quality
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      width: 794,
+      height: container.offsetHeight,
+      onclone: (clonedDoc) => {
+        const clonedContainer = clonedDoc.body.querySelector('div');
+        if (clonedContainer) {
+          clonedContainer.style.position = 'static';
+          clonedContainer.style.transform = 'none';
+          clonedContainer.style.width = '794px';
+          clonedContainer.style.margin = '0';
+        }
+      }
+    });
+    
+    document.body.removeChild(container);
+    return canvas;
+  };
+  
   const handleDownload = async () => {
     setIsGenerating(true);
     toast({
@@ -26,80 +60,39 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     });
     
     try {
-      // Create a temporary container for HTML content
-      const tempContainer = document.createElement("div");
-      tempContainer.style.position = "absolute";
-      tempContainer.style.left = "-9999px";
-      tempContainer.style.top = "-9999px";
-      tempContainer.style.width = "800px"; // Set a fixed width to ensure proper rendering
-      tempContainer.style.backgroundColor = "#ffffff";
+      // Generate separate HTML for cover letter and superbill
+      const { coverLetterHTML, superbillHTML } = generatePrintableHTML(superbill, coverLetterContent);
       
-      // Generate HTML with cover letter if available
-      tempContainer.innerHTML = generatePrintableHTML(superbill, coverLetterContent);
-      document.body.appendChild(tempContainer);
-      
-      // Use html2canvas to capture the preview as an image
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: 800, // Match the container width
-        height: tempContainer.offsetHeight,
-        onclone: (clonedDoc) => {
-          // Ensure all content is visible in the cloned document
-          const clonedContainer = clonedDoc.body.querySelector('div');
-          if (clonedContainer) {
-            clonedContainer.style.position = 'static';
-            clonedContainer.style.transform = 'none';
-            clonedContainer.style.width = '800px';
-            clonedContainer.style.margin = '0';
-          }
-        }
-      });
-      
-      // Create PDF with appropriate page size and margins
+      // Create PDF with A4 dimensions
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4"
       });
       
-      // Calculate dimensions to fit content properly with margins
-      const pageWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const margin = 20; // 20mm margin on all sides
-      const contentWidth = pageWidth - (margin * 2); // 170mm
-      const contentHeight = pageHeight - (margin * 2); // 257mm
+      const margin = 12.7; // 0.5 inch margins
+      const contentWidth = 210 - (margin * 2); // A4 width minus margins
       
-      const imgHeight = (canvas.height * contentWidth) / canvas.width;
-      
-      // Add the image to the PDF with multi-page support
-      let heightLeft = imgHeight;
-      let position = 0;
-      let pageNumber = 1;
-      
-      // Add first page with margins
-      pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
-      heightLeft -= contentHeight;
-      
-      // Add additional pages if content overflows
-      while (heightLeft > 0) {
-        position = -contentHeight * pageNumber;
-        pdf.addPage();
-        pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
-        heightLeft -= contentHeight;
-        pageNumber++;
+      // Render cover letter if content exists
+      if (coverLetterHTML && coverLetterHTML.trim() !== '') {
+        const coverCanvas = await renderSection(coverLetterHTML);
+        const coverImgHeight = (coverCanvas.height * contentWidth) / coverCanvas.width;
+        
+        pdf.addImage(coverCanvas.toDataURL('image/png'), 'PNG', margin, margin, contentWidth, coverImgHeight);
+        pdf.addPage(); // Add page break before superbill
       }
       
-      // Generate a filename based on the patient name and date
+      // Render superbill
+      const superbillCanvas = await renderSection(superbillHTML);
+      const superbillImgHeight = (superbillCanvas.height * contentWidth) / superbillCanvas.width;
+      
+      pdf.addImage(superbillCanvas.toDataURL('image/png'), 'PNG', margin, margin, contentWidth, superbillImgHeight);
+      
+      // Generate filename
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       
       // Save the PDF
       pdf.save(fileName);
-      
-      // Clean up
-      document.body.removeChild(tempContainer);
       
       toast({
         title: "PDF Downloaded",

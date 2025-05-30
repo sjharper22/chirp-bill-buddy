@@ -1,4 +1,3 @@
-
 import { Superbill } from "@/types/superbill";
 import { generatePrintableCSS } from "./css-generator";
 import { 
@@ -9,19 +8,29 @@ import {
   generateFooter 
 } from "./html-structure";
 
-export function buildDocumentStructure(superbill: Superbill, coverLetterContent?: string): string {
+export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?: string): { coverLetterHTML: string; superbillHTML: string } {
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   
-  let coverLetterHTML = '';
-  if (coverLetterContent && coverLetterContent.trim() !== '') {
-    coverLetterHTML = `
-      <div class="cover-letter">
+  // Cover letter HTML (if provided)
+  const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Cover Letter - ${superbill.patientName}</title>
+      <style>
+        ${generatePrintableCSS()}
+      </style>
+    </head>
+    <body>
+      <div class="container">
         ${coverLetterContent}
       </div>
-    `;
-  }
+    </body>
+    </html>
+  ` : '';
   
-  return `
+  // Superbill HTML
+  const superbillHTML = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -32,8 +41,6 @@ export function buildDocumentStructure(superbill: Superbill, coverLetterContent?
     </head>
     <body>
       <div class="container">
-        ${coverLetterHTML}
-        
         <div class="header">
           <h1>SUPERBILL</h1>
         </div>
@@ -55,4 +62,12 @@ export function buildDocumentStructure(superbill: Superbill, coverLetterContent?
     </body>
     </html>
   `;
+  
+  return { coverLetterHTML, superbillHTML };
+}
+
+// Keep the original function for backward compatibility
+export function buildDocumentStructure(superbill: Superbill, coverLetterContent?: string): string {
+  const { coverLetterHTML, superbillHTML } = buildSeparateDocuments(superbill, coverLetterContent);
+  return coverLetterHTML + superbillHTML;
 }
