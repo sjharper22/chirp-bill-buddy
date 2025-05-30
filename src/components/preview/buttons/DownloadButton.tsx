@@ -5,9 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Superbill } from "@/types/superbill";
 import { useState } from "react";
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import { formatDate } from "@/lib/utils/superbill-utils";
-import { generatePrintableHTML } from "@/lib/utils/html-generator";
+import { formatDate, formatCurrency } from "@/lib/utils/superbill-utils";
 
 interface DownloadButtonProps {
   superbill: Superbill;
@@ -26,344 +24,309 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     });
     
     try {
-      // Create a temporary container with exact print dimensions
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-10000px';
-      tempContainer.style.top = '0';
-      tempContainer.style.width = '794px'; // A4 width at 96 DPI
-      tempContainer.style.backgroundColor = '#ffffff';
-      tempContainer.style.fontFamily = 'Arial, sans-serif';
-      tempContainer.style.fontSize = '12px';
-      tempContainer.style.lineHeight = '1.4';
-      tempContainer.style.color = '#000000';
-      tempContainer.style.padding = '40px';
-      tempContainer.style.boxSizing = 'border-box';
-      
-      // Enhanced CSS for better pagination and spacing
-      const enhancedCSS = `
-        <style>
-          @page {
-            margin: 0.5in;
-            size: A4;
-          }
-          
-          body {
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-            line-height: 1.3;
-            color: #000;
-            margin: 0;
-            padding: 0;
-          }
-          
-          .container {
-            width: 100%;
-            max-width: 714px; /* Account for margins */
-          }
-          
-          /* Cover letter page break */
-          .cover-letter {
-            page-break-after: always;
-            margin-bottom: 0;
-            padding-bottom: 20px;
-          }
-          
-          /* Header styling */
-          .header {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #333;
-            page-break-inside: avoid;
-          }
-          
-          .header h1 {
-            font-size: 20px;
-            margin: 0;
-            text-align: center;
-            font-weight: bold;
-          }
-          
-          /* Info section - prevent breaking */
-          .info-section {
-            margin-bottom: 20px;
-            page-break-inside: avoid;
-          }
-          
-          .info-block {
-            margin-bottom: 15px;
-            width: 48%;
-            display: inline-block;
-            vertical-align: top;
-          }
-          
-          .info-block:first-child {
-            margin-right: 4%;
-          }
-          
-          .info-title {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            padding-bottom: 3px;
-            border-bottom: 1px solid #ccc;
-          }
-          
-          .info-block p {
-            margin: 2px 0;
-            font-size: 11px;
-          }
-          
-          /* Services section with page break control */
-          .services-section {
-            margin-bottom: 20px;
-            page-break-inside: avoid;
-          }
-          
-          .services-title {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 3px;
-            border-bottom: 1px solid #ccc;
-            page-break-after: avoid;
-          }
-          
-          /* Table with enhanced pagination */
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 10px;
-            page-break-inside: auto;
-          }
-          
-          thead {
-            display: table-header-group;
-            page-break-inside: avoid;
-            page-break-after: avoid;
-          }
-          
-          tbody {
-            display: table-row-group;
-            page-break-inside: auto;
-          }
-          
-          tr {
-            page-break-inside: avoid;
-            page-break-after: auto;
-          }
-          
-          th, td {
-            border: 1px solid #333;
-            padding: 6px 4px;
-            text-align: left;
-            font-size: 10px;
-          }
-          
-          th {
-            background-color: #f0f0f0;
-            font-weight: bold;
-            font-size: 11px;
-          }
-          
-          .total-row {
-            font-weight: bold;
-            background-color: #f5f5f5;
-            font-size: 11px;
-            page-break-inside: avoid;
-          }
-          
-          /* Notes section with page break control */
-          .notes-section {
-            margin-bottom: 20px;
-            page-break-inside: avoid;
-          }
-          
-          .notes-title {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 3px;
-            border-bottom: 1px solid #ccc;
-            page-break-after: avoid;
-          }
-          
-          .notes {
-            border: 1px solid #ccc;
-            padding: 10px;
-            min-height: 30px;
-            background-color: #fafafa;
-            page-break-inside: avoid;
-          }
-          
-          /* Footer */
-          .footer {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #ccc;
-            font-size: 9px;
-            text-align: center;
-            page-break-inside: avoid;
-          }
-          
-          /* Paragraph and list styling */
-          p {
-            margin: 0 0 4px 0;
-          }
-          
-          ol, ul {
-            margin: 6px 0;
-            padding-left: 20px;
-          }
-          
-          ol li, ul li {
-            margin-bottom: 4px;
-            line-height: 1.2;
-          }
-          
-          /* Strong text */
-          strong {
-            font-weight: bold;
-          }
-          
-          /* Prevent orphaned headers */
-          h1, h2, h3, h4, h5, h6 {
-            page-break-after: avoid;
-            margin: 6px 0;
-            line-height: 1.2;
-          }
-          
-          /* Specific spacing adjustments */
-          .no-break {
-            page-break-inside: avoid;
-          }
-          
-          /* Reduce excessive white space */
-          * {
-            box-sizing: border-box;
-          }
-        </style>
-      `;
-      
-      // Generate and insert the HTML content with enhanced CSS
-      const htmlContent = generatePrintableHTML(superbill, coverLetterContent);
-      
-      // Wrap content with enhanced CSS
-      const wrappedContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Superbill</title>
-          ${enhancedCSS}
-        </head>
-        <body>
-          ${htmlContent.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/, '').replace(/<\/body>[\s\S]*?<\/html>/, '')}
-        </body>
-        </html>
-      `;
-      
-      tempContainer.innerHTML = wrappedContent;
-      document.body.appendChild(tempContainer);
-      
-      // Wait for fonts and content to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Force a layout recalculation
-      tempContainer.offsetHeight;
-      
-      // Use html2canvas with optimized settings
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2.5, // High quality but manageable file size
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#ffffff',
-        width: 794,
-        height: tempContainer.scrollHeight,
-        logging: false,
-        foreignObjectRendering: false,
-        removeContainer: false,
-        imageTimeout: 30000,
-        onclone: (clonedDoc) => {
-          // Ensure the cloned document has proper styling
-          const clonedContainer = clonedDoc.querySelector('div');
-          if (clonedContainer) {
-            clonedContainer.style.position = 'static';
-            clonedContainer.style.left = 'auto';
-            clonedContainer.style.width = '794px';
-            clonedContainer.style.fontFamily = 'Arial, sans-serif';
-            clonedContainer.style.fontSize = '12px';
-            clonedContainer.style.lineHeight = '1.4';
-            clonedContainer.style.color = '#000000';
-            clonedContainer.style.backgroundColor = '#ffffff';
-            
-            // Ensure all text elements have proper anti-aliasing
-            const allElements = clonedContainer.querySelectorAll('*');
-            allElements.forEach((el: any) => {
-              if (el.style) {
-                el.style.webkitFontSmoothing = 'antialiased';
-                el.style.mozOsxFontSmoothing = 'grayscale';
-                el.style.textRendering = 'optimizeLegibility';
-              }
-            });
-          }
-        }
-      });
-      
-      // Clean up the temporary container
-      document.body.removeChild(tempContainer);
-      
-      // Create PDF with optimized pagination
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4",
-        compress: true,
-        precision: 2
+        compress: true
       });
       
       const pageWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
-      const margin = 12.7; // 0.5 inch margins
+      const margin = 20;
       const contentWidth = pageWidth - (margin * 2);
-      const contentHeight = pageHeight - (margin * 2);
+      let currentY = margin;
       
-      // Calculate scaling to fit content properly
-      const imgWidth = contentWidth;
-      const imgHeight = (canvas.height * contentWidth) / canvas.width;
+      // Set font
+      pdf.setFont("helvetica");
       
-      // Add pages with proper pagination
-      let remainingHeight = imgHeight;
-      let yPosition = 0;
-      let pageCount = 0;
-      
-      while (remainingHeight > 0) {
-        if (pageCount > 0) {
+      // Helper function to add new page if needed
+      const checkPageBreak = (neededHeight: number, forceBreak = false) => {
+        if (currentY + neededHeight > pageHeight - margin || forceBreak) {
           pdf.addPage();
+          currentY = margin;
+          return true;
+        }
+        return false;
+      };
+      
+      // Helper function to add text with word wrapping
+      const addText = (text: string, x: number, y: number, options: any = {}) => {
+        const fontSize = options.fontSize || 10;
+        const maxWidth = options.maxWidth || contentWidth;
+        const lineHeight = options.lineHeight || fontSize * 0.35;
+        
+        pdf.setFontSize(fontSize);
+        if (options.bold) pdf.setFont("helvetica", "bold");
+        else pdf.setFont("helvetica", "normal");
+        
+        const lines = pdf.splitTextToSize(text, maxWidth);
+        
+        lines.forEach((line: string, index: number) => {
+          if (y + (index * lineHeight) > pageHeight - margin) {
+            pdf.addPage();
+            currentY = margin;
+            y = currentY;
+          }
+          pdf.text(line, x, y + (index * lineHeight));
+        });
+        
+        return y + (lines.length * lineHeight);
+      };
+      
+      // Add cover letter if provided
+      if (coverLetterContent && coverLetterContent.trim()) {
+        // Strip HTML tags for plain text
+        const plainText = coverLetterContent.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+        
+        currentY = addText(plainText, margin, currentY, {
+          fontSize: 11,
+          maxWidth: contentWidth,
+          lineHeight: 4
+        });
+        
+        // Force page break after cover letter
+        checkPageBreak(0, true);
+      }
+      
+      // SUPERBILL HEADER
+      currentY = addText("SUPERBILL", pageWidth / 2, currentY, {
+        fontSize: 18,
+        bold: true
+      });
+      currentY += 15;
+      
+      // Check page break before patient info
+      checkPageBreak(40);
+      
+      // PATIENT INFORMATION SECTION
+      const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
+      const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
+      const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;
+      
+      // Patient Info Box
+      pdf.setDrawColor(0);
+      pdf.setLineWidth(0.5);
+      pdf.rect(margin, currentY, contentWidth / 2 - 5, 35);
+      
+      currentY += 5;
+      currentY = addText("PATIENT INFORMATION", margin + 2, currentY, {
+        fontSize: 12,
+        bold: true
+      });
+      currentY += 2;
+      
+      currentY = addText(`Name: ${superbill.patientName}`, margin + 2, currentY, {
+        fontSize: 10
+      });
+      currentY += 4;
+      
+      currentY = addText(`DOB: ${formatDate(superbill.patientDob)}`, margin + 2, currentY, {
+        fontSize: 10
+      });
+      currentY += 4;
+      
+      currentY = addText(`Date: ${formatDate(superbill.issueDate)}`, margin + 2, currentY, {
+        fontSize: 10
+      });
+      currentY += 4;
+      
+      if (visitDates.length > 0) {
+        currentY = addText(`Visit Period: ${formatDate(earliestDate)} to ${formatDate(latestDate)}`, margin + 2, currentY, {
+          fontSize: 10
+        });
+      }
+      
+      // Provider Info Box (right side)
+      const providerX = margin + contentWidth / 2 + 5;
+      pdf.rect(providerX, currentY - 23, contentWidth / 2 - 5, 35);
+      
+      let providerY = currentY - 18;
+      providerY = addText("PROVIDER INFORMATION", providerX + 2, providerY, {
+        fontSize: 12,
+        bold: true
+      });
+      providerY += 2;
+      
+      providerY = addText(`Provider: ${superbill.providerName}`, providerX + 2, providerY, {
+        fontSize: 10
+      });
+      providerY += 4;
+      
+      providerY = addText(superbill.clinicName, providerX + 2, providerY, {
+        fontSize: 10
+      });
+      providerY += 4;
+      
+      providerY = addText(superbill.clinicAddress, providerX + 2, providerY, {
+        fontSize: 10
+      });
+      providerY += 4;
+      
+      providerY = addText(`Phone: ${superbill.clinicPhone}`, providerX + 2, providerY, {
+        fontSize: 10
+      });
+      providerY += 4;
+      
+      providerY = addText(`Email: ${superbill.clinicEmail}`, providerX + 2, providerY, {
+        fontSize: 10
+      });
+      providerY += 4;
+      
+      providerY = addText(`EIN: ${superbill.ein}`, providerX + 2, providerY, {
+        fontSize: 10
+      });
+      providerY += 4;
+      
+      providerY = addText(`NPI #: ${superbill.npi}`, providerX + 2, providerY, {
+        fontSize: 10
+      });
+      
+      currentY += 20;
+      
+      // SERVICES TABLE
+      checkPageBreak(50);
+      
+      currentY = addText("SERVICES", margin, currentY, {
+        fontSize: 14,
+        bold: true
+      });
+      currentY += 8;
+      
+      // Table headers
+      const colWidths = [30, 50, 50, 30]; // Date, ICD, CPT, Fee
+      const colX = [margin, margin + 30, margin + 80, margin + 130];
+      
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(margin, currentY, contentWidth, 8, 'F');
+      pdf.rect(margin, currentY, contentWidth, 8);
+      
+      // Vertical lines for table
+      colX.slice(1).forEach((x, index) => {
+        pdf.line(x, currentY, x, currentY + 8);
+      });
+      
+      currentY += 6;
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Date", colX[0] + 1, currentY);
+      pdf.text("ICD-10 Codes", colX[1] + 1, currentY);
+      pdf.text("CPT Codes", colX[2] + 1, currentY);
+      pdf.text("Fee", colX[3] + 1, currentY);
+      
+      currentY += 4;
+      
+      // Table rows
+      let totalFee = 0;
+      superbill.visits.forEach((visit, index) => {
+        // Check if we need a new page for this row
+        checkPageBreak(8);
+        
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(9);
+        
+        // Row background (alternating)
+        if (index % 2 === 1) {
+          pdf.setFillColor(250, 250, 250);
+          pdf.rect(margin, currentY - 2, contentWidth, 8, 'F');
         }
         
-        const currentPageHeight = Math.min(remainingHeight, contentHeight);
+        // Row border
+        pdf.rect(margin, currentY - 2, contentWidth, 8);
         
-        // Add image with margins
-        pdf.addImage(
-          canvas.toDataURL('image/png', 1.0), // Use PNG for better text quality
-          'PNG',
-          margin,
-          margin + yPosition,
-          imgWidth,
-          imgHeight,
-          undefined,
-          'MEDIUM'
-        );
+        // Vertical lines
+        colX.slice(1).forEach((x) => {
+          pdf.line(x, currentY - 2, x, currentY + 6);
+        });
         
-        remainingHeight -= contentHeight;
-        yPosition -= contentHeight;
-        pageCount++;
+        // Cell content
+        pdf.text(formatDate(visit.date), colX[0] + 1, currentY + 2);
+        pdf.text(visit.icdCodes.join(", "), colX[1] + 1, currentY + 2);
+        pdf.text(visit.cptCodes.join(", "), colX[2] + 1, currentY + 2);
+        pdf.text(formatCurrency(visit.fee), colX[3] + 1, currentY + 2);
         
-        // Prevent infinite loops
-        if (pageCount > 20) break;
+        totalFee += visit.fee || 0;
+        currentY += 8;
+      });
+      
+      // Total row
+      checkPageBreak(8);
+      
+      pdf.setFillColor(245, 245, 245);
+      pdf.rect(margin, currentY, contentWidth, 8, 'F');
+      pdf.rect(margin, currentY, contentWidth, 8);
+      
+      // Vertical lines for total row
+      colX.slice(1).forEach((x) => {
+        pdf.line(x, currentY, x, currentY + 8);
+      });
+      
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(10);
+      pdf.text("Total:", colX[2] + 1, currentY + 5);
+      pdf.text(formatCurrency(totalFee), colX[3] + 1, currentY + 5);
+      
+      currentY += 15;
+      
+      // NOTES SECTION
+      checkPageBreak(30);
+      
+      currentY = addText("NOTES", margin, currentY, {
+        fontSize: 14,
+        bold: true
+      });
+      currentY += 8;
+      
+      // Notes content
+      const hasNotes = superbill.visits.some(v => v.notes || (v.mainComplaints && v.mainComplaints.length > 0));
+      
+      if (hasNotes) {
+        superbill.visits.forEach(visit => {
+          const hasContent = visit.notes || (visit.mainComplaints && visit.mainComplaints.length > 0);
+          if (hasContent) {
+            checkPageBreak(15);
+            
+            currentY = addText(`${formatDate(visit.date)}:`, margin, currentY, {
+              fontSize: 10,
+              bold: true
+            });
+            currentY += 2;
+            
+            if (visit.mainComplaints && visit.mainComplaints.length > 0) {
+              currentY = addText(`Main Complaints: ${visit.mainComplaints.join(', ')}`, margin + 5, currentY, {
+                fontSize: 9
+              });
+              currentY += 3;
+            }
+            
+            if (visit.notes) {
+              currentY = addText(visit.notes, margin + 5, currentY, {
+                fontSize: 9
+              });
+              currentY += 3;
+            }
+            
+            currentY += 3;
+          }
+        });
+      } else {
+        currentY = addText("No notes", margin, currentY, {
+          fontSize: 10
+        });
       }
+      
+      // FOOTER
+      checkPageBreak(20);
+      currentY += 10;
+      
+      currentY = addText("This is a superbill for services rendered. It is not a bill.", margin, currentY, {
+        fontSize: 9
+      });
+      currentY += 4;
+      
+      currentY = addText("Please submit to your insurance company for reimbursement.", margin, currentY, {
+        fontSize: 9
+      });
       
       // Generate filename and save
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
