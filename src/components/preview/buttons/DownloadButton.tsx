@@ -83,7 +83,6 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         foreignObjectRendering: true, // Better for text rendering
         removeContainer: false,
         imageTimeout: 15000,
-        letterRendering: true, // Better text rendering
         onclone: (clonedDoc) => {
           // Ensure proper styling in cloned document
           const clonedBody = clonedDoc.body;
