@@ -26,46 +26,80 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     });
     
     try {
-      // Create a new window for rendering
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        throw new Error('Failed to open print window');
+      // Create an iframe for isolated rendering
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'absolute';
+      iframe.style.left = '-9999px';
+      iframe.style.top = '-9999px';
+      iframe.style.width = '800px';
+      iframe.style.height = '1200px';
+      iframe.style.border = 'none';
+      iframe.style.backgroundColor = '#ffffff';
+      
+      document.body.appendChild(iframe);
+      
+      // Wait for iframe to be ready
+      await new Promise((resolve) => {
+        iframe.onload = resolve;
+        setTimeout(resolve, 100); // Fallback
+      });
+      
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        throw new Error('Could not access iframe document');
       }
       
       // Generate the complete HTML document
       const htmlContent = generatePrintableHTML(superbill, coverLetterContent);
       
-      // Write the HTML to the new window
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
+      // Write HTML to iframe
+      iframeDoc.open();
+      iframeDoc.write(htmlContent);
+      iframeDoc.close();
       
-      // Wait for the document to load completely
-      await new Promise((resolve) => {
-        printWindow.onload = resolve;
-        // Fallback timeout
-        setTimeout(resolve, 2000);
-      });
+      // Wait for content to render
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Wait a bit more for fonts and images to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Force a reflow to ensure all content is rendered
+      const body = iframeDoc.body;
+      if (body) {
+        body.style.display = 'none';
+        body.offsetHeight; // Trigger reflow
+        body.style.display = 'block';
+        
+        // Wait a bit more after reflow
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
       
-      // Capture the content from the print window
-      const canvas = await html2canvas(printWindow.document.body, {
-        scale: 2,
+      // Capture the content with html2canvas
+      const canvas = await html2canvas(body, {
+        scale: 1.5,
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
         width: 800,
-        height: printWindow.document.body.scrollHeight,
+        height: body.scrollHeight,
         windowWidth: 800,
-        windowHeight: printWindow.document.body.scrollHeight,
+        windowHeight: body.scrollHeight,
         allowTaint: false,
         foreignObjectRendering: false,
-        removeContainer: true
+        removeContainer: false,
+        imageTimeout: 0,
+        onclone: (clonedDoc) => {
+          // Ensure proper styling in cloned document
+          const clonedBody = clonedDoc.body;
+          if (clonedBody) {
+            clonedBody.style.width = '800px';
+            clonedBody.style.margin = '0';
+            clonedBody.style.padding = '40px';
+            clonedBody.style.backgroundColor = '#ffffff';
+            clonedBody.style.fontFamily = 'Arial, sans-serif';
+          }
+        }
       });
       
-      // Close the print window
-      printWindow.close();
+      // Clean up iframe
+      document.body.removeChild(iframe);
       
       // Create PDF with proper dimensions
       const pdf = new jsPDF({
@@ -81,21 +115,23 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       const contentHeight = pageHeight - (margin * 2);
       
       // Calculate the height of the image when scaled to fit the page width
+      const imgWidth = contentWidth;
       const imgHeight = (canvas.height * contentWidth) / canvas.width;
       
+      // Split content across multiple pages if needed
       let heightLeft = imgHeight;
       let position = 0;
       let pageNumber = 1;
       
       // Add first page
-      pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
+      pdf.addImage(canvas.toDataURL('image/png'), "PNG", margin, margin + position, imgWidth, imgHeight);
       heightLeft -= contentHeight;
       
       // Add additional pages if needed
       while (heightLeft > 0) {
         position = -contentHeight * pageNumber;
         pdf.addPage();
-        pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
+        pdf.addImage(canvas.toDataURL('image/png'), "PNG", margin, margin + position, imgWidth, imgHeight);
         heightLeft -= contentHeight;
         pageNumber++;
       }
