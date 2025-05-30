@@ -21,7 +21,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
   return `
     <div style="padding: 40px; font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; page-break-inside: avoid;">
       <!-- Professional Letterhead with Logo in Upper Left -->
-      <div style="display: flex; align-items: flex-start; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #2d5a3d;">
+      <div style="display: flex; align-items: flex-start; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #2d5a3d; page-break-inside: avoid;">
         <div style="flex-shrink: 0; margin-right: 20px;">
           <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 40px;" />
         </div>
@@ -39,7 +39,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
       </div>
 
       <!-- Reference Line -->
-      <div style="margin-bottom: 20px;">
+      <div style="margin-bottom: 20px; page-break-inside: avoid;">
         <p style="margin: 0; font-weight: bold; font-size: 16px;">
           <strong>RE: Superbill for Out-of-Network Reimbursement</strong><br>
           <strong>Patient:</strong> ${superbill.patientName}<br>
@@ -50,11 +50,11 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
 
       <!-- Letter Content -->
       <div style="margin-bottom: 20px;">
-        <p style="margin-bottom: 20px; font-size: 16px;"><strong>Dear ${salutation},</strong></p>
+        <p style="margin-bottom: 20px; font-size: 16px; page-break-inside: avoid;"><strong>Dear ${salutation},</strong></p>
         
-        <p style="margin-bottom: 20px;">We hope this message finds you well. Enclosed, please find your completed superbill documenting chiropractic services provided by ${superbill.providerName} at ${superbill.clinicName} from ${visitPeriod}, totaling ${formatCurrency(totalAmount)}.</p>
+        <p style="margin-bottom: 20px; page-break-inside: avoid;">We hope this message finds you well. Enclosed, please find your completed superbill documenting chiropractic services provided by ${superbill.providerName} at ${superbill.clinicName} from ${visitPeriod}, totaling ${formatCurrency(totalAmount)}.</p>
         
-        <p style="margin-bottom: 20px;">This superbill serves as official documentation to support your out-of-network insurance reimbursement request. To assist you in the submission process, we've outlined the recommended steps below:</p>
+        <p style="margin-bottom: 20px; page-break-inside: avoid;">This superbill serves as official documentation to support your out-of-network insurance reimbursement request. To assist you in the submission process, we've outlined the recommended steps below:</p>
         
         <!-- Step-by-Step Instructions -->
         <div style="background-color: #f8f9fa; padding: 20px; border-left: 4px solid #2d5a3d; margin-bottom: 20px; page-break-inside: avoid;">
@@ -102,7 +102,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
           </ul>
         </div>
         
-        <p style="margin-bottom: 20px;">Thank you for allowing us to support your health and wellness journey. We're honored to be a part of your care and look forward to continuing to serve your health needs.</p>
+        <p style="margin-bottom: 20px; page-break-inside: avoid;">Thank you for allowing us to support your health and wellness journey. We're honored to be a part of your care and look forward to continuing to serve your health needs.</p>
         
         <!-- Professional Closing -->
         <div style="margin-bottom: 40px; page-break-inside: avoid;">
@@ -118,7 +118,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
         </div>
         
         <!-- Footer -->
-        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">
+        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #ddd; font-size: 12px; color: #666; page-break-inside: avoid;">
           <p style="margin: 0;">This document serves as official documentation of services rendered for insurance reimbursement purposes.</p>
         </div>
       </div>
