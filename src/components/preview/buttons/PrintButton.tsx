@@ -24,9 +24,28 @@ export function PrintButton({ superbill, coverLetterContent }: PrintButtonProps)
       return;
     }
     
-    const printableContent = generatePrintableHTML(superbill, coverLetterContent);
+    const { coverLetterHTML, superbillHTML } = generatePrintableHTML(superbill, coverLetterContent);
     
-    printWindow.document.write(printableContent);
+    // Combine the HTML for printing
+    const combinedHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Superbill - ${superbill.patientName}</title>
+        <style>
+          @media print {
+            .page-break { page-break-before: always; }
+          }
+        </style>
+      </head>
+      <body>
+        ${coverLetterHTML ? `<div>${coverLetterHTML}</div><div class="page-break"></div>` : ''}
+        <div>${superbillHTML}</div>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.write(combinedHTML);
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {

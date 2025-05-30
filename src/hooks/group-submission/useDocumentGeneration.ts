@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Superbill } from "@/types/superbill";
 import { generateCoverSheetHtml } from "@/lib/utils/cover-sheet-generator";
@@ -120,9 +121,9 @@ export function useDocumentGeneration() {
     
     // Add each superbill
     selectedSuperbills.forEach((superbill, index) => {
-      const superbillHtml = generatePrintableHTML(superbill);
+      const { superbillHTML } = generatePrintableHTML(superbill);
       // Extract the body content from the superbill HTML
-      const bodyContent = superbillHtml.match(/<body>([\s\S]*)<\/body>/)?.[1] || '';
+      const bodyContent = superbillHTML.match(/<body>([\s\S]*)<\/body>/)?.[1] || superbillHTML;
       completeHtml += `<div class="container">${bodyContent}</div>`;
       
       // Add page break after each superbill except the last one

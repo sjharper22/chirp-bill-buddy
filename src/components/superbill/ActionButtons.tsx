@@ -27,9 +27,28 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
       return;
     }
     
-    const printableContent = generatePrintableHTML(superbill);
+    const { coverLetterHTML, superbillHTML } = generatePrintableHTML(superbill);
     
-    printWindow.document.write(printableContent);
+    // Combine the HTML for printing
+    const combinedHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Superbill - ${superbill.patientName}</title>
+        <style>
+          @media print {
+            .page-break { page-break-before: always; }
+          }
+        </style>
+      </head>
+      <body>
+        ${coverLetterHTML ? `<div>${coverLetterHTML}</div><div class="page-break"></div>` : ''}
+        <div>${superbillHTML}</div>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.write(combinedHTML);
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {
@@ -45,6 +64,8 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
     });
     
     try {
+      const { coverLetterHTML, superbillHTML } = generatePrintableHTML(superbill);
+      
       // Create a temporary container for HTML content
       const tempContainer = document.createElement("div");
       tempContainer.style.position = "absolute";
@@ -53,7 +74,13 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
       tempContainer.style.width = "800px";
       tempContainer.style.backgroundColor = "#ffffff";
       
-      tempContainer.innerHTML = generatePrintableHTML(superbill);
+      // Combine HTML for canvas rendering
+      const combinedHTML = `
+        ${coverLetterHTML ? `<div>${coverLetterHTML}</div><div style="page-break-before: always;"></div>` : ''}
+        <div>${superbillHTML}</div>
+      `;
+      
+      tempContainer.innerHTML = combinedHTML;
       document.body.appendChild(tempContainer);
       
       const canvas = await html2canvas(tempContainer, {
