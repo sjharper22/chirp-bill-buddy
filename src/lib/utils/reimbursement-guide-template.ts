@@ -1,3 +1,4 @@
+
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "./superbill-utils";
 
@@ -56,8 +57,8 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
         <p style="margin-bottom: 30px;">This superbill serves as official documentation to support your out-of-network insurance reimbursement request. To assist you in the submission process, we've outlined the recommended steps below:</p>
       </div>
         
-      <!-- Step-by-Step Instructions - Ensure this stays together -->
-      <div style="background-color: #f8f9fa; padding: 25px; border-left: 4px solid #2d5a3d; margin-bottom: 30px; page-break-inside: avoid; min-height: 400px;">
+      <!-- Step-by-Step Instructions -->
+      <div style="background-color: #f8f9fa; padding: 25px; border-left: 4px solid #2d5a3d; margin-bottom: 30px;">
         <h3 style="color: #2d5a3d; margin-top: 0; margin-bottom: 20px; font-size: 18px;">📝 How to Submit Your Reimbursement Claim</h3>
         
         <div style="margin-bottom: 20px;">
@@ -86,26 +87,26 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
           Send your full packet via your insurer's preferred method (portal upload, mail, or fax). Be sure to retain copies of everything you submit.
         </div>
         
-        <div>
+        <div style="margin-bottom: 0;">
           <strong style="color: #2d5a3d;">Step 5: Follow Up on Your Claim</strong><br>
           Claims typically process within 2–4 weeks. You will receive an Explanation of Benefits (EOB) indicating your reimbursement status.
         </div>
       </div>
       
-      <!-- Important Reminders - Keep together but allow page break before if needed -->
-      <div style="background-color: #fff3cd; padding: 20px; border: 1px solid #ffeaa7; border-radius: 4px; margin-bottom: 30px; page-break-inside: avoid;">
+      <!-- Important Reminders -->
+      <div style="background-color: #fff3cd; padding: 20px; border: 1px solid #ffeaa7; border-radius: 4px; margin-bottom: 30px;">
         <h4 style="color: #856404; margin-top: 0; margin-bottom: 15px;">🔔 Important Notes</h4>
         <ul style="margin: 0; padding-left: 20px; color: #856404;">
           <li style="margin-bottom: 8px;">Submit your claim within your provider's policy window (typically 90–365 days from the date of service)</li>
           <li style="margin-bottom: 8px;">Keep copies of all documents submitted for your records</li>
-          <li>If your insurer requires additional documentation or if you need assistance at any point, please don't hesitate to reach out. We're happy to help</li>
+          <li style="margin-bottom: 0;">If your insurer requires additional documentation or if you need assistance at any point, please don't hesitate to reach out. We're happy to help</li>
         </ul>
       </div>
       
       <p style="margin-bottom: 40px;">Thank you for allowing us to support your health and wellness journey. We're honored to be a part of your care and look forward to continuing to serve your health needs.</p>
       
-      <!-- Professional Closing - Keep signature block together -->
-      <div style="margin-bottom: 40px; page-break-inside: avoid;">
+      <!-- Professional Closing -->
+      <div style="margin-bottom: 40px;">
         <p style="margin-bottom: 5px;">Warmly,</p>
         <div style="margin: 20px 0;">
           <img src="/lovable-uploads/b15651e0-6419-4c8e-ad37-b0626c692134.png" alt="Digital Signature" style="height: 100px;" />
@@ -118,7 +119,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
       </div>
       
       <!-- Footer -->
-      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; page-break-inside: avoid;">
+      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">
         <p style="margin: 0;">This document serves as official documentation of services rendered for insurance reimbursement purposes.</p>
       </div>
     </div>
