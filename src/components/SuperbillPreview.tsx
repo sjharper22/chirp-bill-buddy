@@ -4,6 +4,7 @@ import { Superbill } from "@/types/superbill";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Preview } from "@/components/preview/Preview";
+import { ActionButtons } from "@/components/preview/ActionButtons";
 import { CoverLetterSelector } from "@/components/cover-letter/CoverLetterSelector";
 import { LetterTemplate } from "@/types/template";
 import { generatePatientReimbursementGuide } from "@/lib/utils/reimbursement-guide-template";
@@ -63,6 +64,11 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
             Preview and download superbill with optional cover letter
           </DialogDescription>
         </DialogHeader>
+        
+        {/* Action buttons at the very top */}
+        <div className="flex justify-end px-1 pb-4">
+          <ActionButtons superbill={superbill} coverLetterContent={processedContent} />
+        </div>
         
         <CoverLetterSelector 
           superbill={superbill}

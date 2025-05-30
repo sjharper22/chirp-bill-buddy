@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Preview } from "@/components/preview/Preview";
-import { ActionButtons } from "@/components/preview/ActionButtons";
 import { Superbill } from "@/types/superbill";
 import { PatientProfile } from "@/types/patient";
 
@@ -33,13 +32,6 @@ export function PreviewDialog({
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        
-        {/* Action buttons at the very top for superbills */}
-        {contentType === 'superbill' && (
-          <div className="px-6 py-3 bg-gray-50 border-b flex justify-end">
-            <ActionButtons superbill={content as Superbill} />
-          </div>
-        )}
         
         <div className="overflow-y-auto flex-1 px-6 py-4">
           {contentType === 'superbill' && (
