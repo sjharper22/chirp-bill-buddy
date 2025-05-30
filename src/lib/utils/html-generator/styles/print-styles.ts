@@ -53,6 +53,7 @@ export function generatePrintStyles(): string {
       table {
         margin-bottom: 10px;
         font-size: 10px;
+        page-break-inside: avoid;
       }
       th, td {
         padding: 4px 3px;
@@ -68,6 +69,7 @@ export function generatePrintStyles(): string {
         margin-bottom: 10px;
         min-height: 40px;
         padding: 10px;
+        page-break-inside: avoid;
       }
       .notes-title {
         font-size: 14px;
@@ -78,6 +80,7 @@ export function generatePrintStyles(): string {
         margin-top: 10px;
         padding-top: 10px;
         font-size: 9px;
+        page-break-inside: avoid;
       }
       p {
         margin: 0 0 4px 0;
@@ -85,31 +88,77 @@ export function generatePrintStyles(): string {
       ol li, ul li {
         margin-bottom: 4px;
       }
-      /* Optimize page breaks to reduce white space */
+      
+      /* Critical: Prevent content duplication and ensure proper page breaks */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        box-sizing: border-box;
+      }
+      
+      /* Ensure step-by-step instructions section doesn't break awkwardly */
+      div[style*="background-color: #f8f9fa"] {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        margin-bottom: 20px !important;
+      }
+      
+      /* Ensure important notes section doesn't duplicate */
+      div[style*="background-color: #fff3cd"] {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        margin-bottom: 20px !important;
+      }
+      
+      /* Signature block should stay together */
+      div[style*="margin-bottom: 40px"] {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      
+      /* Better page break management */
       .header,
       .info-section,
       .services-section {
         page-break-inside: avoid;
         page-break-after: auto;
       }
-      .notes,
-      .footer {
+      
+      /* Prevent orphaned content */
+      h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        break-after: avoid;
+        orphans: 3;
+        widows: 3;
+      }
+      
+      /* Ensure lists don't break poorly */
+      ul, ol {
         page-break-inside: avoid;
+        break-inside: avoid;
       }
-      table {
-        page-break-inside: auto;
+      
+      /* Better handling of background colors and borders in print */
+      div[style*="background-color"] {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+        print-color-adjust: exact;
       }
-      tr {
-        page-break-inside: avoid;
-        page-break-after: auto;
+      
+      /* Force page breaks where needed */
+      .page-break-before {
+        page-break-before: always !important;
+        break-before: page !important;
       }
-      thead {
-        display: table-header-group;
+      
+      .page-break-after {
+        page-break-after: always !important;
+        break-after: page !important;
       }
-      /* Minimize orphans and widows */
-      p, div, h1, h2, h3, h4, h5, h6 {
-        orphans: 1;
-        widows: 1;
+      
+      .no-page-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
     }
   `;
