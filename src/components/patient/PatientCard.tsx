@@ -8,8 +8,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useState } from "react";
 import { PatientProfile } from "./PatientProfile";
 import { formatDate } from "@/lib/utils/format-utils";
-import { Trash } from "lucide-react";
+import { Trash, Plus, Eye } from "lucide-react";
 import { usePatient } from "@/context/patient/patient-context";
+import { Link } from "react-router-dom";
 
 interface PatientCardProps {
   patient: PatientProfileType;
@@ -32,25 +33,17 @@ export function PatientCard({ patient, isSelected, onToggleSelection }: PatientC
   };
   
   return (
-    <Card className={`relative ${isSelected ? "ring-2 ring-primary" : ""}`}>
+    <Card className={`relative ${isSelected ? "ring-2 ring-primary" : ""} hover:shadow-md transition-shadow`}>
       <CardContent className="p-4">
         <div className="absolute top-4 left-4">
           <Checkbox checked={isSelected} onCheckedChange={onToggleSelection} />
         </div>
         
         <div className="ml-8">
-          <div className="flex justify-between items-start">
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <Button variant="link" className="p-0 h-auto" onClick={() => setDialogOpen(true)}>
-                <span className="font-semibold text-lg">{patient.name}</span>
-              </Button>
-              <DialogContent className="max-w-xl">
-                <PatientProfile 
-                  patient={patient} 
-                  onUpdate={() => setDialogOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
+          <div className="flex justify-between items-start mb-3">
+            <Button variant="link" className="p-0 h-auto text-left" onClick={() => setDialogOpen(true)}>
+              <span className="font-semibold text-lg hover:underline">{patient.name}</span>
+            </Button>
             
             <Button 
               variant="ghost" 
@@ -63,7 +56,7 @@ export function PatientCard({ patient, isSelected, onToggleSelection }: PatientC
             </Button>
           </div>
           
-          <div className="text-sm text-muted-foreground space-y-1 mt-2">
+          <div className="text-sm text-muted-foreground space-y-1 mb-4">
             <p>DOB: {formatDate(patient.dob)}</p>
             {patient.lastSuperbillDate && (
               <p>Last Superbill: {formatDate(patient.lastSuperbillDate)}</p>
@@ -72,8 +65,31 @@ export function PatientCard({ patient, isSelected, onToggleSelection }: PatientC
               <p>Common ICDs: {patient.commonIcdCodes.length}</p>
             )}
           </div>
+
+          {/* Quick Actions */}
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => setDialogOpen(true)}>
+              <Eye className="mr-2 h-4 w-4" />
+              View Profile
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/new" state={{ prefilledPatient: patient }}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Superbill
+              </Link>
+            </Button>
+          </div>
         </div>
       </CardContent>
+      
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <PatientProfile 
+            patient={patient} 
+            onUpdate={() => setDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
       
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

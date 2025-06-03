@@ -1,17 +1,9 @@
+
 import React, { useState } from 'react';
 import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { MultiTagInput } from "@/components/MultiTagInput";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { PatientViewMode } from './PatientViewMode';
 import { PatientEditMode } from './PatientEditMode';
+import { PatientProfileTabs } from './profile/PatientProfileTabs';
 import { usePatient } from '@/context/patient/patient-context';
 
 interface PatientProfileProps {
@@ -44,7 +36,7 @@ export function PatientProfile({ patient, onUpdate }: PatientProfileProps) {
 
   return (
     <div>
-      <div className="md:flex md:items-center md:justify-between mb-4">
+      <div className="md:flex md:items-center md:justify-between mb-6">
         <h2 className="text-2xl font-bold">{patient.name}</h2>
         <div className="mt-2 md:mt-0">
           {isEditMode ? (
@@ -73,7 +65,10 @@ export function PatientProfile({ patient, onUpdate }: PatientProfileProps) {
           handleChange={handleChange}
         />
       ) : (
-        <PatientViewMode patient={patient} onEdit={() => setIsEditMode(true)} />
+        <PatientProfileTabs 
+          patient={patient} 
+          onEdit={() => setIsEditMode(true)} 
+        />
       )}
     </div>
   );
