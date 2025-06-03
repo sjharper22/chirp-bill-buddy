@@ -1,5 +1,6 @@
 
 import { Superbill } from "@/types/superbill";
+import { PatientProfile } from "@/types/patient";
 import { commonMainComplaints } from "@/constants/superbill-constants";
 import { PatientInfoSection } from "@/components/superbill-form/PatientInfoSection";
 import { ClinicInfoSection } from "@/components/superbill-form/ClinicInfoSection";
@@ -9,9 +10,10 @@ import { useSuperbillForm } from "@/components/superbill-form/hooks/useSuperbill
 
 interface SuperbillFormProps {
   existingSuperbill?: Superbill;
+  prefilledPatient?: PatientProfile;
 }
 
-export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
+export function SuperbillForm({ existingSuperbill, prefilledPatient }: SuperbillFormProps) {
   const {
     superbill,
     handleSubmit,
@@ -23,7 +25,7 @@ export function SuperbillForm({ existingSuperbill }: SuperbillFormProps) {
     updateVisitsWithDefaults,
     totalFee,
     isEdit
-  } = useSuperbillForm(existingSuperbill);
+  } = useSuperbillForm(existingSuperbill, prefilledPatient);
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
