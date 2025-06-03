@@ -56,6 +56,54 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
     }, 500);
   };
   
+  const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, margin: number, contentWidth: number) => {
+    const pageHeight = 297; // A4 height in mm
+    const contentHeight = pageHeight - (margin * 2); // Available height for content
+    
+    const imgWidth = contentWidth;
+    const imgHeight = (canvas.height * contentWidth) / canvas.width;
+    
+    // If content fits on one page, add it directly
+    if (imgHeight <= contentHeight) {
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
+      return;
+    }
+    
+    // Content is too tall - split into multiple pages
+    const totalPages = Math.ceil(imgHeight / contentHeight);
+    
+    for (let page = 0; page < totalPages; page++) {
+      if (page > 0) {
+        pdf.addPage();
+      }
+      
+      // Calculate the portion of the image to show on this page
+      const sourceY = (canvas.height / totalPages) * page;
+      const sourceHeight = Math.min(canvas.height / totalPages, canvas.height - sourceY);
+      
+      // Create a new canvas for this page's content
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sourceHeight;
+      
+      const ctx = pageCanvas.getContext('2d');
+      if (ctx) {
+        // Draw the relevant portion of the original canvas
+        ctx.drawImage(
+          canvas,
+          0, sourceY, canvas.width, sourceHeight, // Source rectangle
+          0, 0, canvas.width, sourceHeight // Destination rectangle
+        );
+        
+        // Calculate the height for this page portion
+        const pageImgHeight = (sourceHeight * contentWidth) / canvas.width;
+        
+        // Add this portion to the PDF
+        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight);
+      }
+    }
+  };
+  
   const handleDownload = async () => {
     setIsGeneratingPDF(true);
     toast({
@@ -108,31 +156,11 @@ export function ActionButtons({ superbill }: ActionButtonsProps) {
       });
       
       // Calculate dimensions with proper margins
-      const pageWidth = 210;
-      const pageHeight = 297;
       const margin = 20;
-      const contentWidth = pageWidth - (margin * 2);
-      const contentHeight = pageHeight - (margin * 2);
+      const contentWidth = 210 - (margin * 2); // A4 width minus margins
       
-      const imgHeight = (canvas.height * contentWidth) / canvas.width;
-      
-      // Add the image to the PDF with multi-page support and margins
-      let heightLeft = imgHeight;
-      let position = 0;
-      let pageNumber = 1;
-      
-      // Add first page with margins
-      pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
-      heightLeft -= contentHeight;
-      
-      // Add additional pages if content overflows
-      while (heightLeft > 0) {
-        position = -contentHeight * pageNumber;
-        pdf.addPage();
-        pdf.addImage(canvas, "PNG", margin, margin + position, contentWidth, imgHeight);
-        heightLeft -= contentHeight;
-        pageNumber++;
-      }
+      // Add the canvas using smart splitting
+      addCanvasToPDF(pdf, canvas, margin, contentWidth);
       
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       

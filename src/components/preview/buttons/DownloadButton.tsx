@@ -51,6 +51,54 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     document.body.removeChild(container);
     return canvas;
   };
+
+  const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, margin: number, contentWidth: number) => {
+    const pageHeight = 297; // A4 height in mm
+    const contentHeight = pageHeight - (margin * 2); // Available height for content
+    
+    const imgWidth = contentWidth;
+    const imgHeight = (canvas.height * contentWidth) / canvas.width;
+    
+    // If content fits on one page, add it directly
+    if (imgHeight <= contentHeight) {
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
+      return;
+    }
+    
+    // Content is too tall - split into multiple pages
+    const totalPages = Math.ceil(imgHeight / contentHeight);
+    
+    for (let page = 0; page < totalPages; page++) {
+      if (page > 0) {
+        pdf.addPage();
+      }
+      
+      // Calculate the portion of the image to show on this page
+      const sourceY = (canvas.height / totalPages) * page;
+      const sourceHeight = Math.min(canvas.height / totalPages, canvas.height - sourceY);
+      
+      // Create a new canvas for this page's content
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sourceHeight;
+      
+      const ctx = pageCanvas.getContext('2d');
+      if (ctx) {
+        // Draw the relevant portion of the original canvas
+        ctx.drawImage(
+          canvas,
+          0, sourceY, canvas.width, sourceHeight, // Source rectangle
+          0, 0, canvas.width, sourceHeight // Destination rectangle
+        );
+        
+        // Calculate the height for this page portion
+        const pageImgHeight = (sourceHeight * contentWidth) / canvas.width;
+        
+        // Add this portion to the PDF
+        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight);
+      }
+    }
+  };
   
   const handleDownload = async () => {
     setIsGenerating(true);
@@ -73,20 +121,23 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       const margin = 12.7; // 0.5 inch margins
       const contentWidth = 210 - (margin * 2); // A4 width minus margins
       
+      let isFirstPage = true;
+      
       // Render cover letter if content exists
       if (coverLetterHTML && coverLetterHTML.trim() !== '') {
         const coverCanvas = await renderSection(coverLetterHTML);
-        const coverImgHeight = (coverCanvas.height * contentWidth) / coverCanvas.width;
-        
-        pdf.addImage(coverCanvas.toDataURL('image/png'), 'PNG', margin, margin, contentWidth, coverImgHeight);
-        pdf.addPage(); // Add page break before superbill
+        addCanvasToPDF(pdf, coverCanvas, margin, contentWidth);
+        isFirstPage = false;
+      }
+      
+      // Add page break before superbill if cover letter was added
+      if (!isFirstPage) {
+        pdf.addPage();
       }
       
       // Render superbill
       const superbillCanvas = await renderSection(superbillHTML);
-      const superbillImgHeight = (superbillCanvas.height * contentWidth) / superbillCanvas.width;
-      
-      pdf.addImage(superbillCanvas.toDataURL('image/png'), 'PNG', margin, margin, contentWidth, superbillImgHeight);
+      addCanvasToPDF(pdf, superbillCanvas, margin, contentWidth);
       
       // Generate filename
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
