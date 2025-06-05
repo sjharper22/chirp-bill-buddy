@@ -1,3 +1,4 @@
+
 export function generatePrintStyles(): string {
   return `
     @media print {
@@ -22,9 +23,9 @@ export function generatePrintStyles(): string {
       }
       .header {
         margin-bottom: 15px;
-        padding: 20px 30px;
+        padding: 25px 30px;
         background: white !important;
-        border-bottom: 1px solid #ccc;
+        border-bottom: 2px solid #ccc;
         text-align: center;
       }
       .header-content {
@@ -34,27 +35,33 @@ export function generatePrintStyles(): string {
         align-items: center;
       }
       .logo-section {
-        margin-bottom: 12px;
+        margin-bottom: 15px;
       }
       .clinic-logo {
-        height: 26px;
+        height: 32px;
         width: auto;
       }
       .title-section {
         text-align: center;
+        margin-bottom: 12px;
       }
       .title-section h1 {
-        font-size: 22px;
-        margin: 0 0 3px 0;
+        font-size: 26px;
+        margin: 0 0 6px 0;
         color: #000;
         font-weight: 700;
-        letter-spacing: 1.5px;
+        letter-spacing: 2px;
+      }
+      .clinic-info {
+        font-size: 11px;
+        color: #666;
+        line-height: 1.3;
       }
       .clinic-name {
-        font-size: 10px;
-        color: #666;
-        font-weight: 500;
-        letter-spacing: 1px;
+        font-size: 13px;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 3px;
       }
       .info-section {
         margin-bottom: 10px;

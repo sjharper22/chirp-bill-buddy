@@ -11,7 +11,12 @@ export function generateSuperbillHeader(superbill: Superbill): string {
         </div>
         <div class="title-section">
           <h1>SUPERBILL</h1>
+        </div>
+        <div class="clinic-info">
           <div class="clinic-name">${superbill.clinicName}</div>
+          ${superbill.clinicAddress}<br>
+          Phone: ${superbill.clinicPhone} | Email: ${superbill.clinicEmail}<br>
+          NPI: ${superbill.npi} | EIN: ${superbill.ein}
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "./superbill-utils";
 
@@ -19,18 +20,20 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
 
   return `
     <div style="padding: 40px; font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; page-break-inside: avoid;">
-      <!-- Professional Letterhead with Centered Logo -->
-      <div style="text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #2d5a3d;">
-        <div style="margin-bottom: 15px;">
-          <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 34px;" />
+      <!-- Professional Letterhead - Matching Superbill Style -->
+      <div style="text-align: center; margin-bottom: 30px; padding: 30px 40px 20px 40px; border-bottom: 2px solid #e5e7eb; background: #ffffff;">
+        <div style="margin-bottom: 20px;">
+          <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 40px;" />
         </div>
-        <div style="font-size: 14px; color: #666;">
-          <strong>${superbill.clinicName}</strong><br>
+        <div style="margin-bottom: 15px;">
+          <div style="font-size: 16px; color: #374151; font-weight: 600; margin-bottom: 4px;">${superbill.clinicName}</div>
+        </div>
+        <div style="font-size: 14px; color: #6b7280; font-weight: 500; line-height: 1.4;">
           ${superbill.clinicAddress}<br>
           Phone: ${superbill.clinicPhone} | Email: ${superbill.clinicEmail}<br>
           NPI: ${superbill.npi} | EIN: ${superbill.ein}
         </div>
-        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #666;">
+        <div style="text-align: right; margin-top: 15px; font-size: 14px; color: #6b7280;">
           ${formatDate(superbill.issueDate)}
         </div>
       </div>

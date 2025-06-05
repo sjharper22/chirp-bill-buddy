@@ -1,10 +1,11 @@
+
 export function generateComponentStyles(): string {
   return `
     .header {
       text-align: center;
       margin-bottom: 30px;
-      padding: 25px 40px;
-      border-bottom: 1px solid #e5e7eb;
+      padding: 30px 40px;
+      border-bottom: 2px solid #e5e7eb;
       background: #ffffff;
     }
     .header-content {
@@ -16,30 +17,37 @@ export function generateComponentStyles(): string {
       margin: 0 auto;
     }
     .logo-section {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
     .clinic-logo {
-      height: 34px;
+      height: 40px;
       width: auto;
       object-fit: contain;
     }
     .title-section {
       text-align: center;
+      margin-bottom: 15px;
     }
     .title-section h1 {
-      margin: 0 0 4px 0;
-      font-size: 28px;
+      margin: 0 0 8px 0;
+      font-size: 32px;
       font-weight: 700;
       color: #1f2937;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       text-transform: uppercase;
     }
-    .clinic-name {
-      font-size: 13px;
+    .clinic-info {
+      text-align: center;
+      font-size: 14px;
       color: #6b7280;
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
+      line-height: 1.4;
+    }
+    .clinic-name {
+      font-size: 16px;
+      color: #374151;
+      font-weight: 600;
+      margin-bottom: 4px;
     }
     .info-section {
       display: flex;
