@@ -4,7 +4,7 @@ export function generatePrintStyles(): string {
     @media print {
       body { 
         margin: 0; 
-        padding: 10px;
+        padding: 8px;
         font-size: 11px;
         line-height: 1.3;
       }
@@ -22,8 +22,8 @@ export function generatePrintStyles(): string {
         max-width: 100%;
       }
       .header {
-        margin-bottom: 12px;
-        padding: 10px 15px;
+        margin-bottom: 10px;
+        padding: 8px 12px;
         background: white !important;
         border-bottom: 2px solid #ccc;
         text-align: left;
@@ -37,7 +37,7 @@ export function generatePrintStyles(): string {
         margin: 0;
       }
       .logo-section {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         text-align: left;
         width: 100%;
       }
@@ -47,11 +47,11 @@ export function generatePrintStyles(): string {
       }
       .title-section {
         text-align: left;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
       .title-section h1 {
         font-size: 20px;
-        margin: 0 0 4px 0;
+        margin: 0 0 3px 0;
         color: #000;
         font-weight: 700;
         letter-spacing: 1.5px;
@@ -69,30 +69,30 @@ export function generatePrintStyles(): string {
         margin-bottom: 2px;
       }
       .info-section {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         gap: 15px;
         page-break-inside: avoid;
       }
       .info-title {
         font-size: 12px;
-        margin-bottom: 4px;
-        padding-bottom: 2px;
+        margin-bottom: 3px;
+        padding-bottom: 1px;
       }
       .info-block p {
         margin: 1px 0;
         font-size: 9px;
       }
       .services-section {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         page-break-inside: avoid;
       }
       .services-title {
         font-size: 12px;
-        margin-bottom: 4px;
-        padding-bottom: 2px;
+        margin-bottom: 3px;
+        padding-bottom: 1px;
       }
       table {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         font-size: 8px;
         page-break-inside: auto;
       }
@@ -107,29 +107,29 @@ export function generatePrintStyles(): string {
         font-size: 9px;
       }
       .notes {
-        margin-bottom: 8px;
-        min-height: 20px;
-        padding: 6px;
+        margin-bottom: 6px;
+        min-height: 15px;
+        padding: 4px;
         page-break-inside: avoid;
       }
       .notes-title {
         font-size: 12px;
-        margin-bottom: 4px;
-        padding-bottom: 2px;
+        margin-bottom: 3px;
+        padding-bottom: 1px;
       }
       .footer {
-        margin-top: 8px;
-        padding-top: 6px;
+        margin-top: 6px;
+        padding-top: 4px;
         font-size: 7px;
         page-break-inside: avoid;
       }
       p {
-        margin: 0 0 2px 0;
+        margin: 0 0 1px 0;
       }
       ol li, ul li {
-        margin-bottom: 2px;
+        margin-bottom: 1px;
       }
-      /* Better page break handling */
+      /* Improved page break handling */
       .header,
       .info-section,
       .services-section {
@@ -159,10 +159,19 @@ export function generatePrintStyles(): string {
         overflow: hidden;
         word-wrap: break-word;
       }
-      /* Minimize orphans and widows */
+      /* Better orphan and widow control */
       p, div, h1, h2, h3, h4, h5, h6 {
-        orphans: 1;
-        widows: 1;
+        orphans: 2;
+        widows: 2;
+      }
+      /* Reduce excessive spacing */
+      div[style*="background-color: #f8f9fa"] {
+        margin-bottom: 8px !important;
+        padding: 8px !important;
+      }
+      div[style*="background-color: #fff3cd"] {
+        margin-bottom: 8px !important;
+        padding: 6px !important;
       }
     }
   `;

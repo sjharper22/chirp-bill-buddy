@@ -25,6 +25,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     container.style.left = "-9999px";
     container.style.width = "794px"; // A4 width at 96DPI for optimal quality
     container.style.backgroundColor = "#ffffff";
+    container.style.fontFamily = "Arial, sans-serif";
     document.body.appendChild(container);
     
     // Wait for DOM rendering and fonts to load
@@ -44,6 +45,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
           clonedContainer.style.transform = 'none';
           clonedContainer.style.width = '794px';
           clonedContainer.style.margin = '0';
+          clonedContainer.style.fontFamily = 'Arial, sans-serif';
         }
       }
     });
@@ -65,38 +67,44 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       return;
     }
     
-    // Content is too tall - split into multiple pages
-    const totalPages = Math.ceil(imgHeight / contentHeight);
+    // Content is too tall - split into multiple pages with better handling
+    const pixelsPerMM = canvas.height / imgHeight;
+    const contentHeightInPixels = contentHeight * pixelsPerMM;
     
-    for (let page = 0; page < totalPages; page++) {
-      if (page > 0) {
+    let currentY = 0;
+    let pageCount = 0;
+    
+    while (currentY < canvas.height) {
+      if (pageCount > 0) {
         pdf.addPage();
       }
       
-      // Calculate the portion of the image to show on this page
-      const sourceY = (canvas.height / totalPages) * page;
-      const sourceHeight = Math.min(canvas.height / totalPages, canvas.height - sourceY);
+      const remainingHeight = canvas.height - currentY;
+      const sectionHeight = Math.min(contentHeightInPixels, remainingHeight);
       
       // Create a new canvas for this page's content
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
-      pageCanvas.height = sourceHeight;
+      pageCanvas.height = sectionHeight;
       
       const ctx = pageCanvas.getContext('2d');
       if (ctx) {
         // Draw the relevant portion of the original canvas
         ctx.drawImage(
           canvas,
-          0, sourceY, canvas.width, sourceHeight, // Source rectangle
-          0, 0, canvas.width, sourceHeight // Destination rectangle
+          0, currentY, canvas.width, sectionHeight, // Source rectangle
+          0, 0, canvas.width, sectionHeight // Destination rectangle
         );
         
         // Calculate the height for this page portion
-        const pageImgHeight = (sourceHeight * contentWidth) / canvas.width;
+        const pageImgHeight = (sectionHeight * contentWidth) / canvas.width;
         
         // Add this portion to the PDF
         pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight);
       }
+      
+      currentY += sectionHeight;
+      pageCount++;
     }
   };
   
@@ -118,7 +126,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         format: "a4"
       });
       
-      const margin = 12.7; // 0.5 inch margins
+      const margin = 10; // Reduced margin to 10mm (about 0.39 inches)
       const contentWidth = 210 - (margin * 2); // A4 width minus margins
       
       let isFirstPage = true;
