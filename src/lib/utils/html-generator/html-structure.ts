@@ -7,7 +7,7 @@ export function generateSuperbillHeader(superbill: Superbill): string {
     <div class="header">
       <div class="header-content">
         <div class="logo-section">
-          <img src="/lovable-uploads/47fb5881-8a7a-4132-ac2a-c9f5e83c01ef.png" alt="Clinic Logo" class="clinic-logo" />
+          <img src="/lovable-uploads/a2e25411-48d4-4692-aa1c-835492f68f8f.png" alt="Collective Family Chiropractic Logo" class="clinic-logo" />
         </div>
         <div class="title-section">
           <h1>SUPERBILL</h1>
