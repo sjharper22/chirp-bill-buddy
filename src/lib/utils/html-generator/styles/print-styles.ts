@@ -25,7 +25,14 @@ export function generatePrintStyles(): string {
         margin-bottom: 10px;
         padding-bottom: 8px;
       }
-      .header h1 {
+      .header-content {
+        gap: 15px;
+      }
+      .clinic-logo {
+        max-height: 60px;
+        max-width: 90px;
+      }
+      .title-section h1 {
         font-size: 20px;
         margin: 0;
       }

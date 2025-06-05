@@ -1,5 +1,21 @@
+
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "../superbill-utils";
+
+export function generateSuperbillHeader(superbill: Superbill): string {
+  return `
+    <div class="header">
+      <div class="header-content">
+        <div class="logo-section">
+          <img src="/lovable-uploads/47fb5881-8a7a-4132-ac2a-c9f5e83c01ef.png" alt="Clinic Logo" class="clinic-logo" />
+        </div>
+        <div class="title-section">
+          <h1>SUPERBILL</h1>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
 export function generatePatientInfoSection(superbill: Superbill, visitDates: number[]): string {
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;

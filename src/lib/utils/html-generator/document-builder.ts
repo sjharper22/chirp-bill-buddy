@@ -1,6 +1,7 @@
 import { Superbill } from "@/types/superbill";
 import { generatePrintableCSS } from "./css-generator";
 import { 
+  generateSuperbillHeader,
   generatePatientInfoSection, 
   generateProviderInfoSection, 
   generateServicesTable, 
@@ -41,9 +42,7 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
     </head>
     <body>
       <div class="container">
-        <div class="header">
-          <h1>SUPERBILL</h1>
-        </div>
+        ${generateSuperbillHeader(superbill)}
         
         <div class="info-section">
           ${generatePatientInfoSection(superbill, visitDates)}

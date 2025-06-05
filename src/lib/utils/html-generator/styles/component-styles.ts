@@ -1,6 +1,35 @@
 
 export function generateComponentStyles(): string {
   return `
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+    }
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .logo-section {
+      flex-shrink: 0;
+    }
+    .clinic-logo {
+      max-height: 80px;
+      max-width: 120px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+    .title-section h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+    }
     .info-section {
       display: flex;
       justify-content: space-between;
