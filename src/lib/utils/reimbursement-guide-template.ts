@@ -1,4 +1,3 @@
-
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "./superbill-utils";
 
@@ -20,20 +19,18 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
 
   return `
     <div style="padding: 40px; font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; page-break-inside: avoid;">
-      <!-- Professional Letterhead with Logo in Upper Left -->
-      <div style="display: flex; align-items: flex-start; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #2d5a3d;">
-        <div style="flex-shrink: 0; margin-right: 20px;">
-          <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 40px;" />
+      <!-- Professional Letterhead with Centered Logo -->
+      <div style="text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #2d5a3d;">
+        <div style="margin-bottom: 15px;">
+          <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 34px;" />
         </div>
-        <div style="flex-grow: 1;">
-          <div style="font-size: 14px; color: #666;">
-            <strong>${superbill.clinicName}</strong><br>
-            ${superbill.clinicAddress}<br>
-            Phone: ${superbill.clinicPhone} | Email: ${superbill.clinicEmail}<br>
-            NPI: ${superbill.npi} | EIN: ${superbill.ein}
-          </div>
+        <div style="font-size: 14px; color: #666;">
+          <strong>${superbill.clinicName}</strong><br>
+          ${superbill.clinicAddress}<br>
+          Phone: ${superbill.clinicPhone} | Email: ${superbill.clinicEmail}<br>
+          NPI: ${superbill.npi} | EIN: ${superbill.ein}
         </div>
-        <div style="text-align: right; font-size: 14px; color: #666;">
+        <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #666;">
           ${formatDate(superbill.issueDate)}
         </div>
       </div>

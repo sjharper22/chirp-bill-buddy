@@ -1,4 +1,3 @@
-
 export function generatePrintStyles(): string {
   return `
     @media print {
@@ -26,25 +25,23 @@ export function generatePrintStyles(): string {
         padding: 20px 30px;
         background: white !important;
         border-bottom: 1px solid #ccc;
-        text-align: left;
+        text-align: center;
       }
       .header-content {
         padding: 0;
         max-width: 100%;
-        position: relative;
+        flex-direction: column;
+        align-items: center;
       }
       .logo-section {
-        margin-right: 30px;
+        margin-bottom: 12px;
       }
       .clinic-logo {
         height: 26px;
         width: auto;
       }
       .title-section {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        text-align: center;
       }
       .title-section h1 {
         font-size: 22px;
