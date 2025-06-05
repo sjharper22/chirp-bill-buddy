@@ -11,6 +11,7 @@ export function generateSuperbillHeader(superbill: Superbill): string {
         </div>
         <div class="title-section">
           <h1>SUPERBILL</h1>
+          <div class="clinic-name">${superbill.clinicName}</div>
         </div>
       </div>
     </div>

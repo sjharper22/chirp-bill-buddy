@@ -22,19 +22,28 @@ export function generatePrintStyles(): string {
         max-width: 100%;
       }
       .header {
-        margin-bottom: 10px;
-        padding-bottom: 8px;
+        margin-bottom: 15px;
+        padding: 15px 0;
+        background: white !important;
+        border-bottom: 2px solid #333;
       }
       .header-content {
-        gap: 15px;
+        padding: 0 10px;
+        max-width: 100%;
       }
       .clinic-logo {
-        max-height: 60px;
-        max-width: 90px;
+        height: 60px;
+        width: auto;
+        filter: none;
       }
       .title-section h1 {
-        font-size: 20px;
-        margin: 0;
+        font-size: 24px;
+        margin: 0 0 5px 0;
+        color: #000;
+      }
+      .clinic-name {
+        font-size: 12px;
+        color: #666;
       }
       .info-section {
         margin-bottom: 10px;
