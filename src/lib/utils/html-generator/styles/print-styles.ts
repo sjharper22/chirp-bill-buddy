@@ -4,7 +4,7 @@ export function generatePrintStyles(): string {
     @media print {
       body { 
         margin: 0; 
-        padding: 15px;
+        padding: 10px;
         font-size: 11px;
         line-height: 1.3;
       }
@@ -23,20 +23,22 @@ export function generatePrintStyles(): string {
       }
       .header {
         margin-bottom: 12px;
-        padding: 15px 20px;
+        padding: 10px 15px;
         background: white !important;
         border-bottom: 2px solid #ccc;
-        text-align: center;
+        text-align: left;
+        page-break-inside: avoid;
       }
       .header-content {
         padding: 0;
         max-width: 100%;
         flex-direction: column;
-        align-items: center;
+        align-items: flex-start;
+        margin: 0;
       }
       .logo-section {
-        margin-bottom: 10px;
-        text-align: center;
+        margin-bottom: 8px;
+        text-align: left;
         width: 100%;
       }
       .clinic-logo {
@@ -44,84 +46,90 @@ export function generatePrintStyles(): string {
         width: auto;
       }
       .title-section {
-        text-align: center;
-        margin-bottom: 10px;
+        text-align: left;
+        margin-bottom: 8px;
       }
       .title-section h1 {
-        font-size: 22px;
-        margin: 0 0 5px 0;
+        font-size: 20px;
+        margin: 0 0 4px 0;
         color: #000;
         font-weight: 700;
         letter-spacing: 1.5px;
       }
       .clinic-info {
-        font-size: 10px;
+        font-size: 9px;
         color: #666;
-        line-height: 1.3;
+        line-height: 1.2;
+        text-align: left;
       }
       .clinic-name {
-        font-size: 12px;
+        font-size: 11px;
         color: #333;
         font-weight: 600;
-        margin-bottom: 3px;
+        margin-bottom: 2px;
       }
       .info-section {
         margin-bottom: 8px;
         gap: 15px;
+        page-break-inside: avoid;
       }
       .info-title {
-        font-size: 13px;
-        margin-bottom: 6px;
+        font-size: 12px;
+        margin-bottom: 4px;
         padding-bottom: 2px;
       }
       .info-block p {
-        margin: 2px 0;
-        font-size: 10px;
+        margin: 1px 0;
+        font-size: 9px;
       }
       .services-section {
         margin-bottom: 8px;
+        page-break-inside: avoid;
       }
       .services-title {
-        font-size: 13px;
-        margin-bottom: 6px;
+        font-size: 12px;
+        margin-bottom: 4px;
         padding-bottom: 2px;
       }
       table {
         margin-bottom: 8px;
-        font-size: 9px;
+        font-size: 8px;
+        page-break-inside: auto;
       }
       th, td {
-        padding: 3px 2px;
-        font-size: 9px;
+        padding: 2px 1px;
+        font-size: 8px;
       }
       th {
-        font-size: 10px;
+        font-size: 9px;
       }
       .total-row {
-        font-size: 10px;
+        font-size: 9px;
       }
       .notes {
         margin-bottom: 8px;
-        min-height: 30px;
-        padding: 8px;
+        min-height: 20px;
+        padding: 6px;
+        page-break-inside: avoid;
       }
       .notes-title {
-        font-size: 13px;
-        margin-bottom: 6px;
+        font-size: 12px;
+        margin-bottom: 4px;
         padding-bottom: 2px;
       }
       .footer {
         margin-top: 8px;
-        padding-top: 8px;
-        font-size: 8px;
+        padding-top: 6px;
+        font-size: 7px;
+        page-break-inside: avoid;
       }
       p {
-        margin: 0 0 3px 0;
+        margin: 0 0 2px 0;
       }
       ol li, ul li {
-        margin-bottom: 3px;
+        margin-bottom: 2px;
       }
-      /* Optimize page breaks to reduce white space */
+      /* Better page break handling */
       .header,
       .info-section,
       .services-section {
@@ -141,6 +149,15 @@ export function generatePrintStyles(): string {
       }
       thead {
         display: table-header-group;
+      }
+      /* Force content to stay within page boundaries */
+      * {
+        box-sizing: border-box;
+      }
+      /* Prevent content overflow */
+      div, p, ul, ol, li {
+        overflow: hidden;
+        word-wrap: break-word;
       }
       /* Minimize orphans and widows */
       p, div, h1, h2, h3, h4, h5, h6 {

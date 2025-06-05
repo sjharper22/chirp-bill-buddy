@@ -4,7 +4,7 @@ export function generateBaseStyles(): string {
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 25px;
+      padding: 15px;
       color: #333;
       line-height: 1.6;
       box-sizing: border-box;
@@ -15,7 +15,7 @@ export function generateBaseStyles(): string {
       padding: 0;
     }
     .header {
-      text-align: center;
+      text-align: left;
       margin-bottom: 30px;
       padding-bottom: 15px;
       border-bottom: 2px solid #eee;

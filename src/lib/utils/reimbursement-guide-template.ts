@@ -19,16 +19,16 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
   const salutation = lastName ? `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}` : superbill.patientName;
 
   return `
-    <div style="padding: 25px; font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; page-break-inside: avoid;">
+    <div style="padding: 15px; font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; page-break-inside: avoid;">
       <!-- Professional Letterhead -->
-      <div style="text-align: center; margin-bottom: 30px; padding: 20px 30px; border-bottom: 2px solid #e5e7eb; background: #ffffff;">
-        <div style="margin-bottom: 15px; text-align: center; width: 100%;">
+      <div style="text-align: left; margin-bottom: 30px; padding: 20px 30px; border-bottom: 2px solid #e5e7eb; background: #ffffff;">
+        <div style="margin-bottom: 15px; text-align: left; width: 100%;">
           <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 30px; width: auto; object-fit: contain;" />
         </div>
-        <div style="text-align: center; margin-bottom: 12px;">
+        <div style="text-align: left; margin-bottom: 12px;">
           <div style="font-size: 16px; color: #374151; font-weight: 600; margin-bottom: 4px;">${superbill.clinicName}</div>
         </div>
-        <div style="text-align: center; font-size: 14px; color: #6b7280; font-weight: 500; line-height: 1.4;">
+        <div style="text-align: left; font-size: 14px; color: #6b7280; font-weight: 500; line-height: 1.4;">
           ${superbill.clinicAddress}<br>
           Phone: ${superbill.clinicPhone} | Email: ${superbill.clinicEmail}<br>
           NPI: ${superbill.npi} | EIN: ${superbill.ein}
@@ -39,7 +39,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
       </div>
 
       <!-- Reference Line -->
-      <div style="margin-bottom: 20px;">
+      <div style="margin-bottom: 20px; page-break-inside: avoid;">
         <p style="margin: 0; font-weight: bold; font-size: 16px;">
           <strong>RE: Superbill for Out-of-Network Reimbursement</strong><br>
           <strong>Patient:</strong> ${superbill.patientName}<br>
@@ -118,7 +118,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
         </div>
         
         <!-- Footer -->
-        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">
+        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #ddd; font-size: 12px; color: #666; page-break-inside: avoid;">
           <p style="margin: 0;">This document serves as official documentation of services rendered for insurance reimbursement purposes.</p>
         </div>
       </div>

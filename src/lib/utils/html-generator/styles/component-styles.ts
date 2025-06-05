@@ -2,7 +2,7 @@
 export function generateComponentStyles(): string {
   return `
     .header {
-      text-align: center;
+      text-align: left;
       margin-bottom: 30px;
       padding: 20px 30px;
       border-bottom: 2px solid #e5e7eb;
@@ -11,14 +11,14 @@ export function generateComponentStyles(): string {
     .header-content {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      align-items: flex-start;
+      justify-content: flex-start;
       max-width: 800px;
-      margin: 0 auto;
+      margin: 0;
     }
     .logo-section {
       margin-bottom: 15px;
-      text-align: center;
+      text-align: left;
       width: 100%;
     }
     .clinic-logo {
@@ -27,7 +27,7 @@ export function generateComponentStyles(): string {
       object-fit: contain;
     }
     .title-section {
-      text-align: center;
+      text-align: left;
       margin-bottom: 12px;
     }
     .title-section h1 {
@@ -39,7 +39,7 @@ export function generateComponentStyles(): string {
       text-transform: uppercase;
     }
     .clinic-info {
-      text-align: center;
+      text-align: left;
       font-size: 14px;
       color: #6b7280;
       font-weight: 500;
