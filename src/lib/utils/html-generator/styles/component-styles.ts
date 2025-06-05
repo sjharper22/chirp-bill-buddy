@@ -4,9 +4,9 @@ export function generateComponentStyles(): string {
     .header {
       text-align: center;
       margin-bottom: 30px;
-      padding: 20px 0;
-      border-bottom: 3px solid #2563eb;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 25px 0;
+      border-bottom: 1px solid #e5e7eb;
+      background: #ffffff;
     }
     .header-content {
       display: flex;
@@ -14,35 +14,34 @@ export function generateComponentStyles(): string {
       justify-content: space-between;
       max-width: 800px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 40px;
     }
     .logo-section {
       flex: 0 0 auto;
     }
     .clinic-logo {
-      height: 80px;
+      height: 45px;
       width: auto;
       object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
     .title-section {
       flex: 1;
       text-align: center;
-      margin-left: 20px;
+      margin: 0 30px;
     }
     .title-section h1 {
-      margin: 0 0 8px 0;
-      font-size: 32px;
-      font-weight: bold;
-      color: #1e40af;
-      letter-spacing: 2px;
+      margin: 0 0 4px 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f2937;
+      letter-spacing: 0.5px;
     }
     .clinic-name {
-      font-size: 16px;
-      color: #64748b;
-      font-weight: 500;
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 400;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
     }
     .info-section {
       display: flex;

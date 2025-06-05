@@ -23,26 +23,26 @@ export function generatePrintStyles(): string {
       }
       .header {
         margin-bottom: 15px;
-        padding: 15px 0;
+        padding: 20px 0;
         background: white !important;
-        border-bottom: 2px solid #333;
+        border-bottom: 1px solid #ccc;
       }
       .header-content {
-        padding: 0 10px;
+        padding: 0 20px;
         max-width: 100%;
       }
       .clinic-logo {
-        height: 60px;
+        height: 35px;
         width: auto;
-        filter: none;
       }
       .title-section h1 {
-        font-size: 24px;
-        margin: 0 0 5px 0;
+        font-size: 20px;
+        margin: 0 0 3px 0;
         color: #000;
+        font-weight: 600;
       }
       .clinic-name {
-        font-size: 12px;
+        font-size: 10px;
         color: #666;
       }
       .info-section {
