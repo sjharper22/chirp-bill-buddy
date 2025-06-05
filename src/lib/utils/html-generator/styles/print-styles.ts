@@ -23,27 +23,41 @@ export function generatePrintStyles(): string {
       }
       .header {
         margin-bottom: 15px;
-        padding: 20px 0;
+        padding: 20px 30px;
         background: white !important;
         border-bottom: 1px solid #ccc;
+        text-align: left;
       }
       .header-content {
-        padding: 0 20px;
+        padding: 0;
         max-width: 100%;
+        position: relative;
+      }
+      .logo-section {
+        margin-right: 30px;
       }
       .clinic-logo {
-        height: 35px;
+        height: 26px;
         width: auto;
       }
+      .title-section {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
       .title-section h1 {
-        font-size: 20px;
+        font-size: 22px;
         margin: 0 0 3px 0;
         color: #000;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 1.5px;
       }
       .clinic-name {
         font-size: 10px;
         color: #666;
+        font-weight: 500;
+        letter-spacing: 1px;
       }
       .info-section {
         margin-bottom: 10px;

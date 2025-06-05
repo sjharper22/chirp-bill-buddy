@@ -2,46 +2,52 @@
 export function generateComponentStyles(): string {
   return `
     .header {
-      text-align: center;
+      text-align: left;
       margin-bottom: 30px;
-      padding: 25px 0;
+      padding: 25px 40px;
       border-bottom: 1px solid #e5e7eb;
       background: #ffffff;
+      position: relative;
     }
     .header-content {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      align-items: flex-start;
+      justify-content: flex-start;
       max-width: 800px;
       margin: 0 auto;
-      padding: 0 40px;
+      position: relative;
     }
     .logo-section {
       flex: 0 0 auto;
+      margin-right: 40px;
     }
     .clinic-logo {
-      height: 45px;
+      height: 34px;
       width: auto;
       object-fit: contain;
     }
     .title-section {
-      flex: 1;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       text-align: center;
-      margin: 0 30px;
+      white-space: nowrap;
     }
     .title-section h1 {
       margin: 0 0 4px 0;
-      font-size: 24px;
-      font-weight: 600;
+      font-size: 28px;
+      font-weight: 700;
       color: #1f2937;
-      letter-spacing: 0.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
     .clinic-name {
-      font-size: 12px;
+      font-size: 13px;
       color: #6b7280;
-      font-weight: 400;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 1.2px;
     }
     .info-section {
       display: flex;
