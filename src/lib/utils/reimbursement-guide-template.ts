@@ -19,16 +19,16 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
   const salutation = lastName ? `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}` : superbill.patientName;
 
   return `
-    <div style="padding: 40px; font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; page-break-inside: avoid;">
-      <!-- Professional Letterhead - Matching Superbill Style -->
-      <div style="text-align: center; margin-bottom: 30px; padding: 30px 40px 20px 40px; border-bottom: 2px solid #e5e7eb; background: #ffffff;">
-        <div style="margin-bottom: 20px;">
-          <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 40px;" />
+    <div style="padding: 25px; font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; page-break-inside: avoid;">
+      <!-- Professional Letterhead -->
+      <div style="text-align: center; margin-bottom: 30px; padding: 20px 30px; border-bottom: 2px solid #e5e7eb; background: #ffffff;">
+        <div style="margin-bottom: 15px; text-align: center; width: 100%;">
+          <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 30px; width: auto; object-fit: contain;" />
         </div>
-        <div style="margin-bottom: 15px;">
+        <div style="text-align: center; margin-bottom: 12px;">
           <div style="font-size: 16px; color: #374151; font-weight: 600; margin-bottom: 4px;">${superbill.clinicName}</div>
         </div>
-        <div style="font-size: 14px; color: #6b7280; font-weight: 500; line-height: 1.4;">
+        <div style="text-align: center; font-size: 14px; color: #6b7280; font-weight: 500; line-height: 1.4;">
           ${superbill.clinicAddress}<br>
           Phone: ${superbill.clinicPhone} | Email: ${superbill.clinicEmail}<br>
           NPI: ${superbill.npi} | EIN: ${superbill.ein}

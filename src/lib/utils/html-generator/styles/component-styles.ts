@@ -4,7 +4,7 @@ export function generateComponentStyles(): string {
     .header {
       text-align: center;
       margin-bottom: 30px;
-      padding: 30px 40px;
+      padding: 20px 30px;
       border-bottom: 2px solid #e5e7eb;
       background: #ffffff;
     }
@@ -17,23 +17,25 @@ export function generateComponentStyles(): string {
       margin: 0 auto;
     }
     .logo-section {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+      text-align: center;
+      width: 100%;
     }
     .clinic-logo {
-      height: 40px;
+      height: 30px;
       width: auto;
       object-fit: contain;
     }
     .title-section {
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
     .title-section h1 {
-      margin: 0 0 8px 0;
-      font-size: 32px;
+      margin: 0 0 6px 0;
+      font-size: 28px;
       font-weight: 700;
       color: #1f2937;
-      letter-spacing: 3px;
+      letter-spacing: 2px;
       text-transform: uppercase;
     }
     .clinic-info {

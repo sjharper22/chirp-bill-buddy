@@ -4,7 +4,7 @@ export function generatePrintStyles(): string {
     @media print {
       body { 
         margin: 0; 
-        padding: 10px;
+        padding: 15px;
         font-size: 11px;
         line-height: 1.3;
       }
@@ -22,8 +22,8 @@ export function generatePrintStyles(): string {
         max-width: 100%;
       }
       .header {
-        margin-bottom: 15px;
-        padding: 25px 30px;
+        margin-bottom: 12px;
+        padding: 15px 20px;
         background: white !important;
         border-bottom: 2px solid #ccc;
         text-align: center;
@@ -35,89 +35,91 @@ export function generatePrintStyles(): string {
         align-items: center;
       }
       .logo-section {
-        margin-bottom: 15px;
+        margin-bottom: 10px;
+        text-align: center;
+        width: 100%;
       }
       .clinic-logo {
-        height: 32px;
+        height: 22px;
         width: auto;
       }
       .title-section {
         text-align: center;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
       .title-section h1 {
-        font-size: 26px;
-        margin: 0 0 6px 0;
+        font-size: 22px;
+        margin: 0 0 5px 0;
         color: #000;
         font-weight: 700;
-        letter-spacing: 2px;
+        letter-spacing: 1.5px;
       }
       .clinic-info {
-        font-size: 11px;
+        font-size: 10px;
         color: #666;
         line-height: 1.3;
       }
       .clinic-name {
-        font-size: 13px;
+        font-size: 12px;
         color: #333;
         font-weight: 600;
         margin-bottom: 3px;
       }
       .info-section {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         gap: 15px;
       }
       .info-title {
-        font-size: 14px;
-        margin-bottom: 8px;
-        padding-bottom: 3px;
+        font-size: 13px;
+        margin-bottom: 6px;
+        padding-bottom: 2px;
       }
       .info-block p {
         margin: 2px 0;
-        font-size: 11px;
+        font-size: 10px;
       }
       .services-section {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
       }
       .services-title {
-        font-size: 14px;
-        margin-bottom: 8px;
-        padding-bottom: 3px;
+        font-size: 13px;
+        margin-bottom: 6px;
+        padding-bottom: 2px;
       }
       table {
-        margin-bottom: 10px;
-        font-size: 10px;
-      }
-      th, td {
-        padding: 4px 3px;
-        font-size: 10px;
-      }
-      th {
-        font-size: 11px;
-      }
-      .total-row {
-        font-size: 11px;
-      }
-      .notes {
-        margin-bottom: 10px;
-        min-height: 40px;
-        padding: 10px;
-      }
-      .notes-title {
-        font-size: 14px;
         margin-bottom: 8px;
-        padding-bottom: 3px;
-      }
-      .footer {
-        margin-top: 10px;
-        padding-top: 10px;
         font-size: 9px;
       }
+      th, td {
+        padding: 3px 2px;
+        font-size: 9px;
+      }
+      th {
+        font-size: 10px;
+      }
+      .total-row {
+        font-size: 10px;
+      }
+      .notes {
+        margin-bottom: 8px;
+        min-height: 30px;
+        padding: 8px;
+      }
+      .notes-title {
+        font-size: 13px;
+        margin-bottom: 6px;
+        padding-bottom: 2px;
+      }
+      .footer {
+        margin-top: 8px;
+        padding-top: 8px;
+        font-size: 8px;
+      }
       p {
-        margin: 0 0 4px 0;
+        margin: 0 0 3px 0;
       }
       ol li, ul li {
-        margin-bottom: 4px;
+        margin-bottom: 3px;
       }
       /* Optimize page breaks to reduce white space */
       .header,

@@ -4,7 +4,7 @@ export function generateBaseStyles(): string {
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 40px;
+      padding: 25px;
       color: #333;
       line-height: 1.6;
       box-sizing: border-box;
