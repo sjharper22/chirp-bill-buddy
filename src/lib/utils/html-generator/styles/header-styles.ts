@@ -23,7 +23,7 @@ export const headerStyles = `
   }
   
   .logo-image {
-    height: 40px;
+    height: 32px;
     width: auto;
     object-fit: contain;
   }
