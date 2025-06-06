@@ -1,4 +1,3 @@
-
 import { Superbill } from "@/types/superbill";
 import { formatDate } from "../superbill-utils";
 
@@ -16,9 +15,6 @@ export function generatePageHeader(config: PageHeaderConfig): string {
     <div class="document-header">
       <div class="header-content">
         <div class="header-left">
-          <img src="/lovable-uploads/c6ab98f1-de36-4a83-906d-eacf15310b84.png" 
-               alt="Collective Family Chiropractic Logo" 
-               class="header-logo" />
           <div class="header-clinic-info">
             <div class="clinic-name">${superbill.clinicName}</div>
             <div class="clinic-contact">${superbill.clinicPhone} | ${superbill.clinicEmail}</div>
