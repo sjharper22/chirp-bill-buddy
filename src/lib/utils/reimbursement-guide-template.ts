@@ -15,161 +15,111 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
   // Split patient name for salutation
   const nameParts = superbill.patientName.split(' ');
   const firstName = nameParts[0] || '';
-  const salutation = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+  const salutation = lastName ? `${firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()}` : superbill.patientName;
 
   return `
-    <div class="professional-document cover-letter">
-      <!-- Professional Letterhead -->
-      <div class="letterhead">
-        <div class="logo-container">
-          <img src="/lovable-uploads/a2e25411-48d4-4692-aa1c-835492f68f8f.png" alt="Collective Family Chiropractic" class="clinic-logo" />
-          <div>
-            <div class="clinic-name">${superbill.clinicName}</div>
-            <div class="small-text">Excellence in Chiropractic Care</div>
-          </div>
+    <div style="padding: 40px; font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; page-break-inside: avoid;">
+      <!-- Professional Letterhead with Logo in Upper Left -->
+      <div style="display: flex; align-items: flex-start; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #2d5a3d;">
+        <div style="flex-shrink: 0; margin-right: 20px;">
+          <img src="/lovable-uploads/baea450a-542f-416b-89bb-74dfadbb180b.png" alt="Collective Family Chiropractic" style="height: 40px;" />
         </div>
-        
-        <div class="contact-info-grid">
-          <div class="contact-item">
-            <span class="contact-icon">📍</span>
-            ${superbill.clinicAddress}
-          </div>
-          <div class="contact-item">
-            <span class="contact-icon">📞</span>
-            ${superbill.clinicPhone}
-          </div>
-          <div class="contact-item">
-            <span class="contact-icon">✉️</span>
-            ${superbill.clinicEmail}
-          </div>
-          <div class="contact-item">
-            <span class="contact-icon">🏥</span>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14px; color: #666;">
+            <strong>${superbill.clinicName}</strong><br>
+            ${superbill.clinicAddress}<br>
+            Phone: ${superbill.clinicPhone} | Email: ${superbill.clinicEmail}<br>
             NPI: ${superbill.npi} | EIN: ${superbill.ein}
           </div>
         </div>
-        
-        <div style="text-align: right; margin-top: 20px;">
-          <span class="date-badge">${formatDate(superbill.issueDate)}</span>
+        <div style="text-align: right; font-size: 14px; color: #666;">
+          ${formatDate(superbill.issueDate)}
         </div>
       </div>
 
-      <div class="document-body">
-        <!-- Reference Information -->
-        <div class="info-card" style="margin-bottom: 25px; background: linear-gradient(135deg, #f8fffe 0%, #f0f9f7 100%); border-left: 4px solid #2d5a3d;">
-          <div class="info-card-title">
-            <span class="info-card-icon">📋</span>
-            <span class="section-title">Insurance Reimbursement Request</span>
-          </div>
-          <div class="body-text">
-            <p><strong>Patient Name:</strong> ${superbill.patientName}</p>
-            <p><strong>Service Period:</strong> ${visitPeriod}</p>
-            <p><strong>Total Service Fees:</strong> ${formatCurrency(totalAmount)}</p>
-            <p><strong>Provider:</strong> ${superbill.providerName}</p>
-          </div>
-        </div>
+      <!-- Reference Line -->
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 0; font-weight: bold; font-size: 16px;">
+          <strong>RE: Superbill for Out-of-Network Reimbursement</strong><br>
+          <strong>Patient:</strong> ${superbill.patientName}<br>
+          <strong>Dates of Service:</strong> ${visitPeriod}<br>
+          <strong>Total Amount:</strong> ${formatCurrency(totalAmount)}
+        </p>
+      </div>
 
-        <!-- Letter Content -->
-        <div class="body-text" style="margin-bottom: 25px;">
-          <p style="font-size: 16px; margin-bottom: 20px;"><strong>Dear ${salutation},</strong></p>
-          
-          <p style="margin-bottom: 20px;">We hope this correspondence finds you in excellent health. Please find enclosed your completed superbill documenting chiropractic services provided by ${superbill.providerName} at ${superbill.clinicName} from ${visitPeriod}, totaling ${formatCurrency(totalAmount)}.</p>
-          
-          <p style="margin-bottom: 25px;">This superbill serves as official documentation to support your out-of-network insurance reimbursement request. To facilitate your submission process, we have outlined the recommended procedures below:</p>
-        </div>
+      <!-- Letter Content -->
+      <div style="margin-bottom: 20px;">
+        <p style="margin-bottom: 20px; font-size: 16px;"><strong>Dear ${salutation},</strong></p>
+        
+        <p style="margin-bottom: 20px;">We hope this message finds you well. Enclosed, please find your completed superbill documenting chiropractic services provided by ${superbill.providerName} at ${superbill.clinicName} from ${visitPeriod}, totaling ${formatCurrency(totalAmount)}.</p>
+        
+        <p style="margin-bottom: 20px;">This superbill serves as official documentation to support your out-of-network insurance reimbursement request. To assist you in the submission process, we've outlined the recommended steps below:</p>
         
         <!-- Step-by-Step Instructions -->
-        <div class="services-container" style="margin-bottom: 25px;">
-          <div class="services-header">
-            <span class="services-icon">📝</span>
-            <span style="color: #ffffff; font-weight: 600;">Insurance Claim Submission Process</span>
+        <div style="background-color: #f8f9fa; padding: 20px; border-left: 4px solid #2d5a3d; margin-bottom: 20px; page-break-inside: avoid;">
+          <h3 style="color: #2d5a3d; margin-top: 0; margin-bottom: 15px; font-size: 18px;">📝 How to Submit Your Reimbursement Claim</h3>
+          
+          <div style="margin-bottom: 15px;">
+            <strong style="color: #2d5a3d;">Step 1: Obtain Your Insurance Claim Form</strong><br>
+            Visit your provider's member portal or call them directly to request their out-of-network claim form.
           </div>
-          <div style="padding: 20px; background: #ffffff;">
-            <div style="margin-bottom: 20px; padding: 15px; background: #f8fffe; border-left: 3px solid #2d5a3d; border-radius: 4px;">
-              <h4 style="color: #2d5a3d; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">Step 1: Obtain Your Insurance Claim Form</h4>
-              <p style="margin: 0; font-size: 13px; line-height: 1.5;">Contact your insurance provider's member services or access their online portal to request the appropriate out-of-network claim form for your policy.</p>
-            </div>
-            
-            <div style="margin-bottom: 20px; padding: 15px; background: #f8fffe; border-left: 3px solid #2d5a3d; border-radius: 4px;">
-              <h4 style="color: #2d5a3d; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">Step 2: Complete Form Accurately</h4>
-              <p style="margin: 0; font-size: 13px; line-height: 1.5;">Fill out all required fields with precise information, including your personal details, policy information, treatment dates, and provider data as shown on the enclosed superbill.</p>
-            </div>
-            
-            <div style="margin-bottom: 20px; padding: 15px; background: #f8fffe; border-left: 3px solid #2d5a3d; border-radius: 4px;">
-              <h4 style="color: #2d5a3d; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">Step 3: Prepare Complete Documentation Package</h4>
-              <p style="margin: 0 0 10px 0; font-size: 13px; line-height: 1.5;">Include the following essential documents:</p>
-              <ul style="margin: 0; padding-left: 20px; font-size: 12px; line-height: 1.4;">
-                <li style="margin-bottom: 4px;">Completed insurance claim form</li>
-                <li style="margin-bottom: 4px;">This official superbill</li>
-                <li style="margin-bottom: 4px;">Copy of insurance card (both sides)</li>
-                <li style="margin-bottom: 4px;">Proof of payment documentation</li>
-              </ul>
-            </div>
-            
-            <div style="margin-bottom: 20px; padding: 15px; background: #f8fffe; border-left: 3px solid #2d5a3d; border-radius: 4px;">
-              <h4 style="color: #2d5a3d; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">Step 4: Submit Through Preferred Channel</h4>
-              <p style="margin: 0; font-size: 13px; line-height: 1.5;">Submit your complete documentation package via your insurer's preferred method (online portal, mail, or fax). Retain copies of all submitted materials for your records.</p>
-            </div>
-            
-            <div style="padding: 15px; background: #f8fffe; border-left: 3px solid #2d5a3d; border-radius: 4px;">
-              <h4 style="color: #2d5a3d; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">Step 5: Monitor Claim Status</h4>
-              <p style="margin: 0; font-size: 13px; line-height: 1.5;">Claims typically process within 14-30 business days. You will receive an Explanation of Benefits (EOB) detailing the reimbursement determination and any approved benefits.</p>
-            </div>
+          
+          <div style="margin-bottom: 15px;">
+            <strong style="color: #2d5a3d;">Step 2: Complete the Form Accurately</strong><br>
+            Fill out all required fields, including your personal and policy details, treatment dates, and provider information.
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            <strong style="color: #2d5a3d;">Step 3: Prepare Your Submission Packet</strong><br>
+            Include the following:
+            <ul style="margin: 10px 0 0 20px; padding-left: 0;">
+              <li style="margin-bottom: 5px;">Your completed claim form</li>
+              <li style="margin-bottom: 5px;">The enclosed superbill</li>
+              <li style="margin-bottom: 5px;">A copy of your insurance card (front and back)</li>
+              <li style="margin-bottom: 5px;">Proof of payment (bank statement, receipt, or payment confirmation)</li>
+            </ul>
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            <strong style="color: #2d5a3d;">Step 4: Submit to Your Insurance Provider</strong><br>
+            Send your full packet via your insurer's preferred method (portal upload, mail, or fax). Be sure to retain copies of everything you submit.
+          </div>
+          
+          <div>
+            <strong style="color: #2d5a3d;">Step 5: Follow Up on Your Claim</strong><br>
+            Claims typically process within 2–4 weeks. You will receive an Explanation of Benefits (EOB) indicating your reimbursement status.
           </div>
         </div>
         
         <!-- Important Reminders -->
-        <div class="notes-container" style="background: linear-gradient(135deg, #fff3cd 0%, #fef7e0 100%); border-left: 4px solid #f59e0b; margin-bottom: 25px;">
-          <div class="notes-header" style="color: #92400e;">
-            <span class="notes-icon">⚠️</span>
-            <span class="section-title" style="color: #92400e;">Important Submission Guidelines</span>
-          </div>
-          <div style="color: #92400e; font-size: 13px; line-height: 1.5;">
-            <ul style="margin: 0; padding-left: 20px;">
-              <li style="margin-bottom: 8px;">Submit your claim within your provider's specified timeframe (typically 90-365 days from service date)</li>
-              <li style="margin-bottom: 8px;">Maintain copies of all submitted documentation for your personal records</li>
-              <li style="margin-bottom: 8px;">Contact our office if you require additional documentation or assistance with the claims process</li>
-              <li>Follow up with your insurance provider if you don't receive acknowledgment within 10 business days</li>
-            </ul>
-          </div>
+        <div style="background-color: #fff3cd; padding: 15px; border: 1px solid #ffeaa7; border-radius: 4px; margin-bottom: 20px; page-break-inside: avoid;">
+          <h4 style="color: #856404; margin-top: 0; margin-bottom: 10px;">🔔 Important Notes</h4>
+          <ul style="margin: 0; padding-left: 20px; color: #856404;">
+            <li style="margin-bottom: 5px;">Submit your claim within your provider's policy window (typically 90–365 days from the date of service)</li>
+            <li style="margin-bottom: 5px;">Keep copies of all documents submitted for your records</li>
+            <li>If your insurer requires additional documentation or if you need assistance at any point, please don't hesitate to reach out. We're happy to help</li>
+          </ul>
         </div>
         
-        <div class="body-text" style="margin-bottom: 30px;">
-          <p style="margin-bottom: 20px;">Thank you for entrusting ${superbill.clinicName} with your healthcare needs. We are committed to supporting your wellness journey and ensuring you receive the maximum benefits available through your insurance coverage.</p>
-          
-          <p style="margin-bottom: 25px;">Should you require any additional documentation or assistance with your insurance claim submission, please do not hesitate to contact our office. We are here to support you throughout this process.</p>
-        </div>
+        <p style="margin-bottom: 20px;">Thank you for allowing us to support your health and wellness journey. We're honored to be a part of your care and look forward to continuing to serve your health needs.</p>
         
         <!-- Professional Closing -->
-        <div style="margin-bottom: 40px;">
-          <p style="margin-bottom: 8px; font-size: 14px;">With warm regards,</p>
-          <div style="margin: 20px 0;">
-            <img src="/lovable-uploads/b15651e0-6419-4c8e-ad37-b0626c692134.png" alt="Digital Signature" style="height: 80px;" />
+        <div style="margin-bottom: 40px; page-break-inside: avoid;">
+          <p style="margin-bottom: 5px;">Warmly,</p>
+          <div style="margin: 15px 0;">
+            <img src="/lovable-uploads/b15651e0-6419-4c8e-ad37-b0626c692134.png" alt="Digital Signature" style="height: 100px;" />
           </div>
-          <div class="body-text">
-            <p style="margin: 0; font-weight: 600; color: #2d5a3d;">Jordan Harper</p>
-            <p style="margin: 0; color: #666;">Practice Administrator</p>
-            <p style="margin: 0; color: #666;">${superbill.clinicName}</p>
-            <div style="margin-top: 8px; font-size: 12px; color: #666;">
-              <p style="margin: 2px 0;">📞 ${superbill.clinicPhone}</p>
-              <p style="margin: 2px 0;">📧 ${superbill.clinicEmail}</p>
-            </div>
-          </div>
+          <p style="margin: 0; font-weight: bold;">Jordan Harper</p>
+          <p style="margin: 0; color: #666;">Office Manager</p>
+          <p style="margin: 0; color: #666;">${superbill.clinicName}</p>
+          <p style="margin: 5px 0 0 0; color: #666;">📞 ${superbill.clinicPhone}</p>
+          <p style="margin: 0; color: #666;">📧 ${superbill.clinicEmail}</p>
         </div>
-      </div>
-      
-      <!-- Professional Footer -->
-      <div class="professional-footer">
-        <div class="footer-content">
-          <div>
-            <img src="/lovable-uploads/a2e25411-48d4-4692-aa1c-835492f68f8f.png" alt="Practice Logo" class="footer-logo" />
-          </div>
-          <div class="footer-text">
-            <p><strong>CONFIDENTIAL HEALTHCARE COMMUNICATION</strong></p>
-            <p>This document contains protected health information and is intended solely for insurance reimbursement purposes.</p>
-          </div>
-          <div class="date-badge">
-            Document ID: ${superbill.id?.substring(0, 8).toUpperCase() || 'SB-' + Date.now().toString().slice(-6)}
-          </div>
+        
+        <!-- Footer -->
+        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">
+          <p style="margin: 0;">This document serves as official documentation of services rendered for insurance reimbursement purposes.</p>
         </div>
       </div>
     </div>

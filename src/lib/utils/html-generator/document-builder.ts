@@ -1,5 +1,5 @@
-
 import { Superbill } from "@/types/superbill";
+import { generatePrintableCSS } from "./css-generator";
 import { 
   generateSuperbillHeader,
   generatePatientInfoSection, 
@@ -12,31 +12,54 @@ import {
 export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?: string): { coverLetterHTML: string; superbillHTML: string } {
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   
-  // Cover letter HTML (if provided) - clean HTML with proper styling
+  // Cover letter HTML (if provided)
   const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
-    <div style="width: 210mm; max-width: 100%; margin: 0 auto; background: #ffffff; padding: 25px; font-family: 'Arial', sans-serif; color: #333; line-height: 1.6; box-sizing: border-box;">
-      ${coverLetterContent}
-    </div>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Cover Letter - ${superbill.patientName}</title>
+      <style>
+        ${generatePrintableCSS()}
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        ${coverLetterContent}
+      </div>
+    </body>
+    </html>
   ` : '';
   
-  // Superbill HTML with professional styling
+  // Superbill HTML
   const superbillHTML = `
-    <div style="width: 210mm; max-width: 100%; margin: 0 auto; background: #ffffff; font-family: 'Arial', sans-serif; color: #333; padding: 20px; box-sizing: border-box;">
-      ${generateSuperbillHeader(superbill)}
-      
-      <div style="padding: 25px 0;">
-        <div style="display: flex; justify-content: space-between; gap: 30px; margin-bottom: 30px;">
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Superbill - ${superbill.patientName}</title>
+      <style>
+        ${generatePrintableCSS()}
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        ${generateSuperbillHeader(superbill)}
+        
+        <div class="info-section">
           ${generatePatientInfoSection(superbill, visitDates)}
           ${generateProviderInfoSection(superbill)}
         </div>
         
-        ${generateServicesTable(superbill)}
+        <div class="services-section">
+          <div class="services-title">Services</div>
+          ${generateServicesTable(superbill)}
+        </div>
         
         ${generateNotesSection(superbill)}
+        
+        ${generateFooter()}
       </div>
-      
-      ${generateFooter()}
-    </div>
+    </body>
+    </html>
   `;
   
   return { coverLetterHTML, superbillHTML };

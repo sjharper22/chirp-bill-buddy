@@ -4,7 +4,7 @@ export function generatePrintStyles(): string {
     @media print {
       body { 
         margin: 0; 
-        padding: 8px;
+        padding: 10px;
         font-size: 11px;
         line-height: 1.3;
       }
@@ -23,113 +23,76 @@ export function generatePrintStyles(): string {
       }
       .header {
         margin-bottom: 10px;
-        padding: 8px 12px;
-        background: white !important;
-        border-bottom: 2px solid #ccc;
-        text-align: left;
-        page-break-inside: avoid;
+        padding-bottom: 8px;
       }
       .header-content {
-        padding: 0;
-        max-width: 100%;
-        flex-direction: column;
-        align-items: flex-start;
-        margin: 0;
-      }
-      .logo-section {
-        margin-bottom: 6px;
-        text-align: left;
-        width: 100%;
+        gap: 15px;
       }
       .clinic-logo {
-        height: 22px;
-        width: auto;
-      }
-      .title-section {
-        text-align: left;
-        margin-bottom: 6px;
+        max-height: 60px;
+        max-width: 90px;
       }
       .title-section h1 {
         font-size: 20px;
-        margin: 0 0 3px 0;
-        color: #000;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-      }
-      .clinic-info {
-        font-size: 9px;
-        color: #666;
-        line-height: 1.2;
-        text-align: left;
-      }
-      .clinic-name {
-        font-size: 11px;
-        color: #333;
-        font-weight: 600;
-        margin-bottom: 2px;
+        margin: 0;
       }
       .info-section {
-        margin-bottom: 6px;
+        margin-bottom: 10px;
         gap: 15px;
-        page-break-inside: avoid;
       }
       .info-title {
-        font-size: 12px;
-        margin-bottom: 3px;
-        padding-bottom: 1px;
+        font-size: 14px;
+        margin-bottom: 8px;
+        padding-bottom: 3px;
       }
       .info-block p {
-        margin: 1px 0;
-        font-size: 9px;
+        margin: 2px 0;
+        font-size: 11px;
       }
       .services-section {
-        margin-bottom: 6px;
-        page-break-inside: avoid;
+        margin-bottom: 10px;
       }
       .services-title {
-        font-size: 12px;
-        margin-bottom: 3px;
-        padding-bottom: 1px;
+        font-size: 14px;
+        margin-bottom: 8px;
+        padding-bottom: 3px;
       }
       table {
-        margin-bottom: 6px;
-        font-size: 8px;
-        page-break-inside: auto;
+        margin-bottom: 10px;
+        font-size: 10px;
       }
       th, td {
-        padding: 2px 1px;
-        font-size: 8px;
+        padding: 4px 3px;
+        font-size: 10px;
       }
       th {
-        font-size: 9px;
+        font-size: 11px;
       }
       .total-row {
-        font-size: 9px;
+        font-size: 11px;
       }
       .notes {
-        margin-bottom: 6px;
-        min-height: 15px;
-        padding: 4px;
-        page-break-inside: avoid;
+        margin-bottom: 10px;
+        min-height: 40px;
+        padding: 10px;
       }
       .notes-title {
-        font-size: 12px;
-        margin-bottom: 3px;
-        padding-bottom: 1px;
+        font-size: 14px;
+        margin-bottom: 8px;
+        padding-bottom: 3px;
       }
       .footer {
-        margin-top: 6px;
-        padding-top: 4px;
-        font-size: 7px;
-        page-break-inside: avoid;
+        margin-top: 10px;
+        padding-top: 10px;
+        font-size: 9px;
       }
       p {
-        margin: 0 0 1px 0;
+        margin: 0 0 4px 0;
       }
       ol li, ul li {
-        margin-bottom: 1px;
+        margin-bottom: 4px;
       }
-      /* Improved page break handling */
+      /* Optimize page breaks to reduce white space */
       .header,
       .info-section,
       .services-section {
@@ -150,28 +113,10 @@ export function generatePrintStyles(): string {
       thead {
         display: table-header-group;
       }
-      /* Force content to stay within page boundaries */
-      * {
-        box-sizing: border-box;
-      }
-      /* Prevent content overflow */
-      div, p, ul, ol, li {
-        overflow: hidden;
-        word-wrap: break-word;
-      }
-      /* Better orphan and widow control */
+      /* Minimize orphans and widows */
       p, div, h1, h2, h3, h4, h5, h6 {
-        orphans: 2;
-        widows: 2;
-      }
-      /* Reduce excessive spacing */
-      div[style*="background-color: #f8f9fa"] {
-        margin-bottom: 8px !important;
-        padding: 8px !important;
-      }
-      div[style*="background-color: #fff3cd"] {
-        margin-bottom: 8px !important;
-        padding: 6px !important;
+        orphans: 1;
+        widows: 1;
       }
     }
   `;
