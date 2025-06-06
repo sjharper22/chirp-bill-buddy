@@ -25,6 +25,10 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
     setProcessedContent(content);
   };
 
+  const handleContentChange = (content: string) => {
+    setProcessedContent(content);
+  };
+
   // Generate a default custom cover letter if none is selected
   useEffect(() => {
     if ((!processedContent || processedContent.trim() === "") && dialogOpen) {
@@ -81,6 +85,8 @@ export function SuperbillPreview({ superbill }: SuperbillPreviewProps) {
           selectedTemplateId={selectedTemplate?.id}
           showCoverLetter={true}
           coverLetterContent={processedContent}
+          editable={true}
+          onContentChange={handleContentChange}
         />
       </DialogContent>
     </Dialog>

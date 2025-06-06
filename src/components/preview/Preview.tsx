@@ -16,13 +16,17 @@ interface PreviewProps {
   selectedTemplateId?: string;
   showCoverLetter?: boolean;
   coverLetterContent?: string;
+  editable?: boolean;
+  onContentChange?: (content: string) => void;
 }
 
 export function Preview({ 
   superbill, 
   selectedTemplateId, 
   showCoverLetter = true,
-  coverLetterContent
+  coverLetterContent,
+  editable = false,
+  onContentChange
 }: PreviewProps) {
   const [displayCoverLetter, setDisplayCoverLetter] = useState(showCoverLetter);
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
@@ -40,7 +44,8 @@ export function Preview({
     selectedTemplateId,
     hasContent: Boolean(coverLetterContent),
     contentLength: coverLetterContent?.length || 0,
-    patientName: superbill.patientName
+    patientName: superbill.patientName,
+    editable
   });
   
   return (
@@ -78,6 +83,8 @@ export function Preview({
               superbills={[superbill]}
               selectedTemplateId={selectedTemplateId}
               content={coverLetterContent}
+              editable={editable}
+              onContentChange={onContentChange}
             />
           </div>
         )}
