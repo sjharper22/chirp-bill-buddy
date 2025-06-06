@@ -39,19 +39,19 @@ export function generateCoverLetter({
       <div style="margin-bottom: 25px;">
         <div style="margin: 0 0 20px 0;">To Whom It May Concern,</div>
 
-        <div style="margin: 0 0 15px 20px; text-align: justify;">
+        <div style="margin: 0 0 15px 0; text-align: justify;">
           Please find attached a detailed superbill for <strong>${patientName}</strong>, covering
           <strong>${totalVisits}</strong> visits between <strong>${visitDateRange}</strong>, totaling
           <strong>${formatCurrency(totalCharges)}</strong>.
         </div>
 
-        <div style="margin: 0 0 15px 20px; text-align: justify;">
+        <div style="margin: 0 0 15px 0; text-align: justify;">
           This superbill includes the relevant diagnostic (ICD-10) and procedure (CPT) codes, along with the provider and clinic information needed for out-of-network reimbursement submission.
         </div>
 
         ${
           includeInvoiceNote
-            ? `<div style="margin: 0 0 15px 20px; text-align: justify;">Invoices for each visit are also included in case your system requires additional documentation.</div>`
+            ? `<div style="margin: 0 0 15px 0; text-align: justify;">Invoices for each visit are also included in case your system requires additional documentation.</div>`
             : ''
         }
       </div>

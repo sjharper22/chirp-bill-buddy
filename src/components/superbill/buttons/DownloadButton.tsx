@@ -22,14 +22,15 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
     container.innerHTML = html;
     container.style.position = "absolute";
     container.style.left = "-9999px";
-    container.style.width = "210mm"; // A4 width
-    container.style.minHeight = "297mm"; // A4 height
+    container.style.width = "8.27in"; // A4 width in inches
+    container.style.maxWidth = "8.27in";
     container.style.backgroundColor = "#ffffff";
-    container.style.padding = "15mm";
+    container.style.padding = "0.5in";
     container.style.boxSizing = "border-box";
     container.style.fontFamily = "Arial, sans-serif";
     container.style.fontSize = "12px";
     container.style.lineHeight = "1.4";
+    container.style.overflow = "visible";
     document.body.appendChild(container);
     
     // Wait for images to load
@@ -51,28 +52,31 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
     // Wait for DOM rendering and fonts to load
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Use higher DPI for better quality
-    const scale = 2;
+    // Use higher scale for better quality but ensure we capture full content
+    const scale = 3;
     const canvas = await html2canvas(container, {
       scale: scale,
       useCORS: true,
       allowTaint: true,
       logging: false,
       backgroundColor: "#ffffff",
-      width: container.scrollWidth,
-      height: container.scrollHeight,
-      windowWidth: container.scrollWidth,
-      windowHeight: container.scrollHeight,
+      width: container.offsetWidth,
+      height: container.offsetHeight,
+      windowWidth: container.offsetWidth,
+      windowHeight: container.offsetHeight,
+      scrollX: 0,
+      scrollY: 0,
       onclone: (clonedDoc) => {
         const clonedContainer = clonedDoc.body.querySelector('div');
         if (clonedContainer) {
           clonedContainer.style.position = 'static';
           clonedContainer.style.transform = 'none';
-          clonedContainer.style.width = '210mm';
-          clonedContainer.style.minHeight = '297mm';
+          clonedContainer.style.width = '8.27in';
+          clonedContainer.style.maxWidth = '8.27in';
           clonedContainer.style.margin = '0';
-          clonedContainer.style.padding = '15mm';
+          clonedContainer.style.padding = '0.5in';
           clonedContainer.style.boxSizing = 'border-box';
+          clonedContainer.style.overflow = 'visible';
         }
       }
     });
@@ -84,32 +88,35 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
   const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, isFirstPage: boolean = false) => {
     const pageWidth = 210; // A4 width in mm
     const pageHeight = 297; // A4 height in mm
-    const margin = 0; // No margins since content already has padding
+    const margin = 12.7; // 0.5 inch margins in mm
+    const printableWidth = pageWidth - (margin * 2);
+    const printableHeight = pageHeight - (margin * 2);
     
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    // Calculate dimensions maintaining aspect ratio
+    const imgWidth = printableWidth;
+    const imgHeight = (canvas.height * printableWidth) / canvas.width;
     
     if (!isFirstPage) {
       pdf.addPage();
     }
     
     // If content fits on one page, add it directly
-    if (imgHeight <= pageHeight) {
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
+    if (imgHeight <= printableHeight) {
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight, '', 'FAST');
       return;
     }
     
     // Content is too tall - split into multiple pages
-    const totalPages = Math.ceil(imgHeight / pageHeight);
+    const pagesNeeded = Math.ceil(imgHeight / printableHeight);
     
-    for (let page = 0; page < totalPages; page++) {
+    for (let page = 0; page < pagesNeeded; page++) {
       if (page > 0) {
         pdf.addPage();
       }
       
-      // Calculate the portion of the image to show on this page
-      const sourceY = (canvas.height / totalPages) * page;
-      const sourceHeight = Math.min(canvas.height / totalPages, canvas.height - sourceY);
+      // Calculate the source area for this page
+      const sourceY = (canvas.height / pagesNeeded) * page;
+      const sourceHeight = Math.min(canvas.height / pagesNeeded, canvas.height - sourceY);
       
       // Create a new canvas for this page's content
       const pageCanvas = document.createElement('canvas');
@@ -118,18 +125,14 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
       
       const ctx = pageCanvas.getContext('2d');
       if (ctx) {
-        // Draw the relevant portion of the original canvas
         ctx.drawImage(
           canvas,
-          0, sourceY, canvas.width, sourceHeight, // Source rectangle
-          0, 0, canvas.width, sourceHeight // Destination rectangle
+          0, sourceY, canvas.width, sourceHeight,
+          0, 0, canvas.width, sourceHeight
         );
         
-        // Calculate the height for this page portion
-        const pageImgHeight = (sourceHeight * pageWidth) / canvas.width;
-        
-        // Add this portion to the PDF
-        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight);
+        const pageImgHeight = (sourceHeight * printableWidth) / canvas.width;
+        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight, '', 'FAST');
       }
     }
   };
