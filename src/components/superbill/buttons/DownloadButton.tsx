@@ -92,9 +92,27 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
       tempContainer.innerHTML = combinedHTML;
       document.body.appendChild(tempContainer);
       
+      // Wait for images to load before rendering
+      const images = tempContainer.querySelectorAll('img');
+      const imageLoadPromises = Array.from(images).map(img => {
+        return new Promise((resolve) => {
+          if (img.complete) {
+            resolve(true);
+          } else {
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(true); // Continue even if image fails to load
+            // Set a timeout to prevent hanging
+            setTimeout(() => resolve(true), 3000);
+          }
+        });
+      });
+      
+      await Promise.all(imageLoadPromises);
+      
       const canvas = await html2canvas(tempContainer, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: false,
         backgroundColor: "#ffffff",
         width: 800,

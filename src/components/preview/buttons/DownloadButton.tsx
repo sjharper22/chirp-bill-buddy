@@ -27,12 +27,30 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     container.style.backgroundColor = "#ffffff";
     document.body.appendChild(container);
     
+    // Wait for images to load
+    const images = container.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      return new Promise((resolve) => {
+        if (img.complete) {
+          resolve(true);
+        } else {
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(true); // Continue even if image fails to load
+          // Set a timeout to prevent hanging
+          setTimeout(() => resolve(true), 3000);
+        }
+      });
+    });
+    
+    await Promise.all(imageLoadPromises);
+    
     // Wait for DOM rendering and fonts to load
     await new Promise(resolve => setTimeout(resolve, 300));
     
     const canvas = await html2canvas(container, {
       scale: 2.5, // Higher scale for better text quality
       useCORS: true,
+      allowTaint: true,
       logging: false,
       backgroundColor: "#ffffff",
       width: 794,
