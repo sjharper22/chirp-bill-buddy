@@ -1,5 +1,4 @@
 import { Superbill } from "@/types/superbill";
-import { generatePrintableCSS } from "./css-generator";
 import { 
   generateSuperbillHeader,
   generatePatientInfoSection, 
@@ -11,35 +10,31 @@ import {
 
 export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?: string): { coverLetterHTML: string; superbillHTML: string } {
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
-  const styles = generatePrintableCSS();
   
-  // Cover letter HTML (if provided) - simplified with inline styles
+  // Cover letter HTML (if provided) - clean HTML without CSS
   const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
     <div style="max-width: 8.5in; margin: 0 auto; background: #ffffff; padding: 30px; font-family: 'Open Sans', Arial, sans-serif; color: #333; line-height: 1.6;">
       ${coverLetterContent}
     </div>
   ` : '';
   
-  // Superbill HTML with inline styles for better rendering
+  // Superbill HTML without any CSS style tags
   const superbillHTML = `
-    <div style="max-width: 8.5in; margin: 0 auto; background: #ffffff; font-family: 'Open Sans', Arial, sans-serif; color: #333;">
-      <style>${styles}</style>
-      <div class="professional-document">
-        ${generateSuperbillHeader(superbill)}
-        
-        <div class="document-body">
-          <div class="info-grid">
-            ${generatePatientInfoSection(superbill, visitDates)}
-            ${generateProviderInfoSection(superbill)}
-          </div>
-          
-          ${generateServicesTable(superbill)}
-          
-          ${generateNotesSection(superbill)}
+    <div style="max-width: 8.5in; margin: 0 auto; background: #ffffff; font-family: 'Open Sans', Arial, sans-serif; color: #333; padding: 20px;">
+      ${generateSuperbillHeader(superbill)}
+      
+      <div style="padding: 30px; background: #ffffff;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; padding: 20px; background: #f8fffe; border: 1px solid #e5f3f0; border-radius: 8px;">
+          ${generatePatientInfoSection(superbill, visitDates)}
+          ${generateProviderInfoSection(superbill)}
         </div>
         
-        ${generateFooter()}
+        ${generateServicesTable(superbill)}
+        
+        ${generateNotesSection(superbill)}
       </div>
+      
+      ${generateFooter()}
     </div>
   `;
   

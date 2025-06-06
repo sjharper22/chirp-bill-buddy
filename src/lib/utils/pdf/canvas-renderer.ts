@@ -19,17 +19,8 @@ export async function renderSection(html: string): Promise<HTMLCanvasElement> {
   container.style.display = "block";
   document.body.appendChild(container);
   
-  // Process any style tags in the HTML and apply them
-  const styleTags = container.querySelectorAll('style');
-  styleTags.forEach(styleTag => {
-    const style = document.createElement('style');
-    style.textContent = styleTag.textContent;
-    document.head.appendChild(style);
-    styleTag.remove(); // Remove from container to prevent it from showing as text
-  });
-  
   // Wait for DOM rendering and fonts to load
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  await new Promise(resolve => setTimeout(resolve, 1000));
   
   // Force all elements to be visible and properly styled
   const allElements = container.querySelectorAll('*');
@@ -86,14 +77,6 @@ export async function renderSection(html: string): Promise<HTMLCanvasElement> {
           img.style.visibility = 'visible';
         });
       }
-    }
-  });
-  
-  // Clean up any styles we added
-  const addedStyles = document.head.querySelectorAll('style');
-  addedStyles.forEach(style => {
-    if (style.textContent && style.textContent.includes('.professional-document')) {
-      document.head.removeChild(style);
     }
   });
   
