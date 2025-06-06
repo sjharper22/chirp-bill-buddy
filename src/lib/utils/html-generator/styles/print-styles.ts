@@ -23,34 +23,8 @@ export function generatePrintStyles(): string {
         max-width: 100% !important;
         min-height: auto !important;
       }
-      .header {
-        margin-bottom: 10px !important;
-        padding-bottom: 5px !important;
-      }
-      .header-content {
-        gap: 15px !important;
-        justify-content: flex-start !important;
-        flex-wrap: nowrap !important;
-      }
-      .clinic-logo {
-        max-height: 50px !important;
-        max-width: 80px !important;
-      }
-      /* Ensure cover letter logos match superbill logo size */
-      img[alt*="Logo"], img[alt*="logo"] {
-        max-height: 50px !important;
-        max-width: 80px !important;
-        width: auto !important;
-        height: auto !important;
-        object-fit: contain !important;
-      }
-      .title-section {
-        text-align: center !important;
-        flex: 1 !important;
-      }
-      .title-section h1 {
-        font-size: 18px !important;
-        margin: 0 !important;
+      .document-content {
+        margin-top: 10px !important;
       }
       .info-section {
         margin-bottom: 10px !important;
@@ -109,7 +83,7 @@ export function generatePrintStyles(): string {
         margin-bottom: 2px !important;
       }
       /* Optimize page breaks to reduce white space */
-      .header,
+      .page-header,
       .info-section,
       .services-section {
         page-break-inside: avoid !important;
@@ -152,40 +126,8 @@ export function generatePrintStyles(): string {
       min-height: auto !important;
     }
     
-    .pdf-optimized .header {
-      margin-bottom: 10px !important;
-      padding-bottom: 5px !important;
-    }
-    
-    .pdf-optimized .header-content {
-      gap: 15px !important;
-      justify-content: flex-start !important;
-      flex-wrap: nowrap !important;
-    }
-    
-    .pdf-optimized .clinic-logo {
-      max-height: 50px !important;
-      max-width: 80px !important;
-    }
-    
-    /* Ensure all logos in PDF are consistently sized */
-    .pdf-optimized img[alt*="Logo"], 
-    .pdf-optimized img[alt*="logo"] {
-      max-height: 50px !important;
-      max-width: 80px !important;
-      width: auto !important;
-      height: auto !important;
-      object-fit: contain !important;
-    }
-    
-    .pdf-optimized .title-section {
-      text-align: center !important;
-      flex: 1 !important;
-    }
-    
-    .pdf-optimized .title-section h1 {
-      font-size: 18px !important;
-      margin: 0 !important;
+    .pdf-optimized .document-content {
+      margin-top: 10px !important;
     }
     
     .pdf-optimized .info-section {

@@ -1,20 +1,8 @@
+
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "../superbill-utils";
 
-export function generateSuperbillHeader(superbill: Superbill): string {
-  return `
-    <div class="header">
-      <div class="header-content">
-        <div class="logo-section">
-          <img src="/lovable-uploads/c6ab98f1-de36-4a83-906d-eacf15310b84.png" alt="Collective Family Chiropractic Logo" class="clinic-logo" />
-        </div>
-        <div class="title-section">
-          <h1>SUPERBILL</h1>
-        </div>
-      </div>
-    </div>
-  `;
-}
+// Remove the old generateSuperbillHeader function as we'll use the new header system
 
 export function generatePatientInfoSection(superbill: Superbill, visitDates: number[]): string {
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;

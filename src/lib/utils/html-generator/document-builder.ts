@@ -1,17 +1,21 @@
-
 import { Superbill } from "@/types/superbill";
 import { generatePrintableCSS } from "./css-generator";
 import { 
-  generateSuperbillHeader,
   generatePatientInfoSection, 
   generateProviderInfoSection, 
   generateServicesTable, 
   generateNotesSection, 
   generateFooter 
 } from "./html-structure";
+import { generatePageHeader, generateRunningHeader } from "./header-generator";
 
 export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?: string): { coverLetterHTML: string; superbillHTML: string } {
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
+  
+  // Estimate total pages (this is approximate - exact count would require rendering)
+  const coverLetterPages = coverLetterContent && coverLetterContent.trim() !== '' ? 1 : 0;
+  const superbillPages = 1; // Most superbills fit on one page
+  const totalPages = coverLetterPages + superbillPages;
   
   // Cover letter HTML (if provided)
   const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
@@ -25,13 +29,19 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
     </head>
     <body class="pdf-optimized">
       <div class="container">
-        ${coverLetterContent}
+        ${generateRunningHeader({ superbill, documentType: 'Cover Letter', totalPages, currentPage: 1 })}
+        ${generatePageHeader({ superbill, documentType: 'Cover Letter', totalPages, currentPage: 1 })}
+        
+        <div class="document-content">
+          ${coverLetterContent}
+        </div>
       </div>
     </body>
     </html>
   ` : '';
   
   // Superbill HTML
+  const superbillCurrentPage = coverLetterPages + 1;
   const superbillHTML = `
     <!DOCTYPE html>
     <html>
@@ -43,21 +53,24 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
     </head>
     <body class="pdf-optimized">
       <div class="container">
-        ${generateSuperbillHeader(superbill)}
+        ${generateRunningHeader({ superbill, documentType: 'Superbill', totalPages, currentPage: superbillCurrentPage })}
+        ${generatePageHeader({ superbill, documentType: 'Superbill', totalPages, currentPage: superbillCurrentPage })}
         
-        <div class="info-section">
-          ${generatePatientInfoSection(superbill, visitDates)}
-          ${generateProviderInfoSection(superbill)}
+        <div class="document-content">
+          <div class="info-section">
+            ${generatePatientInfoSection(superbill, visitDates)}
+            ${generateProviderInfoSection(superbill)}
+          </div>
+          
+          <div class="services-section">
+            <div class="services-title">Services</div>
+            ${generateServicesTable(superbill)}
+          </div>
+          
+          ${generateNotesSection(superbill)}
+          
+          ${generateFooter()}
         </div>
-        
-        <div class="services-section">
-          <div class="services-title">Services</div>
-          ${generateServicesTable(superbill)}
-        </div>
-        
-        ${generateNotesSection(superbill)}
-        
-        ${generateFooter()}
       </div>
     </body>
     </html>
