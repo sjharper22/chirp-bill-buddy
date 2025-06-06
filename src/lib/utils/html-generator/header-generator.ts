@@ -17,7 +17,7 @@ export function generatePageHeader(config: PageHeaderConfig): string {
       <div class="header-content">
         <div class="header-left">
           <div class="header-logo">
-            <img src="/lovable-uploads/0d176244-e119-4e77-bd6b-42cd02db00d2.png" alt="Collective Family Chiropractic Logo" class="logo-image" />
+            <img src="/lovable-uploads/33ce0021-5b69-4940-9eb0-78e2f5fe7052.png" alt="Collective Family Chiropractic Logo" class="logo-image" />
           </div>
           <div class="header-clinic-info">
             <div class="clinic-name">${superbill.clinicName}</div>
