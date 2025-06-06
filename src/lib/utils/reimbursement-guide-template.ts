@@ -1,4 +1,3 @@
-
 import { Superbill } from "@/types/superbill";
 import { formatCurrency } from "./format-utils";
 
@@ -34,7 +33,7 @@ export function generatePatientReimbursementGuide(superbill: Superbill): string 
         
         <div style="margin-left: 20px;">
           <div style="margin-bottom: 8px;"><strong>Patient Name:</strong> ${superbill.patientName}</div>
-          <div style="margin-bottom: 8px;"><strong>Date of Birth:</strong> ${superbill.dateOfBirth}</div>
+          <div style="margin-bottom: 8px;"><strong>Date of Birth:</strong> ${new Date(superbill.patientDob).toLocaleDateString()}</div>
           <div style="margin-bottom: 8px;"><strong>Dates of Service:</strong> ${visitDateRange}</div>
           <div style="margin-bottom: 8px;"><strong>Total Number of Visits:</strong> ${superbill.visits.length}</div>
           <div style="margin-bottom: 8px;"><strong>Total Charges:</strong> ${formatCurrency(totalCharges)}</div>
