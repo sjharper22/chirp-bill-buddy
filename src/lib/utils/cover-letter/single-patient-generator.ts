@@ -72,7 +72,7 @@ export function generateCoverLetter({
         <div style="margin: 20px 0 0 0;">
           <img src="/lovable-uploads/47fb5881-8a7a-4132-ac2a-c9f5e83c01ef.png" alt="Jordan Harper Signature" style="height: 40px; width: auto; object-fit: contain;" />
         </div>
-        <div style="margin: 10px 0 0 0;">${providerName}<br/>Office Manager<br/>${clinicName}</div>
+        <div style="margin: 10px 0 0 0;">Jordan Harper<br/>Office Manager<br/>${clinicName}</div>
       </div>
     </div>
   `;
