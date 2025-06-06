@@ -9,15 +9,15 @@ interface CoverLetterPreviewProps {
   superbills: Superbill[];
   includeInvoiceNote?: boolean;
   editable?: boolean;
-  superbill?: Superbill; // Added to support single superbill use case
+  superbill?: Superbill;
   selectedTemplateId?: string;
-  content?: string; // Allow direct content to be provided
-  onContentChange?: (content: string) => void; // Allow content updates
+  content?: string;
+  onContentChange?: (content: string) => void;
 }
 
 export function CoverLetterPreview({ 
-  superbills = [], // Default to empty array
-  superbill, // Single superbill support
+  superbills = [],
+  superbill,
   includeInvoiceNote = true,
   editable = false,
   selectedTemplateId,
@@ -27,14 +27,12 @@ export function CoverLetterPreview({
   const [displayContent, setDisplayContent] = useState<string>("");
   
   useEffect(() => {
-    // If direct content is provided, use it
     if (content) {
       console.log("Using provided content for cover letter");
       setDisplayContent(content);
       return;
     }
     
-    // Otherwise, generate content from superbills
     const billsToProcess = superbill ? [superbill] : superbills;
     
     if (billsToProcess.length > 0) {
@@ -45,15 +43,14 @@ export function CoverLetterPreview({
     }
   }, [superbills, superbill, includeInvoiceNote, selectedTemplateId, content]);
   
-  // Handle AI enhancement
   const handleAIEnhancement = (enhancedContent: string) => {
+    console.log("AI enhancement received, updating content");
     setDisplayContent(enhancedContent);
     if (onContentChange) {
       onContentChange(enhancedContent);
     }
   };
 
-  // Don't render if we have no content to display
   if (!displayContent && superbills.length === 0 && !superbill) {
     return null;
   }
@@ -62,7 +59,8 @@ export function CoverLetterPreview({
   const patientInfo = billsToProcess.length > 0 ? {
     patients: billsToProcess.map(b => b.patientName),
     totalVisits: billsToProcess.reduce((sum, b) => sum + b.visits.length, 0),
-    clinicName: billsToProcess[0]?.clinicName
+    clinicName: billsToProcess[0]?.clinicName,
+    providerName: billsToProcess[0]?.providerName
   } : undefined;
 
   return (
@@ -71,7 +69,7 @@ export function CoverLetterPreview({
         <div className="flex justify-end">
           <AIAssistantButton
             type="cover_letter_enhancement"
-            prompt={`Enhance this insurance cover letter to be more professional and persuasive while maintaining accuracy: ${displayContent}`}
+            prompt={`Please enhance this insurance cover letter to be more professional, persuasive, and medically accurate while maintaining all important details: ${displayContent}`}
             context={patientInfo}
             onResult={handleAIEnhancement}
             variant="outline"
