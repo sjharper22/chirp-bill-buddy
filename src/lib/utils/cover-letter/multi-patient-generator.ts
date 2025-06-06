@@ -4,13 +4,13 @@ import { formatCurrency } from "@/lib/utils/format-utils";
 import { PatientSummary } from "./types";
 
 /**
- * Generates HTML content for a multi-patient cover letter
+ * Generates HTML content for a multi-patient cover letter with comprehensive reimbursement instructions
  */
 export function generateMultiPatientCoverLetter(
   superbills: Superbill[],
   includeInvoiceNote = true
 ): string {
-  console.log("Generating multi-patient cover letter with Jordan Harper signature");
+  console.log("Generating enhanced multi-patient cover letter with comprehensive reimbursement steps");
   
   if (superbills.length === 0) {
     return "";
@@ -70,20 +70,12 @@ export function generateMultiPatientCoverLetter(
         <div style="margin: 0 0 20px 0;">To Whom It May Concern,</div>
 
         <div style="margin: 0 0 15px 0; text-align: justify;">
-          Please find attached detailed superbills for <strong>${totalPatients} patients</strong>, covering
-          <strong>${totalVisits} total visits</strong> between <strong>${overallDateRange}</strong>, totaling
-          <strong>${formatCurrency(grandTotal)}</strong>.
+          Enclosed with this letter, you will find superbills summarizing the chiropractic care received at our office for <strong>${totalPatients} patients</strong>, covering <strong>${totalVisits} total visits</strong> between <strong>${overallDateRange}</strong>, totaling <strong>${formatCurrency(grandTotal)}</strong>, along with individual invoices for your records.
         </div>
 
         <div style="margin: 0 0 15px 0; text-align: justify;">
-          These superbills include the relevant diagnostic (ICD-10) and procedure (CPT) codes, along with the provider and clinic information needed for out-of-network reimbursement submission.
+          These documents are provided to assist you in submitting reimbursement claims to your insurance provider for out-of-network services.
         </div>
-
-        ${
-          includeInvoiceNote
-            ? `<div style="margin: 0 0 15px 0; text-align: justify;">Invoices for each visit are also included in case your system requires additional documentation.</div>`
-            : ''
-        }
 
         <div style="margin: 0 0 15px 0; text-align: justify;">
           The patients included in this submission are:
@@ -95,6 +87,57 @@ export function generateMultiPatientCoverLetter(
               <strong>${patient.patientName}</strong> - ${patient.totalVisits} visit${patient.totalVisits !== 1 ? 's' : ''} (${patient.visitDateRange}) - ${formatCurrency(patient.totalCharges)}
             </div>
           `).join('')}
+        </div>
+
+        <div style="margin: 0 0 20px 0; text-align: justify;">
+          Below is a simple set of steps to help guide you through the process:
+        </div>
+      </div>
+
+      <!-- Step-by-step reimbursement process -->
+      <div style="margin-bottom: 30px; border: 1px solid #e0e0e0; padding: 20px; background-color: #f9f9f9;">
+        <div style="font-weight: bold; font-size: 14px; margin-bottom: 20px; text-align: center; color: #1a1a1a;">
+          Reimbursement Submission Steps
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <div style="font-weight: bold; margin-bottom: 8px; color: #2c2c2c;">1. Access Your Claim Form</div>
+          <div style="margin-left: 15px; line-height: 1.6; color: #444;">
+            Log in to your insurance provider's member portal or contact them directly to obtain their standard out-of-network reimbursement form.
+          </div>
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <div style="font-weight: bold; margin-bottom: 8px; color: #2c2c2c;">2. Fill Out the Required Fields</div>
+          <div style="margin-left: 15px; line-height: 1.6; color: #444;">
+            Complete all necessary sections of the form, including your personal information and the dates of care for each patient.
+          </div>
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <div style="font-weight: bold; margin-bottom: 8px; color: #2c2c2c;">3. Attach Supporting Documents</div>
+          <div style="margin-left: 15px; line-height: 1.6; color: #444;">
+            Include the following with your submission:
+            <ul style="margin: 8px 0 0 20px; padding: 0;">
+              <li style="margin-bottom: 4px;">The superbills we've provided for each patient</li>
+              <li style="margin-bottom: 4px;">The attached invoices for all visits</li>
+              <li style="margin-bottom: 4px;">Your completed claim forms</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <div style="font-weight: bold; margin-bottom: 8px; color: #2c2c2c;">4. Submit to Your Insurance Provider</div>
+          <div style="margin-left: 15px; line-height: 1.6; color: #444;">
+            Most providers accept claims by mail, fax, or through a member portal. Be sure to keep a copy for your records.
+          </div>
+        </div>
+
+        <div style="margin-bottom: 0;">
+          <div style="font-weight: bold; margin-bottom: 8px; color: #2c2c2c;">5. Track Your Claim</div>
+          <div style="margin-left: 15px; line-height: 1.6; color: #444;">
+            After processing, your provider will issue an Explanation of Benefits (EOB) and, if approved, send your reimbursement.
+          </div>
         </div>
       </div>
 
@@ -113,7 +156,11 @@ export function generateMultiPatientCoverLetter(
 
       <div style="margin-bottom: 30px;">
         <div style="margin: 0 0 15px 0; text-align: justify;">
-          If any further documentation is needed or if questions arise, feel free to contact our office at the above number or email.
+          If your provider requests additional documentation, they're welcome to contact our clinic directly. We're happy to assist if needed.
+        </div>
+
+        <div style="margin: 0 0 15px 0; text-align: justify;">
+          Thank you again for choosing Collective Family Chiropractic. We're honored to be part of your wellness journey.
         </div>
 
         <div style="margin: 40px 0 0 0;">Sincerely,</div>

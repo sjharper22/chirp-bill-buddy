@@ -1,6 +1,7 @@
 
 import { Visit } from "@/types/superbill";
 import { Badge } from "@/components/ui/badge";
+import { AIAssistantButton } from "@/components/ai/AIAssistantButton";
 import { commonICD10Codes } from "@/lib/utils/superbill-utils";
 import { Command } from "cmdk";
 import {
@@ -67,13 +68,33 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
     }
   };
 
+  const handleAICodeSuggestions = (aiContent: string) => {
+    // Parse AI response for ICD-10 codes (assuming format includes codes)
+    const codeMatches = aiContent.match(/\b[A-Z]\d{2}(?:\.\d{1,3})?\b/g) || [];
+    const newCodes = codeMatches.filter(code => !visit.icdCodes.includes(code));
+    
+    if (newCodes.length > 0) {
+      onVisitChange({ ...visit, icdCodes: [...visit.icdCodes, ...newCodes] });
+    }
+  };
+
+  const generateTreatmentDescription = () => {
+    const complaints = visit.mainComplaints.length > 0 ? `Chief complaints: ${visit.mainComplaints.join(', ')}` : '';
+    const existingCpts = visit.cptCodes.length > 0 ? `Existing CPT codes: ${visit.cptCodes.join(', ')}` : '';
+    const notes = visit.notes ? `Notes: ${visit.notes}` : '';
+    
+    return [complaints, existingCpts, notes].filter(Boolean).join('. ');
+  };
+
+  const treatmentDescription = generateTreatmentDescription();
+
   return (
     <div className="mt-3">
-      <div className="flex items-center mb-2">
+      <div className="flex items-center mb-2 gap-2">
         <span className="text-sm font-medium mr-2">ICD-10 Codes:</span>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="w-[300px] justify-start">
+            <Button variant="outline" size="sm" className="w-[200px] justify-start">
               <Search className="mr-2 h-4 w-4" />
               Search or add ICD-10 code
             </Button>
@@ -125,6 +146,18 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
             </Command>
           </PopoverContent>
         </Popover>
+        
+        {treatmentDescription && (
+          <AIAssistantButton
+            type="code_suggestions"
+            prompt={`Suggest appropriate ICD-10 codes for chiropractic diagnosis: ${treatmentDescription}`}
+            context={{ visit, existingIcdCodes: visit.icdCodes }}
+            onResult={handleAICodeSuggestions}
+            size="sm"
+          >
+            Suggest Codes
+          </AIAssistantButton>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2">

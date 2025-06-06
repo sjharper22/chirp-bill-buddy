@@ -2,6 +2,7 @@
 import { Visit } from "@/types/superbill";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { AIAssistantButton } from "@/components/ai/AIAssistantButton";
 import { useState, useEffect } from "react";
 
 interface VisitNotesProps {
@@ -51,17 +52,55 @@ export function VisitNotes({ visit, onVisitChange, initialShowNotes = false }: V
     e.currentTarget.select();
   };
 
+  // Handle AI-generated notes
+  const handleAINotesResult = (aiContent: string) => {
+    const newValue = aiContent;
+    setNotesValue(newValue);
+    onVisitChange({ 
+      ...visit, 
+      notes: newValue 
+    });
+    if (!showNotes) {
+      setShowNotes(true);
+    }
+  };
+
+  // Generate treatment description for AI
+  const generateTreatmentDescription = () => {
+    const icdDescriptions = visit.icdCodes.length > 0 ? `Diagnoses: ${visit.icdCodes.join(', ')}` : '';
+    const cptDescriptions = visit.cptCodes.length > 0 ? `Procedures: ${visit.cptCodes.join(', ')}` : '';
+    const complaints = visit.mainComplaints.length > 0 ? `Chief complaints: ${visit.mainComplaints.join(', ')}` : '';
+    
+    return [complaints, icdDescriptions, cptDescriptions].filter(Boolean).join('. ');
+  };
+
+  const treatmentDescription = generateTreatmentDescription();
+
   return (
     <div className="mt-3">
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={handleToggleNotes}
-        className="text-xs p-0 h-auto"
-        type="button" // Explicitly set button type to avoid form submission
-      >
-        {showNotes ? "Hide Notes" : "Add Notes"}
-      </Button>
+      <div className="flex items-center gap-2 mb-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleToggleNotes}
+          className="text-xs p-0 h-auto"
+          type="button" // Explicitly set button type to avoid form submission
+        >
+          {showNotes ? "Hide Notes" : "Add Notes"}
+        </Button>
+        
+        {treatmentDescription && (
+          <AIAssistantButton
+            type="visit_notes"
+            prompt={`Generate professional visit notes for a chiropractic visit with: ${treatmentDescription}`}
+            context={{ visit, date: visit.date }}
+            onResult={handleAINotesResult}
+            size="sm"
+          >
+            Generate Notes
+          </AIAssistantButton>
+        )}
+      </div>
       
       {showNotes && (
         <Textarea
