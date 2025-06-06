@@ -20,24 +20,30 @@ export function generatePrintStyles(): string {
         margin: 0;
         padding: 0;
         max-width: 100%;
+        min-height: auto;
       }
       .header {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         padding-bottom: 8px;
       }
       .header-content {
-        gap: 15px;
+        gap: 20px;
+        justify-content: flex-start;
       }
       .clinic-logo {
         max-height: 60px;
         max-width: 90px;
+      }
+      .title-section {
+        text-align: center;
+        flex: 1;
       }
       .title-section h1 {
         font-size: 20px;
         margin: 0;
       }
       .info-section {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         gap: 15px;
       }
       .info-title {
@@ -50,7 +56,7 @@ export function generatePrintStyles(): string {
         font-size: 11px;
       }
       .services-section {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
       }
       .services-title {
         font-size: 14px;
@@ -58,7 +64,7 @@ export function generatePrintStyles(): string {
         padding-bottom: 3px;
       }
       table {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         font-size: 10px;
       }
       th, td {
@@ -72,8 +78,8 @@ export function generatePrintStyles(): string {
         font-size: 11px;
       }
       .notes {
-        margin-bottom: 10px;
-        min-height: 40px;
+        margin-bottom: 15px;
+        min-height: 60px;
         padding: 10px;
       }
       .notes-title {
@@ -82,7 +88,7 @@ export function generatePrintStyles(): string {
         padding-bottom: 3px;
       }
       .footer {
-        margin-top: 10px;
+        margin-top: 15px;
         padding-top: 10px;
         font-size: 9px;
       }
@@ -113,10 +119,38 @@ export function generatePrintStyles(): string {
       thead {
         display: table-header-group;
       }
-      /* Minimize orphans and widows */
+      /* Minimize orphans and widows to reduce white space */
       p, div, h1, h2, h3, h4, h5, h6 {
-        orphans: 1;
-        widows: 1;
+        orphans: 2;
+        widows: 2;
+      }
+      /* Reduce excessive spacing */
+      * {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .container * {
+        margin: revert !important;
+        padding: revert !important;
+      }
+      /* Specific spacing adjustments */
+      .header {
+        margin: 0 0 10px 0 !important;
+        padding: 0 0 5px 0 !important;
+      }
+      .info-section {
+        margin: 0 0 10px 0 !important;
+      }
+      .services-section {
+        margin: 0 0 10px 0 !important;
+      }
+      .notes {
+        margin: 0 0 10px 0 !important;
+        padding: 8px !important;
+      }
+      .footer {
+        margin: 10px 0 0 0 !important;
+        padding: 5px 0 0 0 !important;
       }
     }
   `;

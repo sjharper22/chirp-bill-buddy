@@ -2,7 +2,6 @@
 export function generateComponentStyles(): string {
   return `
     .header {
-      text-align: center;
       margin-bottom: 30px;
       padding-bottom: 15px;
       border-bottom: 2px solid #eee;
@@ -10,9 +9,9 @@ export function generateComponentStyles(): string {
     .header-content {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 30px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
     .logo-section {
       flex-shrink: 0;
@@ -23,6 +22,10 @@ export function generateComponentStyles(): string {
       width: auto;
       height: auto;
       object-fit: contain;
+    }
+    .title-section {
+      flex: 1;
+      text-align: center;
     }
     .title-section h1 {
       margin: 0;

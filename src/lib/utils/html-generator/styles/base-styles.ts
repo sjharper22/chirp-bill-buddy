@@ -8,14 +8,15 @@ export function generateBaseStyles(): string {
       color: #333;
       line-height: 1.6;
       box-sizing: border-box;
+      min-height: auto;
     }
     .container {
       max-width: 100%;
       margin: 0 auto;
       padding: 0;
+      min-height: auto;
     }
     .header {
-      text-align: center;
       margin-bottom: 30px;
       padding-bottom: 15px;
       border-bottom: 2px solid #eee;
