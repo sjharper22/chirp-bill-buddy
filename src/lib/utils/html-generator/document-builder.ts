@@ -1,3 +1,4 @@
+
 import { Superbill } from "@/types/superbill";
 import { generatePrintableCSS } from "./css-generator";
 import { 
@@ -15,46 +16,49 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
   // Cover letter HTML (if provided)
   const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Cover Letter - ${superbill.patientName}</title>
       <style>
         ${generatePrintableCSS()}
       </style>
     </head>
     <body>
-      <div class="container">
+      <div class="professional-document cover-letter">
         ${coverLetterContent}
       </div>
     </body>
     </html>
   ` : '';
   
-  // Superbill HTML
+  // Superbill HTML with professional layout
   const superbillHTML = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Superbill - ${superbill.patientName}</title>
       <style>
         ${generatePrintableCSS()}
       </style>
     </head>
     <body>
-      <div class="container">
+      <div class="professional-document">
         ${generateSuperbillHeader(superbill)}
         
-        <div class="info-section">
-          ${generatePatientInfoSection(superbill, visitDates)}
-          ${generateProviderInfoSection(superbill)}
-        </div>
-        
-        <div class="services-section">
-          <div class="services-title">Services</div>
+        <div class="document-body">
+          <div class="info-grid">
+            ${generatePatientInfoSection(superbill, visitDates)}
+            ${generateProviderInfoSection(superbill)}
+          </div>
+          
           ${generateServicesTable(superbill)}
+          
+          ${generateNotesSection(superbill)}
         </div>
-        
-        ${generateNotesSection(superbill)}
         
         ${generateFooter()}
       </div>

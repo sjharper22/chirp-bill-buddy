@@ -23,21 +23,23 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     container.innerHTML = html;
     container.style.position = "absolute";
     container.style.left = "-9999px";
-    container.style.width = "794px"; // A4 width at 96DPI for optimal quality
+    container.style.width = "794px"; // A4 width at 96DPI
     container.style.backgroundColor = "#ffffff";
-    container.style.fontFamily = "Arial, sans-serif";
+    container.style.fontFamily = "'Open Sans', Arial, sans-serif";
     document.body.appendChild(container);
     
     // Wait for DOM rendering and fonts to load
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     const canvas = await html2canvas(container, {
-      scale: 2.5, // Higher scale for better text quality
+      scale: 3, // Higher scale for better quality
       useCORS: true,
       logging: false,
       backgroundColor: "#ffffff",
       width: 794,
       height: container.offsetHeight,
+      allowTaint: false,
+      foreignObjectRendering: true,
       onclone: (clonedDoc) => {
         const clonedContainer = clonedDoc.body.querySelector('div');
         if (clonedContainer) {
@@ -45,7 +47,15 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
           clonedContainer.style.transform = 'none';
           clonedContainer.style.width = '794px';
           clonedContainer.style.margin = '0';
-          clonedContainer.style.fontFamily = 'Arial, sans-serif';
+          clonedContainer.style.fontFamily = "'Open Sans', Arial, sans-serif";
+          
+          // Ensure all images are loaded in cloned document
+          const images = clonedContainer.querySelectorAll('img');
+          images.forEach(img => {
+            img.style.display = 'block';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+          });
         }
       }
     });
@@ -56,18 +66,18 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
 
   const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, margin: number, contentWidth: number) => {
     const pageHeight = 297; // A4 height in mm
-    const contentHeight = pageHeight - (margin * 2); // Available height for content
+    const contentHeight = pageHeight - (margin * 2);
     
     const imgWidth = contentWidth;
     const imgHeight = (canvas.height * contentWidth) / canvas.width;
     
-    // If content fits on one page, add it directly
+    // If content fits on one page
     if (imgHeight <= contentHeight) {
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
+      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', margin, margin, imgWidth, imgHeight);
       return;
     }
     
-    // Content is too tall - split into multiple pages with better handling
+    // Split content across multiple pages with better precision
     const pixelsPerMM = canvas.height / imgHeight;
     const contentHeightInPixels = contentHeight * pixelsPerMM;
     
@@ -82,25 +92,25 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       const remainingHeight = canvas.height - currentY;
       const sectionHeight = Math.min(contentHeightInPixels, remainingHeight);
       
-      // Create a new canvas for this page's content
+      // Create canvas for this page section
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
       pageCanvas.height = sectionHeight;
       
       const ctx = pageCanvas.getContext('2d');
       if (ctx) {
-        // Draw the relevant portion of the original canvas
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
+        // Draw the section
         ctx.drawImage(
           canvas,
-          0, currentY, canvas.width, sectionHeight, // Source rectangle
-          0, 0, canvas.width, sectionHeight // Destination rectangle
+          0, currentY, canvas.width, sectionHeight,
+          0, 0, canvas.width, sectionHeight
         );
         
-        // Calculate the height for this page portion
         const pageImgHeight = (sectionHeight * contentWidth) / canvas.width;
-        
-        // Add this portion to the PDF
-        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight);
+        pdf.addImage(pageCanvas.toDataURL('image/png', 1.0), 'PNG', margin, margin, imgWidth, pageImgHeight);
       }
       
       currentY += sectionHeight;
@@ -111,57 +121,69 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
   const handleDownload = async () => {
     setIsGenerating(true);
     toast({
-      title: "PDF Download",
-      description: "Preparing PDF download...",
+      title: "PDF Generation",
+      description: "Preparing your professional healthcare document...",
     });
     
     try {
-      // Generate separate HTML for cover letter and superbill
       const { coverLetterHTML, superbillHTML } = generatePrintableHTML(superbill, coverLetterContent);
       
-      // Create PDF with A4 dimensions
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: "a4"
+        format: "a4",
+        compress: true
       });
       
-      const margin = 10; // Reduced margin to 10mm (about 0.39 inches)
-      const contentWidth = 210 - (margin * 2); // A4 width minus margins
+      // Professional margins for healthcare documents
+      const margin = 12.7; // Standard 0.5 inch margins
+      const contentWidth = 210 - (margin * 2);
       
       let isFirstPage = true;
       
-      // Render cover letter if content exists
+      // Add cover letter if exists
       if (coverLetterHTML && coverLetterHTML.trim() !== '') {
+        console.log("Rendering cover letter...");
         const coverCanvas = await renderSection(coverLetterHTML);
         addCanvasToPDF(pdf, coverCanvas, margin, contentWidth);
         isFirstPage = false;
       }
       
-      // Add page break before superbill if cover letter was added
+      // Add new page for superbill if cover letter was added
       if (!isFirstPage) {
         pdf.addPage();
       }
       
-      // Render superbill
+      // Add superbill
+      console.log("Rendering superbill...");
       const superbillCanvas = await renderSection(superbillHTML);
       addCanvasToPDF(pdf, superbillCanvas, margin, contentWidth);
       
-      // Generate filename
-      const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
+      // Generate professional filename
+      const timestamp = formatDate(superbill.issueDate).replace(/\//g, '-');
+      const patientName = superbill.patientName.replace(/[^a-zA-Z0-9]/g, '-');
+      const fileName = `Superbill-${patientName}-${timestamp}.pdf`;
       
-      // Save the PDF
+      // Add PDF metadata for professional appearance
+      pdf.setProperties({
+        title: `Superbill - ${superbill.patientName}`,
+        subject: 'Healthcare Services Documentation',
+        author: superbill.clinicName,
+        creator: superbill.clinicName,
+        producer: 'Healthcare Document Management System'
+      });
+      
       pdf.save(fileName);
       
       toast({
-        title: "PDF Downloaded",
-        description: "Your superbill has been downloaded successfully.",
+        title: "Download Complete",
+        description: "Your professional superbill has been generated successfully.",
       });
     } catch (error) {
       console.error("PDF generation error:", error);
       toast({
-        title: "Download Failed",
-        description: "There was an error generating your PDF. Please try again.",
+        title: "Generation Failed",
+        description: "There was an error creating your PDF. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -174,9 +196,12 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       variant="outline" 
       onClick={handleDownload} 
       disabled={isGenerating}
+      className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 hover:from-emerald-100 hover:to-teal-100"
     >
-      <Download className="mr-2 h-4 w-4" />
-      {isGenerating ? "Generating..." : "Download PDF"}
+      <Download className="mr-2 h-4 w-4 text-emerald-600" />
+      <span className="text-emerald-700">
+        {isGenerating ? "Generating Professional PDF..." : "Download PDF"}
+      </span>
     </Button>
   );
 }
