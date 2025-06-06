@@ -1,4 +1,3 @@
-
 import { Superbill } from "@/types/superbill";
 import { generatePrintableCSS } from "./css-generator";
 import { 
@@ -18,7 +17,7 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
   const superbillPages = 1;
   const totalPages = coverLetterPages + superbillPages;
   
-  // Cover letter HTML - completely standalone without any headers
+  // Cover letter HTML WITHOUT header - just the content
   const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
     <!DOCTYPE html>
     <html>
@@ -26,31 +25,18 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
       <title>Cover Letter - ${superbill.patientName}</title>
       <style>
         ${generatePrintableCSS()}
-        /* Cover letter specific styles - clean and minimal */
-        body {
-          margin: 0;
-          padding: 20px;
-          font-family: Arial, sans-serif;
-          background: white;
-        }
+        /* Additional styles for clean cover letter */
         .cover-letter-content {
-          width: 100%;
-          max-width: 8.5in;
-          margin: 0 auto;
           padding: 0;
-        }
-        /* Remove any header-related styles for cover letters */
-        .document-header {
-          display: none !important;
-        }
-        .page-content {
-          padding-top: 0 !important;
+          margin: 0;
         }
       </style>
     </head>
-    <body>
-      <div class="cover-letter-content">
-        ${coverLetterContent}
+    <body class="pdf-optimized">
+      <div class="document-page">
+        <div class="cover-letter-content">
+          ${coverLetterContent}
+        </div>
       </div>
     </body>
     </html>
