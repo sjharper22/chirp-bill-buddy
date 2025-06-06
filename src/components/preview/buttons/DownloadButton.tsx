@@ -23,38 +23,75 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     container.innerHTML = html;
     container.style.position = "absolute";
     container.style.left = "-9999px";
+    container.style.top = "0";
     container.style.width = "794px"; // A4 width at 96DPI
     container.style.backgroundColor = "#ffffff";
     container.style.fontFamily = "'Open Sans', Arial, sans-serif";
+    container.style.color = "#000000";
+    container.style.lineHeight = "1.5";
+    container.style.fontSize = "14px";
+    container.style.padding = "0";
+    container.style.margin = "0";
+    container.style.visibility = "visible";
+    container.style.display = "block";
     document.body.appendChild(container);
     
     // Wait for DOM rendering and fonts to load
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Force all elements to be visible and properly styled
+    const allElements = container.querySelectorAll('*');
+    allElements.forEach(el => {
+      const element = el as HTMLElement;
+      element.style.visibility = 'visible';
+      element.style.display = element.style.display || 'block';
+      element.style.opacity = '1';
+      element.style.transform = 'none';
+      element.style.position = element.style.position === 'absolute' ? 'static' : element.style.position;
+    });
     
     const canvas = await html2canvas(container, {
-      scale: 3, // Higher scale for better quality
+      scale: 2,
       useCORS: true,
-      logging: false,
+      logging: true,
       backgroundColor: "#ffffff",
       width: 794,
-      height: container.offsetHeight,
+      height: container.scrollHeight,
       allowTaint: false,
-      foreignObjectRendering: true,
+      foreignObjectRendering: false,
+      removeContainer: false,
       onclone: (clonedDoc) => {
         const clonedContainer = clonedDoc.body.querySelector('div');
         if (clonedContainer) {
+          // Ensure the cloned container is visible and properly positioned
           clonedContainer.style.position = 'static';
           clonedContainer.style.transform = 'none';
           clonedContainer.style.width = '794px';
           clonedContainer.style.margin = '0';
+          clonedContainer.style.padding = '20px';
           clonedContainer.style.fontFamily = "'Open Sans', Arial, sans-serif";
+          clonedContainer.style.backgroundColor = '#ffffff';
+          clonedContainer.style.color = '#000000';
+          clonedContainer.style.visibility = 'visible';
+          clonedContainer.style.display = 'block';
           
-          // Ensure all images are loaded in cloned document
+          // Force all child elements to be visible
+          const allClonedElements = clonedContainer.querySelectorAll('*');
+          allClonedElements.forEach(el => {
+            const element = el as HTMLElement;
+            element.style.visibility = 'visible';
+            element.style.opacity = '1';
+            element.style.color = element.style.color || '#000000';
+            element.style.backgroundColor = element.style.backgroundColor || 'transparent';
+          });
+          
+          // Ensure images are loaded in cloned document
           const images = clonedContainer.querySelectorAll('img');
           images.forEach(img => {
             img.style.display = 'block';
             img.style.maxWidth = '100%';
             img.style.height = 'auto';
+            img.style.visibility = 'visible';
           });
         }
       }
@@ -126,7 +163,13 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     });
     
     try {
+      console.log("Starting PDF generation...");
       const { coverLetterHTML, superbillHTML } = generatePrintableHTML(superbill, coverLetterContent);
+      
+      console.log("Generated HTML lengths:", {
+        coverLetter: coverLetterHTML.length,
+        superbill: superbillHTML.length
+      });
       
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -136,7 +179,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       });
       
       // Professional margins for healthcare documents
-      const margin = 10; // Reduced margins for better content fitting
+      const margin = 15; // Slightly larger margins for better appearance
       const contentWidth = 210 - (margin * 2);
       
       let isFirstPage = true;
@@ -145,6 +188,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       if (coverLetterHTML && coverLetterHTML.trim() !== '') {
         console.log("Rendering cover letter...");
         const coverCanvas = await renderSection(coverLetterHTML);
+        console.log("Cover letter canvas dimensions:", coverCanvas.width, coverCanvas.height);
         addCanvasToPDF(pdf, coverCanvas, margin, contentWidth);
         isFirstPage = false;
       }
@@ -157,6 +201,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       // Add superbill
       console.log("Rendering superbill...");
       const superbillCanvas = await renderSection(superbillHTML);
+      console.log("Superbill canvas dimensions:", superbillCanvas.width, superbillCanvas.height);
       addCanvasToPDF(pdf, superbillCanvas, margin, contentWidth);
       
       // Generate professional filename
@@ -164,7 +209,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       const patientName = superbill.patientName.replace(/[^a-zA-Z0-9]/g, '-');
       const fileName = `Superbill-${patientName}-${timestamp}.pdf`;
       
-      // Add PDF metadata for professional appearance (fixed to use only valid properties)
+      // Add PDF metadata for professional appearance
       pdf.setProperties({
         title: `Superbill - ${superbill.patientName}`,
         subject: 'Healthcare Services Documentation',
