@@ -27,22 +27,26 @@ export function CoverLetterPreview({
   const [displayContent, setDisplayContent] = useState<string>("");
   const [hasBeenEnhanced, setHasBeenEnhanced] = useState(false);
   const lastContentRef = useRef<string>("");
+  const enhancedContentRef = useRef<string>("");
   
   useEffect(() => {
-    // If content is provided and it's different from what we had before, use it
+    // If we have enhanced content, always use that first
+    if (hasBeenEnhanced && enhancedContentRef.current) {
+      console.log("Using preserved enhanced content");
+      setDisplayContent(enhancedContentRef.current);
+      return;
+    }
+
+    // If content is provided from props and it's different, use it
     if (content && content !== lastContentRef.current) {
       console.log("Using provided content for cover letter");
       setDisplayContent(content);
       lastContentRef.current = content;
-      // If the content is significantly different from generated content, mark as enhanced
-      if (hasBeenEnhanced || content.length < 5000) { // Enhanced content is usually shorter
-        setHasBeenEnhanced(true);
-      }
       return;
     }
     
-    // Only generate new content if we don't have enhanced content
-    if (!hasBeenEnhanced && !content) {
+    // Only generate new content if we don't have any content and haven't been enhanced
+    if (!hasBeenEnhanced && !content && !displayContent) {
       const billsToProcess = superbill ? [superbill] : superbills;
       
       if (billsToProcess.length > 0) {
@@ -56,9 +60,10 @@ export function CoverLetterPreview({
   }, [superbills, superbill, includeInvoiceNote, selectedTemplateId, content, hasBeenEnhanced]);
   
   const handleAIEnhancement = (enhancedContent: string) => {
-    console.log("AI enhancement received, updating content");
+    console.log("AI enhancement received, updating content and marking as enhanced");
     setDisplayContent(enhancedContent);
     setHasBeenEnhanced(true);
+    enhancedContentRef.current = enhancedContent;
     lastContentRef.current = enhancedContent;
     if (onContentChange) {
       onContentChange(enhancedContent);
