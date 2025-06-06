@@ -20,7 +20,7 @@ export function generateCoverLetter({
   includeInvoiceNote = true,
 }: CoverLetterOptions) {
   return `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; font-size: 12px; max-width: 100%; margin: 0; padding: 0;">
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; font-size: 12px; max-width: 100%; margin: 0; padding: 20px;">
       <div style="margin-bottom: 30px; text-align: left;">
         <div style="margin: 0; font-weight: bold; font-size: 14px;">${clinicName}</div>
         <div style="margin: 0; margin-top: 5px;">${clinicAddress}</div>
