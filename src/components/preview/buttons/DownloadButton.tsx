@@ -136,7 +136,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       });
       
       // Professional margins for healthcare documents
-      const margin = 12.7; // Standard 0.5 inch margins
+      const margin = 10; // Reduced margins for better content fitting
       const contentWidth = 210 - (margin * 2);
       
       let isFirstPage = true;
@@ -164,13 +164,12 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
       const patientName = superbill.patientName.replace(/[^a-zA-Z0-9]/g, '-');
       const fileName = `Superbill-${patientName}-${timestamp}.pdf`;
       
-      // Add PDF metadata for professional appearance
+      // Add PDF metadata for professional appearance (fixed to use only valid properties)
       pdf.setProperties({
         title: `Superbill - ${superbill.patientName}`,
         subject: 'Healthcare Services Documentation',
         author: superbill.clinicName,
-        creator: superbill.clinicName,
-        producer: 'Healthcare Document Management System'
+        creator: superbill.clinicName
       });
       
       pdf.save(fileName);
