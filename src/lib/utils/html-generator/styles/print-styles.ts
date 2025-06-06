@@ -3,155 +3,237 @@ export function generatePrintStyles(): string {
   return `
     @media print {
       body { 
-        margin: 0; 
-        padding: 10px;
-        font-size: 11px;
-        line-height: 1.3;
+        margin: 0 !important; 
+        padding: 10px !important;
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+        min-height: auto !important;
       }
       button { 
-        display: none; 
+        display: none !important; 
       }
       .cover-letter { 
-        page-break-after: always;
-        margin-bottom: 0;
-        padding-bottom: 0;
+        page-break-after: always !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
       }
       .container {
-        margin: 0;
-        padding: 0;
-        max-width: 100%;
-        min-height: auto;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        min-height: auto !important;
       }
       .header {
-        margin-bottom: 15px;
-        padding-bottom: 8px;
+        margin-bottom: 10px !important;
+        padding-bottom: 5px !important;
       }
       .header-content {
-        gap: 20px;
-        justify-content: flex-start;
+        gap: 15px !important;
+        justify-content: flex-start !important;
+        flex-wrap: nowrap !important;
       }
       .clinic-logo {
-        max-height: 60px;
-        max-width: 90px;
+        max-height: 50px !important;
+        max-width: 80px !important;
       }
       .title-section {
-        text-align: center;
-        flex: 1;
+        text-align: center !important;
+        flex: 1 !important;
       }
       .title-section h1 {
-        font-size: 20px;
-        margin: 0;
+        font-size: 18px !important;
+        margin: 0 !important;
       }
       .info-section {
-        margin-bottom: 15px;
-        gap: 15px;
+        margin-bottom: 10px !important;
+        gap: 10px !important;
       }
       .info-title {
-        font-size: 14px;
-        margin-bottom: 8px;
-        padding-bottom: 3px;
+        font-size: 12px !important;
+        margin-bottom: 5px !important;
+        padding-bottom: 2px !important;
       }
       .info-block p {
-        margin: 2px 0;
-        font-size: 11px;
+        margin: 1px 0 !important;
+        font-size: 10px !important;
       }
       .services-section {
-        margin-bottom: 15px;
+        margin-bottom: 10px !important;
       }
       .services-title {
-        font-size: 14px;
-        margin-bottom: 8px;
-        padding-bottom: 3px;
+        font-size: 12px !important;
+        margin-bottom: 5px !important;
+        padding-bottom: 2px !important;
       }
       table {
-        margin-bottom: 15px;
-        font-size: 10px;
+        margin-bottom: 10px !important;
+        font-size: 9px !important;
       }
       th, td {
-        padding: 4px 3px;
-        font-size: 10px;
+        padding: 2px 1px !important;
+        font-size: 9px !important;
       }
       th {
-        font-size: 11px;
+        font-size: 10px !important;
       }
       .total-row {
-        font-size: 11px;
+        font-size: 10px !important;
       }
       .notes {
-        margin-bottom: 15px;
-        min-height: 60px;
-        padding: 10px;
+        margin-bottom: 10px !important;
+        min-height: 40px !important;
+        padding: 5px !important;
       }
       .notes-title {
-        font-size: 14px;
-        margin-bottom: 8px;
-        padding-bottom: 3px;
+        font-size: 12px !important;
+        margin-bottom: 5px !important;
+        padding-bottom: 2px !important;
       }
       .footer {
-        margin-top: 15px;
-        padding-top: 10px;
-        font-size: 9px;
+        margin-top: 10px !important;
+        padding-top: 5px !important;
+        font-size: 8px !important;
       }
       p {
-        margin: 0 0 4px 0;
+        margin: 0 0 2px 0 !important;
       }
       ol li, ul li {
-        margin-bottom: 4px;
+        margin-bottom: 2px !important;
       }
       /* Optimize page breaks to reduce white space */
       .header,
       .info-section,
       .services-section {
-        page-break-inside: avoid;
-        page-break-after: auto;
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
       }
       .notes,
       .footer {
-        page-break-inside: avoid;
+        page-break-inside: avoid !important;
       }
       table {
-        page-break-inside: auto;
+        page-break-inside: auto !important;
       }
       tr {
-        page-break-inside: avoid;
-        page-break-after: auto;
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
       }
       thead {
-        display: table-header-group;
+        display: table-header-group !important;
       }
       /* Minimize orphans and widows to reduce white space */
       p, div, h1, h2, h3, h4, h5, h6 {
-        orphans: 2;
-        widows: 2;
+        orphans: 2 !important;
+        widows: 2 !important;
       }
-      /* Reduce excessive spacing */
-      * {
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      .container * {
-        margin: revert !important;
-        padding: revert !important;
-      }
-      /* Specific spacing adjustments */
-      .header {
-        margin: 0 0 10px 0 !important;
-        padding: 0 0 5px 0 !important;
-      }
-      .info-section {
-        margin: 0 0 10px 0 !important;
-      }
-      .services-section {
-        margin: 0 0 10px 0 !important;
-      }
-      .notes {
-        margin: 0 0 10px 0 !important;
-        padding: 8px !important;
-      }
-      .footer {
-        margin: 10px 0 0 0 !important;
-        padding: 5px 0 0 0 !important;
-      }
+    }
+    
+    /* Styles that apply to both screen and print for PDF generation */
+    .pdf-optimized {
+      font-size: 11px !important;
+      line-height: 1.3 !important;
+      margin: 0 !important;
+      padding: 10px !important;
+      min-height: auto !important;
+    }
+    
+    .pdf-optimized .container {
+      margin: 0 !important;
+      padding: 0 !important;
+      max-width: 100% !important;
+      min-height: auto !important;
+    }
+    
+    .pdf-optimized .header {
+      margin-bottom: 10px !important;
+      padding-bottom: 5px !important;
+    }
+    
+    .pdf-optimized .header-content {
+      gap: 15px !important;
+      justify-content: flex-start !important;
+      flex-wrap: nowrap !important;
+    }
+    
+    .pdf-optimized .clinic-logo {
+      max-height: 50px !important;
+      max-width: 80px !important;
+    }
+    
+    .pdf-optimized .title-section {
+      text-align: center !important;
+      flex: 1 !important;
+    }
+    
+    .pdf-optimized .title-section h1 {
+      font-size: 18px !important;
+      margin: 0 !important;
+    }
+    
+    .pdf-optimized .info-section {
+      margin-bottom: 10px !important;
+      gap: 10px !important;
+    }
+    
+    .pdf-optimized .info-title {
+      font-size: 12px !important;
+      margin-bottom: 5px !important;
+      padding-bottom: 2px !important;
+    }
+    
+    .pdf-optimized .info-block p {
+      margin: 1px 0 !important;
+      font-size: 10px !important;
+    }
+    
+    .pdf-optimized .services-section {
+      margin-bottom: 10px !important;
+    }
+    
+    .pdf-optimized .services-title {
+      font-size: 12px !important;
+      margin-bottom: 5px !important;
+      padding-bottom: 2px !important;
+    }
+    
+    .pdf-optimized table {
+      margin-bottom: 10px !important;
+      font-size: 9px !important;
+    }
+    
+    .pdf-optimized th, .pdf-optimized td {
+      padding: 2px 1px !important;
+      font-size: 9px !important;
+    }
+    
+    .pdf-optimized th {
+      font-size: 10px !important;
+    }
+    
+    .pdf-optimized .total-row {
+      font-size: 10px !important;
+    }
+    
+    .pdf-optimized .notes {
+      margin-bottom: 10px !important;
+      min-height: 40px !important;
+      padding: 5px !important;
+    }
+    
+    .pdf-optimized .notes-title {
+      font-size: 12px !important;
+      margin-bottom: 5px !important;
+      padding-bottom: 2px !important;
+    }
+    
+    .pdf-optimized .footer {
+      margin-top: 10px !important;
+      padding-top: 5px !important;
+      font-size: 8px !important;
+    }
+    
+    .pdf-optimized p {
+      margin: 0 0 2px 0 !important;
     }
   `;
 }

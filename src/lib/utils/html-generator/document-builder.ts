@@ -1,3 +1,4 @@
+
 import { Superbill } from "@/types/superbill";
 import { generatePrintableCSS } from "./css-generator";
 import { 
@@ -22,7 +23,7 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
         ${generatePrintableCSS()}
       </style>
     </head>
-    <body>
+    <body class="pdf-optimized">
       <div class="container">
         ${coverLetterContent}
       </div>
@@ -40,7 +41,7 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
         ${generatePrintableCSS()}
       </style>
     </head>
-    <body>
+    <body class="pdf-optimized">
       <div class="container">
         ${generateSuperbillHeader(superbill)}
         
