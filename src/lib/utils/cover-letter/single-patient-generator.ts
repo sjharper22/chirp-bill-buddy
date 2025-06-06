@@ -20,63 +20,63 @@ export function generateCoverLetter({
   includeInvoiceNote = true,
 }: CoverLetterOptions) {
   return `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; font-size: 14px; max-width: 800px; margin: 0 auto; padding: 0;">
-      <div style="margin-bottom: 20px; text-align: left;">
-        <p style="margin: 0; font-weight: bold;">${clinicName}</p>
-        <p style="margin: 0;">${clinicAddress}</p>
-        <p style="margin: 0;">${clinicPhone}</p>
-        <p style="margin: 0;">${clinicEmail}</p>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; font-size: 12px; max-width: 100%; margin: 0; padding: 0;">
+      <div style="margin-bottom: 30px; text-align: left;">
+        <div style="margin: 0; font-weight: bold; font-size: 14px;">${clinicName}</div>
+        <div style="margin: 0; margin-top: 5px;">${clinicAddress}</div>
+        <div style="margin: 0; margin-top: 3px;">${clinicPhone}</div>
+        <div style="margin: 0; margin-top: 3px;">${clinicEmail}</div>
       </div>
       
-      <div style="margin-bottom: 20px; text-align: left;">
-        <p>${new Date().toLocaleDateString()}</p>
+      <div style="margin-bottom: 30px; text-align: left;">
+        <div style="margin: 0;">${new Date().toLocaleDateString()}</div>
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <p style="font-weight: bold;">RE: Request for Reimbursement — Services for ${patientName}</p>
+      <div style="margin-bottom: 25px;">
+        <div style="font-weight: bold; margin: 0;">RE: Request for Reimbursement — Services for ${patientName}</div>
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <p>To Whom It May Concern,</p>
+      <div style="margin-bottom: 25px;">
+        <div style="margin: 0 0 20px 0;">To Whom It May Concern,</div>
 
-        <p style="margin-top: 15px; text-indent: 20px;">
+        <div style="margin: 0 0 15px 20px; text-align: justify;">
           Please find attached a detailed superbill for <strong>${patientName}</strong>, covering
           <strong>${totalVisits}</strong> visits between <strong>${visitDateRange}</strong>, totaling
           <strong>${formatCurrency(totalCharges)}</strong>.
-        </p>
+        </div>
 
-        <p style="margin-top: 15px; text-indent: 20px;">
+        <div style="margin: 0 0 15px 20px; text-align: justify;">
           This superbill includes the relevant diagnostic (ICD-10) and procedure (CPT) codes, along with the provider and clinic information needed for out-of-network reimbursement submission.
-        </p>
+        </div>
 
         ${
           includeInvoiceNote
-            ? `<p style="margin-top: 15px; text-indent: 20px;">Invoices for each visit are also included in case your system requires additional documentation.</p>`
+            ? `<div style="margin: 0 0 15px 20px; text-align: justify;">Invoices for each visit are also included in case your system requires additional documentation.</div>`
             : ''
         }
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <p>Clinic and provider information is listed below:</p>
+      <div style="margin-bottom: 25px;">
+        <div style="margin: 0 0 15px 0;">Clinic and provider information is listed below:</div>
 
-        <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
-          <li style="margin-bottom: 5px;"><strong>Clinic:</strong> ${clinicName}</li>
-          <li style="margin-bottom: 5px;"><strong>Provider:</strong> ${providerName}</li>
-          <li style="margin-bottom: 5px;"><strong>Address:</strong> ${clinicAddress}</li>
-          <li style="margin-bottom: 5px;"><strong>Phone:</strong> ${clinicPhone}</li>
-          <li style="margin-bottom: 5px;"><strong>Email:</strong> ${clinicEmail}</li>
-          <li style="margin-bottom: 5px;"><strong>EIN:</strong> ${ein}</li>
-          <li style="margin-bottom: 5px;"><strong>NPI:</strong> ${npi}</li>
-        </ul>
+        <div style="margin-left: 20px; margin-top: 10px;">
+          <div style="margin-bottom: 8px;"><strong>Clinic:</strong> ${clinicName}</div>
+          <div style="margin-bottom: 8px;"><strong>Provider:</strong> ${providerName}</div>
+          <div style="margin-bottom: 8px;"><strong>Address:</strong> ${clinicAddress}</div>
+          <div style="margin-bottom: 8px;"><strong>Phone:</strong> ${clinicPhone}</div>
+          <div style="margin-bottom: 8px;"><strong>Email:</strong> ${clinicEmail}</div>
+          <div style="margin-bottom: 8px;"><strong>EIN:</strong> ${ein}</div>
+          <div style="margin-bottom: 8px;"><strong>NPI:</strong> ${npi}</div>
+        </div>
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <p>
+      <div style="margin-bottom: 30px;">
+        <div style="margin: 0 0 15px 0; text-align: justify;">
           If any further documentation is needed or if questions arise, feel free to contact our office at the above number or email.
-        </p>
+        </div>
 
-        <p style="margin-top: 30px;">Sincerely,</p>
-        <p style="margin-top: 50px;">${providerName}<br/>${clinicName}</p>
+        <div style="margin: 40px 0 0 0;">Sincerely,</div>
+        <div style="margin: 60px 0 0 0;">${providerName}<br/>${clinicName}</div>
       </div>
     </div>
   `;

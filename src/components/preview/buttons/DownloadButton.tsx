@@ -23,10 +23,14 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     container.innerHTML = html;
     container.style.position = "absolute";
     container.style.left = "-9999px";
-    container.style.width = "794px"; // A4 width at 96DPI
+    container.style.width = "210mm"; // A4 width
+    container.style.minHeight = "297mm"; // A4 height
     container.style.backgroundColor = "#ffffff";
-    container.style.padding = "20px";
+    container.style.padding = "15mm";
     container.style.boxSizing = "border-box";
+    container.style.fontFamily = "Arial, sans-serif";
+    container.style.fontSize = "12px";
+    container.style.lineHeight = "1.4";
     document.body.appendChild(container);
     
     // Wait for images to load
@@ -46,26 +50,29 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     await Promise.all(imageLoadPromises);
     
     // Wait for DOM rendering and fonts to load
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
+    // Use higher DPI for better quality
+    const scale = 2;
     const canvas = await html2canvas(container, {
-      scale: 2, // Good balance of quality and performance
+      scale: scale,
       useCORS: true,
       allowTaint: true,
       logging: false,
       backgroundColor: "#ffffff",
-      width: 794,
-      height: container.scrollHeight, // Use scrollHeight to capture all content
-      windowWidth: 794,
+      width: container.scrollWidth,
+      height: container.scrollHeight,
+      windowWidth: container.scrollWidth,
       windowHeight: container.scrollHeight,
       onclone: (clonedDoc) => {
         const clonedContainer = clonedDoc.body.querySelector('div');
         if (clonedContainer) {
           clonedContainer.style.position = 'static';
           clonedContainer.style.transform = 'none';
-          clonedContainer.style.width = '794px';
+          clonedContainer.style.width = '210mm';
+          clonedContainer.style.minHeight = '297mm';
           clonedContainer.style.margin = '0';
-          clonedContainer.style.padding = '20px';
+          clonedContainer.style.padding = '15mm';
           clonedContainer.style.boxSizing = 'border-box';
         }
       }
@@ -75,21 +82,26 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     return canvas;
   };
 
-  const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, margin: number, contentWidth: number) => {
+  const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, isFirstPage: boolean = false) => {
+    const pageWidth = 210; // A4 width in mm
     const pageHeight = 297; // A4 height in mm
-    const availableHeight = pageHeight - (margin * 2); // Available height for content
+    const margin = 0; // No margins since content already has padding
     
-    const imgWidth = contentWidth;
-    const imgHeight = (canvas.height * contentWidth) / canvas.width;
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    
+    if (!isFirstPage) {
+      pdf.addPage();
+    }
     
     // If content fits on one page, add it directly
-    if (imgHeight <= availableHeight) {
+    if (imgHeight <= pageHeight) {
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
       return;
     }
     
     // Content is too tall - split into multiple pages
-    const totalPages = Math.ceil(imgHeight / availableHeight);
+    const totalPages = Math.ceil(imgHeight / pageHeight);
     
     for (let page = 0; page < totalPages; page++) {
       if (page > 0) {
@@ -115,7 +127,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         );
         
         // Calculate the height for this page portion
-        const pageImgHeight = (sourceHeight * contentWidth) / canvas.width;
+        const pageImgHeight = (sourceHeight * pageWidth) / canvas.width;
         
         // Add this portion to the PDF
         pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight);
@@ -141,26 +153,20 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         format: "a4"
       });
       
-      const margin = 15; // Slightly larger margins to prevent cut-off
-      const contentWidth = 210 - (margin * 2); // A4 width minus margins
-      
       let isFirstPage = true;
       
       // Render cover letter if content exists
       if (coverLetterHTML && coverLetterHTML.trim() !== '') {
+        console.log("Rendering cover letter...");
         const coverCanvas = await renderSection(coverLetterHTML);
-        addCanvasToPDF(pdf, coverCanvas, margin, contentWidth);
+        addCanvasToPDF(pdf, coverCanvas, isFirstPage);
         isFirstPage = false;
       }
       
-      // Add page break before superbill if cover letter was added
-      if (!isFirstPage) {
-        pdf.addPage();
-      }
-      
       // Render superbill
+      console.log("Rendering superbill...");
       const superbillCanvas = await renderSection(superbillHTML);
-      addCanvasToPDF(pdf, superbillCanvas, margin, contentWidth);
+      addCanvasToPDF(pdf, superbillCanvas, isFirstPage);
       
       // Generate filename
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;

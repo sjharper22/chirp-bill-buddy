@@ -17,21 +17,90 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
   const { toast } = useToast();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
-  const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, margin: number, contentWidth: number) => {
-    const pageHeight = 297; // A4 height in mm
-    const availableHeight = pageHeight - (margin * 2); // Available height for content
+  const renderSection = async (html: string): Promise<HTMLCanvasElement> => {
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    container.style.position = "absolute";
+    container.style.left = "-9999px";
+    container.style.width = "210mm"; // A4 width
+    container.style.minHeight = "297mm"; // A4 height
+    container.style.backgroundColor = "#ffffff";
+    container.style.padding = "15mm";
+    container.style.boxSizing = "border-box";
+    container.style.fontFamily = "Arial, sans-serif";
+    container.style.fontSize = "12px";
+    container.style.lineHeight = "1.4";
+    document.body.appendChild(container);
     
-    const imgWidth = contentWidth;
-    const imgHeight = (canvas.height * contentWidth) / canvas.width;
+    // Wait for images to load
+    const images = container.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      return new Promise((resolve) => {
+        if (img.complete) {
+          resolve(true);
+        } else {
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(true);
+          setTimeout(() => resolve(true), 3000);
+        }
+      });
+    });
+    
+    await Promise.all(imageLoadPromises);
+    
+    // Wait for DOM rendering and fonts to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Use higher DPI for better quality
+    const scale = 2;
+    const canvas = await html2canvas(container, {
+      scale: scale,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      width: container.scrollWidth,
+      height: container.scrollHeight,
+      windowWidth: container.scrollWidth,
+      windowHeight: container.scrollHeight,
+      onclone: (clonedDoc) => {
+        const clonedContainer = clonedDoc.body.querySelector('div');
+        if (clonedContainer) {
+          clonedContainer.style.position = 'static';
+          clonedContainer.style.transform = 'none';
+          clonedContainer.style.width = '210mm';
+          clonedContainer.style.minHeight = '297mm';
+          clonedContainer.style.margin = '0';
+          clonedContainer.style.padding = '15mm';
+          clonedContainer.style.boxSizing = 'border-box';
+        }
+      }
+    });
+    
+    document.body.removeChild(container);
+    return canvas;
+  };
+  
+  const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, isFirstPage: boolean = false) => {
+    const pageWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const margin = 0; // No margins since content already has padding
+    
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    
+    if (!isFirstPage) {
+      pdf.addPage();
+    }
     
     // If content fits on one page, add it directly
-    if (imgHeight <= availableHeight) {
+    if (imgHeight <= pageHeight) {
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
       return;
     }
     
     // Content is too tall - split into multiple pages
-    const totalPages = Math.ceil(imgHeight / availableHeight);
+    const totalPages = Math.ceil(imgHeight / pageHeight);
     
     for (let page = 0; page < totalPages; page++) {
       if (page > 0) {
@@ -57,7 +126,7 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
         );
         
         // Calculate the height for this page portion
-        const pageImgHeight = (sourceHeight * contentWidth) / canvas.width;
+        const pageImgHeight = (sourceHeight * pageWidth) / canvas.width;
         
         // Add this portion to the PDF
         pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight);
@@ -75,83 +144,31 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
     try {
       const { coverLetterHTML, superbillHTML } = generatePrintableHTML(superbill);
       
-      // Create a temporary container for HTML content
-      const tempContainer = document.createElement("div");
-      tempContainer.style.position = "absolute";
-      tempContainer.style.left = "-9999px";
-      tempContainer.style.top = "-9999px";
-      tempContainer.style.width = "794px";
-      tempContainer.style.backgroundColor = "#ffffff";
-      tempContainer.style.padding = "20px";
-      tempContainer.style.boxSizing = "border-box";
-      
-      // Combine HTML for canvas rendering
-      const combinedHTML = `
-        ${coverLetterHTML ? `<div>${coverLetterHTML}</div><div style="page-break-before: always;"></div>` : ''}
-        <div>${superbillHTML}</div>
-      `;
-      
-      tempContainer.innerHTML = combinedHTML;
-      document.body.appendChild(tempContainer);
-      
-      // Wait for images to load before rendering
-      const images = tempContainer.querySelectorAll('img');
-      const imageLoadPromises = Array.from(images).map(img => {
-        return new Promise((resolve) => {
-          if (img.complete) {
-            resolve(true);
-          } else {
-            img.onload = () => resolve(true);
-            img.onerror = () => resolve(true);
-            setTimeout(() => resolve(true), 3000);
-          }
-        });
-      });
-      
-      await Promise.all(imageLoadPromises);
-      
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: 794,
-        height: tempContainer.scrollHeight,
-        windowWidth: 794,
-        windowHeight: tempContainer.scrollHeight,
-        onclone: (clonedDoc) => {
-          const clonedContainer = clonedDoc.body.querySelector('div');
-          if (clonedContainer) {
-            clonedContainer.style.position = 'static';
-            clonedContainer.style.transform = 'none';
-            clonedContainer.style.width = '794px';
-            clonedContainer.style.margin = '0';
-            clonedContainer.style.padding = '20px';
-            clonedContainer.style.boxSizing = 'border-box';
-          }
-        }
-      });
-      
+      // Create PDF with A4 dimensions
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4"
       });
       
-      // Calculate dimensions with proper margins
-      const margin = 15;
-      const contentWidth = 210 - (margin * 2); // A4 width minus margins
+      let isFirstPage = true;
       
-      // Add the canvas using smart splitting
-      addCanvasToPDF(pdf, canvas, margin, contentWidth);
+      // Render cover letter if content exists
+      if (coverLetterHTML && coverLetterHTML.trim() !== '') {
+        console.log("Rendering cover letter...");
+        const coverCanvas = await renderSection(coverLetterHTML);
+        addCanvasToPDF(pdf, coverCanvas, isFirstPage);
+        isFirstPage = false;
+      }
+      
+      // Render superbill
+      console.log("Rendering superbill...");
+      const superbillCanvas = await renderSection(superbillHTML);
+      addCanvasToPDF(pdf, superbillCanvas, isFirstPage);
       
       const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
       
       pdf.save(fileName);
-      
-      // Clean up
-      document.body.removeChild(tempContainer);
       
       toast({
         title: "PDF Downloaded",
