@@ -19,7 +19,9 @@ export function generateCoverLetter({
   npi,
   includeInvoiceNote = true,
 }: CoverLetterOptions) {
-  return `
+  console.log("Generating cover letter with signature for Jordan Harper");
+  
+  const letterContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; font-size: 12px; max-width: 100%; margin: 0; padding: 20px;">
       <div style="margin-bottom: 30px; text-align: left;">
         <div style="margin: 0;">${new Date().toLocaleDateString()}</div>
@@ -70,10 +72,13 @@ export function generateCoverLetter({
 
         <div style="margin: 40px 0 0 0;">Sincerely,</div>
         <div style="margin: 20px 0 0 0;">
-          <img src="/lovable-uploads/47fb5881-8a7a-4132-ac2a-c9f5e83c01ef.png" alt="Jordan Harper Signature" style="height: 40px; width: auto; object-fit: contain;" />
+          <img src="/lovable-uploads/47fb5881-8a7a-4132-ac2a-c9f5e83c01ef.png" alt="Jordan Harper Signature" style="height: 50px; width: auto; object-fit: contain; display: block;" onload="console.log('Signature image loaded successfully')" onerror="console.log('Signature image failed to load')" />
         </div>
-        <div style="margin: 10px 0 0 0;">Jordan Harper<br/>Office Manager<br/>${clinicName}</div>
+        <div style="margin: 10px 0 0 0;"><strong>Jordan Harper</strong><br/>Office Manager<br/>${clinicName}</div>
       </div>
     </div>
   `;
+  
+  console.log("Cover letter generated, checking signature section:", letterContent.includes("Jordan Harper"));
+  return letterContent;
 }
