@@ -118,7 +118,7 @@ export function generateMultiPatientCoverLetter(
 
         <div style="margin: 40px 0 0 0;">Sincerely,</div>
         <div style="margin: 20px 0 0 0;">
-          <img src="/lovable-uploads/47fb5881-8a7a-4132-ac2a-c9f5e83c01ef.png" alt="Jordan Harper Signature" style="height: 50px; width: auto; object-fit: contain; display: block;" onload="console.log('Multi-patient signature image loaded successfully')" onerror="console.log('Multi-patient signature image failed to load')" />
+          <img src="/lovable-uploads/47fb5881-8a7a-4132-ac2a-c9f5e83c01ef.png" alt="Jordan Harper Signature" style="height: 60px; width: auto; object-fit: contain; display: block; max-width: 200px;" />
         </div>
         <div style="margin: 10px 0 0 0;"><strong>Jordan Harper</strong><br/>Office Manager<br/>${clinicName}</div>
       </div>
