@@ -2,8 +2,6 @@
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "../superbill-utils";
 
-// Remove the old generateSuperbillHeader function as we'll use the new header system
-
 export function generatePatientInfoSection(superbill: Superbill, visitDates: number[]): string {
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
   const latestDate = visitDates.length > 0 ? new Date(Math.max(...visitDates)) : null;

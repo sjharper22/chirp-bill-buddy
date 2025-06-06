@@ -7,17 +7,17 @@ import {
   generateNotesSection, 
   generateFooter 
 } from "./html-structure";
-import { generatePageHeader, generateRunningHeader } from "./header-generator";
+import { generatePageHeader } from "./header-generator";
 
 export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?: string): { coverLetterHTML: string; superbillHTML: string } {
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
   
-  // Estimate total pages (this is approximate - exact count would require rendering)
+  // Calculate total pages
   const coverLetterPages = coverLetterContent && coverLetterContent.trim() !== '' ? 1 : 0;
-  const superbillPages = 1; // Most superbills fit on one page
+  const superbillPages = 1;
   const totalPages = coverLetterPages + superbillPages;
   
-  // Cover letter HTML (if provided)
+  // Cover letter HTML with header
   const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
     <!DOCTYPE html>
     <html>
@@ -28,11 +28,15 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
       </style>
     </head>
     <body class="pdf-optimized">
-      <div class="container">
-        ${generateRunningHeader({ superbill, documentType: 'Cover Letter', totalPages, currentPage: 1 })}
-        ${generatePageHeader({ superbill, documentType: 'Cover Letter', totalPages, currentPage: 1 })}
+      <div class="document-page">
+        ${generatePageHeader({ 
+          superbill, 
+          documentType: 'Cover Letter', 
+          totalPages, 
+          currentPage: 1 
+        })}
         
-        <div class="document-content">
+        <div class="page-content">
           ${coverLetterContent}
         </div>
       </div>
@@ -40,7 +44,7 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
     </html>
   ` : '';
   
-  // Superbill HTML
+  // Superbill HTML with header
   const superbillCurrentPage = coverLetterPages + 1;
   const superbillHTML = `
     <!DOCTYPE html>
@@ -52,11 +56,19 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
       </style>
     </head>
     <body class="pdf-optimized">
-      <div class="container">
-        ${generateRunningHeader({ superbill, documentType: 'Superbill', totalPages, currentPage: superbillCurrentPage })}
-        ${generatePageHeader({ superbill, documentType: 'Superbill', totalPages, currentPage: superbillCurrentPage })}
+      <div class="document-page">
+        ${generatePageHeader({ 
+          superbill, 
+          documentType: 'Superbill', 
+          totalPages, 
+          currentPage: superbillCurrentPage 
+        })}
         
-        <div class="document-content">
+        <div class="page-content">
+          <div class="superbill-title">
+            <h2>SUPERBILL</h2>
+          </div>
+          
           <div class="info-section">
             ${generatePatientInfoSection(superbill, visitDates)}
             ${generateProviderInfoSection(superbill)}

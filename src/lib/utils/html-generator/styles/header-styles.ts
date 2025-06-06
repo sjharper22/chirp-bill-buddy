@@ -1,73 +1,49 @@
 
 export function generateHeaderStyles(): string {
   return `
-    /* CSS @page rules for print headers */
-    @page {
-      size: A4;
-      margin: 0.75in 0.5in 0.5in 0.5in;
-      @top-left {
-        content: element(running-header-left);
-        vertical-align: middle;
-      }
-      @top-center {
-        content: element(running-header-center);
-        vertical-align: middle;
-      }
-      @top-right {
-        content: element(running-header-right);
-        vertical-align: middle;
-      }
-    }
-    
-    @page :first {
-      @top-left { content: none; }
-      @top-center { content: none; }
-      @top-right { content: none; }
-    }
-    
-    /* Running header elements */
-    .running-header {
-      position: running(page-header);
-      display: none;
-    }
-    
-    .running-header-left {
-      position: running(running-header-left);
+    /* Document structure */
+    .document-page {
+      min-height: 100vh;
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      page-break-after: always;
     }
     
-    .running-header-center {
-      position: running(running-header-center);
-      text-align: center;
+    .document-page:last-child {
+      page-break-after: auto;
     }
     
-    .running-header-right {
-      position: running(running-header-right);
-      text-align: right;
+    /* Header styles */
+    .document-header {
+      width: 100%;
+      padding: 12px 0;
+      margin-bottom: 20px;
+      page-break-inside: avoid;
     }
     
-    /* Standard page header for first page and fallback */
-    .page-header {
+    .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 0;
-      border-bottom: 2px solid #eee;
-      margin-bottom: 20px;
-      page-break-inside: avoid;
+      width: 100%;
+    }
+    
+    .header-divider {
+      width: 100%;
+      height: 1px;
+      background-color: #ddd;
+      margin-top: 8px;
     }
     
     .header-left {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
     }
     
-    .header-logo, .running-logo {
-      max-height: 50px;
-      max-width: 80px;
+    .header-logo {
+      max-height: 40px;
+      max-width: 65px;
       width: auto;
       height: auto;
       object-fit: contain;
@@ -76,25 +52,27 @@ export function generateHeaderStyles(): string {
     .header-clinic-info {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
     }
     
     .clinic-name {
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
       color: #333;
+      line-height: 1.2;
     }
     
     .clinic-contact {
-      font-size: 12px;
+      font-size: 10px;
       color: #666;
+      line-height: 1.2;
     }
     
     .header-right {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 8px;
+      gap: 6px;
     }
     
     .document-info {
@@ -103,109 +81,120 @@ export function generateHeaderStyles(): string {
     
     .document-type {
       font-weight: bold;
-      font-size: 16px;
+      font-size: 14px;
       color: #333;
+      line-height: 1.2;
     }
     
     .patient-name {
-      font-size: 14px;
+      font-size: 12px;
       color: #333;
-      margin: 2px 0;
+      margin: 1px 0;
+      line-height: 1.2;
     }
     
     .document-date {
-      font-size: 12px;
+      font-size: 10px;
       color: #666;
+      line-height: 1.2;
     }
     
     .page-number {
-      font-size: 12px;
+      font-size: 10px;
       color: #666;
       font-weight: bold;
+      line-height: 1.2;
     }
     
-    /* Print-specific header styles */
+    /* Page content */
+    .page-content {
+      flex: 1;
+      padding-top: 10px;
+    }
+    
+    .superbill-title {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .superbill-title h2 {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+    
+    /* Print-specific styles */
     @media print {
-      .page-header {
+      .document-header {
         padding: 8px 0 !important;
         margin-bottom: 15px !important;
-        border-bottom: 1px solid #ccc !important;
       }
       
-      .header-logo, .running-logo {
-        max-height: 40px !important;
-        max-width: 65px !important;
+      .header-logo {
+        max-height: 35px !important;
+        max-width: 60px !important;
       }
       
       .clinic-name {
-        font-size: 12px !important;
+        font-size: 11px !important;
       }
       
       .clinic-contact {
-        font-size: 10px !important;
+        font-size: 9px !important;
       }
       
       .document-type {
-        font-size: 14px !important;
-      }
-      
-      .patient-name {
         font-size: 12px !important;
       }
       
+      .patient-name {
+        font-size: 11px !important;
+      }
+      
       .document-date, .page-number {
-        font-size: 10px !important;
+        font-size: 9px !important;
       }
       
-      /* Running header styles for browsers that support it */
-      .running-header-left,
-      .running-header-center, 
-      .running-header-right {
-        font-size: 10px;
-        color: #333;
-      }
-      
-      .running-clinic, .running-document-type {
-        font-weight: bold;
-      }
-      
-      .running-patient, .running-date {
-        color: #666;
+      .superbill-title h2 {
+        font-size: 16px !important;
       }
     }
     
-    /* PDF-optimized header styles */
-    .pdf-optimized .page-header {
+    /* PDF-optimized styles */
+    .pdf-optimized .document-header {
       padding: 8px 0 !important;
       margin-bottom: 15px !important;
-      border-bottom: 1px solid #ccc !important;
     }
     
-    .pdf-optimized .header-logo,
-    .pdf-optimized .running-logo {
-      max-height: 40px !important;
-      max-width: 65px !important;
+    .pdf-optimized .header-logo {
+      max-height: 35px !important;
+      max-width: 60px !important;
     }
     
     .pdf-optimized .clinic-name {
-      font-size: 12px !important;
+      font-size: 11px !important;
     }
     
     .pdf-optimized .clinic-contact {
-      font-size: 10px !important;
+      font-size: 9px !important;
     }
     
     .pdf-optimized .document-type {
-      font-size: 14px !important;
+      font-size: 12px !important;
     }
     
     .pdf-optimized .patient-name {
-      font-size: 12px !important;
+      font-size: 11px !important;
     }
     
     .pdf-optimized .document-date,
     .pdf-optimized .page-number {
-      font-size: 10px !important;
+      font-size: 9px !important;
+    }
+    
+    .pdf-optimized .superbill-title h2 {
+      font-size: 16px !important;
     }
   `;
 }
