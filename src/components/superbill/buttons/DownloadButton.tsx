@@ -19,19 +19,19 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
   
   const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, margin: number, contentWidth: number) => {
     const pageHeight = 297; // A4 height in mm
-    const contentHeight = pageHeight - (margin * 2); // Available height for content
+    const availableHeight = pageHeight - (margin * 2); // Available height for content
     
     const imgWidth = contentWidth;
     const imgHeight = (canvas.height * contentWidth) / canvas.width;
     
     // If content fits on one page, add it directly
-    if (imgHeight <= contentHeight) {
+    if (imgHeight <= availableHeight) {
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
       return;
     }
     
     // Content is too tall - split into multiple pages
-    const totalPages = Math.ceil(imgHeight / contentHeight);
+    const totalPages = Math.ceil(imgHeight / availableHeight);
     
     for (let page = 0; page < totalPages; page++) {
       if (page > 0) {
@@ -80,8 +80,10 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
       tempContainer.style.position = "absolute";
       tempContainer.style.left = "-9999px";
       tempContainer.style.top = "-9999px";
-      tempContainer.style.width = "800px";
+      tempContainer.style.width = "794px";
       tempContainer.style.backgroundColor = "#ffffff";
+      tempContainer.style.padding = "20px";
+      tempContainer.style.boxSizing = "border-box";
       
       // Combine HTML for canvas rendering
       const combinedHTML = `
@@ -100,8 +102,7 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
             resolve(true);
           } else {
             img.onload = () => resolve(true);
-            img.onerror = () => resolve(true); // Continue even if image fails to load
-            // Set a timeout to prevent hanging
+            img.onerror = () => resolve(true);
             setTimeout(() => resolve(true), 3000);
           }
         });
@@ -115,15 +116,19 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
         allowTaint: true,
         logging: false,
         backgroundColor: "#ffffff",
-        width: 800,
-        height: tempContainer.offsetHeight,
+        width: 794,
+        height: tempContainer.scrollHeight,
+        windowWidth: 794,
+        windowHeight: tempContainer.scrollHeight,
         onclone: (clonedDoc) => {
           const clonedContainer = clonedDoc.body.querySelector('div');
           if (clonedContainer) {
             clonedContainer.style.position = 'static';
             clonedContainer.style.transform = 'none';
-            clonedContainer.style.width = '800px';
+            clonedContainer.style.width = '794px';
             clonedContainer.style.margin = '0';
+            clonedContainer.style.padding = '20px';
+            clonedContainer.style.boxSizing = 'border-box';
           }
         }
       });
@@ -135,7 +140,7 @@ export function DownloadButton({ superbill }: DownloadButtonProps) {
       });
       
       // Calculate dimensions with proper margins
-      const margin = 20;
+      const margin = 15;
       const contentWidth = 210 - (margin * 2); // A4 width minus margins
       
       // Add the canvas using smart splitting

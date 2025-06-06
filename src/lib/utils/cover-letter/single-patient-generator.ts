@@ -20,15 +20,15 @@ export function generateCoverLetter({
   includeInvoiceNote = true,
 }: CoverLetterOptions) {
   return `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; font-size: 14px; max-width: 800px; margin: 0 auto;">
-      <div style="margin-bottom: 20px;">
-        <p style="margin: 0;">${clinicName}</p>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; font-size: 14px; max-width: 800px; margin: 0 auto; padding: 0;">
+      <div style="margin-bottom: 20px; text-align: left;">
+        <p style="margin: 0; font-weight: bold;">${clinicName}</p>
         <p style="margin: 0;">${clinicAddress}</p>
         <p style="margin: 0;">${clinicPhone}</p>
         <p style="margin: 0;">${clinicEmail}</p>
       </div>
       
-      <div style="margin-bottom: 20px;">
+      <div style="margin-bottom: 20px; text-align: left;">
         <p>${new Date().toLocaleDateString()}</p>
       </div>
 

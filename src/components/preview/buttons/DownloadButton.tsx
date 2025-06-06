@@ -23,8 +23,10 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     container.innerHTML = html;
     container.style.position = "absolute";
     container.style.left = "-9999px";
-    container.style.width = "794px"; // A4 width at 96DPI for optimal quality
+    container.style.width = "794px"; // A4 width at 96DPI
     container.style.backgroundColor = "#ffffff";
+    container.style.padding = "20px";
+    container.style.boxSizing = "border-box";
     document.body.appendChild(container);
     
     // Wait for images to load
@@ -35,8 +37,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
           resolve(true);
         } else {
           img.onload = () => resolve(true);
-          img.onerror = () => resolve(true); // Continue even if image fails to load
-          // Set a timeout to prevent hanging
+          img.onerror = () => resolve(true);
           setTimeout(() => resolve(true), 3000);
         }
       });
@@ -45,16 +46,18 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
     await Promise.all(imageLoadPromises);
     
     // Wait for DOM rendering and fonts to load
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     const canvas = await html2canvas(container, {
-      scale: 2.5, // Higher scale for better text quality
+      scale: 2, // Good balance of quality and performance
       useCORS: true,
       allowTaint: true,
       logging: false,
       backgroundColor: "#ffffff",
       width: 794,
-      height: container.offsetHeight,
+      height: container.scrollHeight, // Use scrollHeight to capture all content
+      windowWidth: 794,
+      windowHeight: container.scrollHeight,
       onclone: (clonedDoc) => {
         const clonedContainer = clonedDoc.body.querySelector('div');
         if (clonedContainer) {
@@ -62,6 +65,8 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
           clonedContainer.style.transform = 'none';
           clonedContainer.style.width = '794px';
           clonedContainer.style.margin = '0';
+          clonedContainer.style.padding = '20px';
+          clonedContainer.style.boxSizing = 'border-box';
         }
       }
     });
@@ -72,19 +77,19 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
 
   const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, margin: number, contentWidth: number) => {
     const pageHeight = 297; // A4 height in mm
-    const contentHeight = pageHeight - (margin * 2); // Available height for content
+    const availableHeight = pageHeight - (margin * 2); // Available height for content
     
     const imgWidth = contentWidth;
     const imgHeight = (canvas.height * contentWidth) / canvas.width;
     
     // If content fits on one page, add it directly
-    if (imgHeight <= contentHeight) {
+    if (imgHeight <= availableHeight) {
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight);
       return;
     }
     
     // Content is too tall - split into multiple pages
-    const totalPages = Math.ceil(imgHeight / contentHeight);
+    const totalPages = Math.ceil(imgHeight / availableHeight);
     
     for (let page = 0; page < totalPages; page++) {
       if (page > 0) {
@@ -136,7 +141,7 @@ export function DownloadButton({ superbill, coverLetterContent }: DownloadButton
         format: "a4"
       });
       
-      const margin = 12.7; // 0.5 inch margins
+      const margin = 15; // Slightly larger margins to prevent cut-off
       const contentWidth = 210 - (margin * 2); // A4 width minus margins
       
       let isFirstPage = true;
