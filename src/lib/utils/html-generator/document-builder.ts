@@ -1,4 +1,3 @@
-
 import { Superbill } from "@/types/superbill";
 import { generatePrintableCSS } from "./css-generator";
 import { 
@@ -12,40 +11,19 @@ import {
 
 export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?: string): { coverLetterHTML: string; superbillHTML: string } {
   const visitDates = superbill.visits.map(visit => new Date(visit.date).getTime());
+  const styles = generatePrintableCSS();
   
-  // Cover letter HTML (if provided)
+  // Cover letter HTML (if provided) - simplified with inline styles
   const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Cover Letter - ${superbill.patientName}</title>
-      <style>
-        ${generatePrintableCSS()}
-      </style>
-    </head>
-    <body>
-      <div class="professional-document cover-letter">
-        ${coverLetterContent}
-      </div>
-    </body>
-    </html>
+    <div style="max-width: 8.5in; margin: 0 auto; background: #ffffff; padding: 30px; font-family: 'Open Sans', Arial, sans-serif; color: #333; line-height: 1.6;">
+      ${coverLetterContent}
+    </div>
   ` : '';
   
-  // Superbill HTML with professional layout
+  // Superbill HTML with inline styles for better rendering
   const superbillHTML = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Superbill - ${superbill.patientName}</title>
-      <style>
-        ${generatePrintableCSS()}
-      </style>
-    </head>
-    <body>
+    <div style="max-width: 8.5in; margin: 0 auto; background: #ffffff; font-family: 'Open Sans', Arial, sans-serif; color: #333;">
+      <style>${styles}</style>
       <div class="professional-document">
         ${generateSuperbillHeader(superbill)}
         
@@ -62,8 +40,7 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
         
         ${generateFooter()}
       </div>
-    </body>
-    </html>
+    </div>
   `;
   
   return { coverLetterHTML, superbillHTML };
