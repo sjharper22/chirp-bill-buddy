@@ -15,7 +15,7 @@ export const headerStyles = `
   .header-left {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
   }
   
@@ -33,6 +33,8 @@ export const headerStyles = `
     display: flex;
     flex-direction: column;
     text-align: center;
+    align-self: center;
+    width: 100%;
   }
   
   .clinic-name {
