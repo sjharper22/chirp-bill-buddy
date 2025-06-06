@@ -36,6 +36,14 @@ export function generatePrintStyles(): string {
         max-height: 50px !important;
         max-width: 80px !important;
       }
+      /* Ensure cover letter logos match superbill logo size */
+      img[alt*="Logo"], img[alt*="logo"] {
+        max-height: 50px !important;
+        max-width: 80px !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+      }
       .title-section {
         text-align: center !important;
         flex: 1 !important;
@@ -158,6 +166,16 @@ export function generatePrintStyles(): string {
     .pdf-optimized .clinic-logo {
       max-height: 50px !important;
       max-width: 80px !important;
+    }
+    
+    /* Ensure all logos in PDF are consistently sized */
+    .pdf-optimized img[alt*="Logo"], 
+    .pdf-optimized img[alt*="logo"] {
+      max-height: 50px !important;
+      max-width: 80px !important;
+      width: auto !important;
+      height: auto !important;
+      object-fit: contain !important;
     }
     
     .pdf-optimized .title-section {
