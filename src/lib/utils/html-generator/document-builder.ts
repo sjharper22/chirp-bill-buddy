@@ -17,7 +17,7 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
   const superbillPages = 1;
   const totalPages = coverLetterPages + superbillPages;
   
-  // Cover letter HTML WITHOUT header - just the content
+  // Cover letter HTML WITH header - keeping the page header as requested
   const coverLetterHTML = coverLetterContent && coverLetterContent.trim() !== '' ? `
     <!DOCTYPE html>
     <html>
@@ -34,15 +34,24 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
     </head>
     <body class="pdf-optimized">
       <div class="document-page">
-        <div class="cover-letter-content">
-          ${coverLetterContent}
+        ${generatePageHeader({ 
+          superbill, 
+          documentType: 'Cover Letter', 
+          totalPages, 
+          currentPage: 1 
+        })}
+        
+        <div class="page-content">
+          <div class="cover-letter-content">
+            ${coverLetterContent}
+          </div>
         </div>
       </div>
     </body>
     </html>
   ` : '';
   
-  // Superbill HTML with header (only superbills get the header)
+  // Superbill HTML with header
   const superbillCurrentPage = coverLetterPages + 1;
   const superbillHTML = `
     <!DOCTYPE html>
