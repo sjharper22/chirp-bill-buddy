@@ -4,10 +4,7 @@ import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Superbill } from "@/types/superbill";
 import { useState } from "react";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import { formatDate } from "@/lib/utils/superbill-utils";
-import { generatePrintableHTML } from "@/lib/utils/html-generator";
+import { PDFGenerator } from "@/lib/utils/pdf/pdf-generator";
 
 interface DownloadButtonProps {
   superbill: Superbill;
@@ -17,165 +14,27 @@ interface DownloadButtonProps {
 export function DownloadButton({ superbill, coverLetterContent }: DownloadButtonProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  
-  const renderSection = async (html: string): Promise<HTMLCanvasElement> => {
-    const container = document.createElement("div");
-    container.innerHTML = html;
-    container.style.position = "absolute";
-    container.style.left = "-9999px";
-    container.style.width = "8.27in"; // A4 width in inches
-    container.style.maxWidth = "8.27in";
-    container.style.backgroundColor = "#ffffff";
-    container.style.padding = "0.5in";
-    container.style.boxSizing = "border-box";
-    container.style.fontFamily = "Arial, sans-serif";
-    container.style.fontSize = "12px";
-    container.style.lineHeight = "1.4";
-    container.style.overflow = "visible";
-    document.body.appendChild(container);
-    
-    // Wait for images to load
-    const images = container.querySelectorAll('img');
-    const imageLoadPromises = Array.from(images).map(img => {
-      return new Promise((resolve) => {
-        if (img.complete) {
-          resolve(true);
-        } else {
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(true);
-          setTimeout(() => resolve(true), 3000);
-        }
-      });
-    });
-    
-    await Promise.all(imageLoadPromises);
-    
-    // Wait for DOM rendering and fonts to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Use higher scale for better quality but ensure we capture full content
-    const scale = 3;
-    const canvas = await html2canvas(container, {
-      scale: scale,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
-      backgroundColor: "#ffffff",
-      width: container.offsetWidth,
-      height: container.offsetHeight,
-      windowWidth: container.offsetWidth,
-      windowHeight: container.offsetHeight,
-      scrollX: 0,
-      scrollY: 0,
-      onclone: (clonedDoc) => {
-        const clonedContainer = clonedDoc.body.querySelector('div');
-        if (clonedContainer) {
-          clonedContainer.style.position = 'static';
-          clonedContainer.style.transform = 'none';
-          clonedContainer.style.width = '8.27in';
-          clonedContainer.style.maxWidth = '8.27in';
-          clonedContainer.style.margin = '0';
-          clonedContainer.style.padding = '0.5in';
-          clonedContainer.style.boxSizing = 'border-box';
-          clonedContainer.style.overflow = 'visible';
-        }
-      }
-    });
-    
-    document.body.removeChild(container);
-    return canvas;
-  };
-
-  const addCanvasToPDF = (pdf: jsPDF, canvas: HTMLCanvasElement, isFirstPage: boolean = false) => {
-    const pageWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
-    const margin = 12.7; // 0.5 inch margins in mm
-    const printableWidth = pageWidth - (margin * 2);
-    const printableHeight = pageHeight - (margin * 2);
-    
-    // Calculate dimensions maintaining aspect ratio
-    const imgWidth = printableWidth;
-    const imgHeight = (canvas.height * printableWidth) / canvas.width;
-    
-    if (!isFirstPage) {
-      pdf.addPage();
-    }
-    
-    // If content fits on one page, add it directly
-    if (imgHeight <= printableHeight) {
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, imgHeight, '', 'FAST');
-      return;
-    }
-    
-    // Content is too tall - split into multiple pages
-    const pagesNeeded = Math.ceil(imgHeight / printableHeight);
-    
-    for (let page = 0; page < pagesNeeded; page++) {
-      if (page > 0) {
-        pdf.addPage();
-      }
-      
-      // Calculate the source area for this page
-      const sourceY = (canvas.height / pagesNeeded) * page;
-      const sourceHeight = Math.min(canvas.height / pagesNeeded, canvas.height - sourceY);
-      
-      // Create a new canvas for this page's content
-      const pageCanvas = document.createElement('canvas');
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = sourceHeight;
-      
-      const ctx = pageCanvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(
-          canvas,
-          0, sourceY, canvas.width, sourceHeight,
-          0, 0, canvas.width, sourceHeight
-        );
-        
-        const pageImgHeight = (sourceHeight * printableWidth) / canvas.width;
-        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, pageImgHeight, '', 'FAST');
-      }
-    }
-  };
+  const pdfGenerator = new PDFGenerator();
   
   const handleDownload = async () => {
     setIsGenerating(true);
-    toast({
-      title: "PDF Download",
-      description: "Preparing PDF download...",
-    });
     
     try {
-      // Generate separate HTML for cover letter and superbill
-      const { coverLetterHTML, superbillHTML } = generatePrintableHTML(superbill, coverLetterContent);
-      
-      // Create PDF with A4 dimensions
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4"
+      toast({
+        title: "PDF Download",
+        description: "Preparing PDF download...",
       });
-      
-      let isFirstPage = true;
-      
-      // Render cover letter if content exists
-      if (coverLetterHTML && coverLetterHTML.trim() !== '') {
-        console.log("Rendering cover letter...");
-        const coverCanvas = await renderSection(coverLetterHTML);
-        addCanvasToPDF(pdf, coverCanvas, isFirstPage);
-        isFirstPage = false;
-      }
-      
-      // Render superbill
-      console.log("Rendering superbill...");
-      const superbillCanvas = await renderSection(superbillHTML);
-      addCanvasToPDF(pdf, superbillCanvas, isFirstPage);
-      
-      // Generate filename
-      const fileName = `Superbill-${superbill.patientName.replace(/\s+/g, "-")}-${formatDate(superbill.issueDate)}.pdf`;
-      
-      // Save the PDF
-      pdf.save(fileName);
+
+      const pdfBlob = await pdfGenerator.generatePDF({
+        superbill,
+        coverLetterContent,
+        onProgress: (message) => {
+          console.log(message);
+        }
+      });
+
+      const fileName = pdfGenerator.generateFileName(superbill);
+      pdfGenerator.downloadPDF(pdfBlob, fileName);
       
       toast({
         title: "PDF Downloaded",
