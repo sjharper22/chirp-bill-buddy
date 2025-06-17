@@ -1,6 +1,4 @@
 
-// Update your PatientHeader.tsx file to include the isAddingPatient prop
-
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PatientProfile } from "@/types/patient"; 
@@ -41,16 +39,20 @@ export function PatientHeader({
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle>Add New Patient</DialogTitle>
-          <DialogDescription>
-            Create a new patient record to manage their visits and superbills.
-          </DialogDescription>
-          <PatientForm 
-            onSubmit={onAddPatient} 
-            onCancel={() => setDialogOpen(false)}
-            isSubmitting={isAddingPatient}
-          />
+        <DialogContent className="max-w-4xl w-full h-[90vh] max-h-[900px] p-0 overflow-hidden">
+          <div className="p-6 border-b">
+            <DialogTitle>Add New Patient</DialogTitle>
+            <DialogDescription>
+              Create a new patient record to manage their visits and superbills.
+            </DialogDescription>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <PatientForm 
+              onSubmit={onAddPatient} 
+              onCancel={() => setDialogOpen(false)}
+              isSubmitting={isAddingPatient}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </div>
