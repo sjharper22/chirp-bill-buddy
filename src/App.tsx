@@ -6,6 +6,7 @@ import { SuperbillProvider } from "@/context/superbill-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AppLayout } from "@/components/layout/AppLayout";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import NewSuperbill from "@/pages/NewSuperbill";
@@ -35,17 +36,83 @@ function App() {
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
-                  <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                  <Route path="/new-superbill" element={<ProtectedRoute><NewSuperbill /></ProtectedRoute>} />
-                  <Route path="/edit-superbill/:id" element={<ProtectedRoute><EditSuperbill /></ProtectedRoute>} />
-                  <Route path="/view-superbill/:id" element={<ProtectedRoute><ViewSuperbill /></ProtectedRoute>} />
-                  <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
-                  <Route path="/patients/:id" element={<ProtectedRoute><PatientProfile /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-                  <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
-                  <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
-                  <Route path="/grouped-submission" element={<ProtectedRoute><GroupedSubmission /></ProtectedRoute>} />
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Dashboard />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/new-superbill" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <NewSuperbill />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/edit-superbill/:id" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <EditSuperbill />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/view-superbill/:id" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <ViewSuperbill />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/patients" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Patients />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/patients/:id" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <PatientProfile />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Settings />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/reports" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Reports />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/team" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Team />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/templates" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Templates />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/grouped-submission" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <GroupedSubmission />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>

@@ -6,7 +6,6 @@ import { PatientForm } from "@/components/patient/PatientForm";
 import { usePatient } from "@/context/patient/patient-context";
 import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -90,16 +89,14 @@ export default function PatientProfilePage() {
 
   if (!patient) {
     return (
-      <div className="container max-w-screen-xl mx-auto py-8 px-4">
-        <div className="text-center">Loading patient information...</div>
-      </div>
+      <div className="text-center">Loading patient information...</div>
     );
   }
 
   return (
-    <div className="container max-w-screen-xl mx-auto py-8 px-4">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
