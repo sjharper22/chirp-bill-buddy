@@ -63,13 +63,14 @@ export function InsuranceSection({ patient, handleChange, disabled = false }: In
           />
         </div>
         
-        {patient.insurance_subscriber_dob && (
+        <div className="space-y-2">
+          <Label>Subscriber Date of Birth</Label>
           <DateOfBirthField
-            value={patient.insurance_subscriber_dob}
+            value={patient.insurance_subscriber_dob || new Date()}
             onChange={(date) => handleChange('insurance_subscriber_dob', date)}
             disabled={disabled}
           />
-        )}
+        </div>
       </CardContent>
     </Card>
   );

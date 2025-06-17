@@ -10,6 +10,12 @@ import { DateOfBirthField } from './form/DateOfBirthField';
 import { CodesField } from './form/CodesField';
 import { NotesField } from './form/NotesField';
 import { FormErrorMessage } from './form/FormErrorMessage';
+import { ContactInfoSection } from './form/ContactInfoSection';
+import { AddressSection } from './form/AddressSection';
+import { DemographicsSection } from './form/DemographicsSection';
+import { EmergencyContactSection } from './form/EmergencyContactSection';
+import { InsuranceSection } from './form/InsuranceSection';
+import { MedicalInfoSection } from './form/MedicalInfoSection';
 
 interface PatientFormProps {
   onSubmit: (patient: Omit<PatientProfile, "id">) => Promise<void>;
@@ -36,46 +42,112 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
           <CardTitle>New Patient Profile</CardTitle>
         </CardHeader>
         
-        <CardContent className="space-y-4 px-0">
+        <CardContent className="space-y-6 px-0">
           <FormErrorMessage error={submitError} />
           
-          <div className="grid grid-cols-1 gap-4">
-            <PatientNameField 
-              value={patient.name}
-              onChange={(value) => handleChange('name', value)}
-              error={validationErrors.name}
-              disabled={isFormSubmitting}
-            />
-            
-            <DateOfBirthField
-              value={patient.dob}
-              onChange={(date) => handleChange('dob', date)}
-              error={validationErrors.dob}
-              disabled={isFormSubmitting}
-            />
-          </div>
-          
-          <CodesField
-            label="Common ICD-10 Codes"
-            codes={patient.commonIcdCodes || []}
-            onChange={(codes) => handleChange('commonIcdCodes', codes)}
-            placeholder="Add ICD codes..."
+          {/* Basic Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <PatientNameField 
+                  value={patient.name}
+                  onChange={(value) => handleChange('name', value)}
+                  error={validationErrors.name}
+                  disabled={isFormSubmitting}
+                />
+                
+                <DateOfBirthField
+                  value={patient.dob}
+                  onChange={(date) => handleChange('dob', date)}
+                  error={validationErrors.dob}
+                  disabled={isFormSubmitting}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information */}
+          <ContactInfoSection
+            patient={patient}
+            handleChange={handleChange}
             disabled={isFormSubmitting}
           />
-          
-          <CodesField
-            label="Common CPT Codes"
-            codes={patient.commonCptCodes || []}
-            onChange={(codes) => handleChange('commonCptCodes', codes)}
-            placeholder="Add CPT codes..."
+
+          {/* Address Information */}
+          <AddressSection
+            patient={patient}
+            handleChange={handleChange}
             disabled={isFormSubmitting}
           />
-          
-          <NotesField
-            value={patient.notes}
-            onChange={(value) => handleChange('notes', value)}
+
+          {/* Demographics */}
+          <DemographicsSection
+            patient={patient}
+            handleChange={handleChange}
             disabled={isFormSubmitting}
           />
+
+          {/* Emergency Contact */}
+          <EmergencyContactSection
+            patient={patient}
+            handleChange={handleChange}
+            disabled={isFormSubmitting}
+          />
+
+          {/* Insurance Information */}
+          <InsuranceSection
+            patient={patient}
+            handleChange={handleChange}
+            disabled={isFormSubmitting}
+          />
+
+          {/* Medical Information */}
+          <MedicalInfoSection
+            patient={patient}
+            handleChange={handleChange}
+            disabled={isFormSubmitting}
+          />
+
+          {/* Default Codes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Default Medical Codes</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <CodesField
+                label="Common ICD-10 Codes"
+                codes={patient.commonIcdCodes || []}
+                onChange={(codes) => handleChange('commonIcdCodes', codes)}
+                placeholder="Add ICD codes..."
+                disabled={isFormSubmitting}
+              />
+              
+              <CodesField
+                label="Common CPT Codes"
+                codes={patient.commonCptCodes || []}
+                onChange={(codes) => handleChange('commonCptCodes', codes)}
+                placeholder="Add CPT codes..."
+                disabled={isFormSubmitting}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Notes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Additional Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <NotesField
+                value={patient.notes}
+                onChange={(value) => handleChange('notes', value)}
+                disabled={isFormSubmitting}
+              />
+            </CardContent>
+          </Card>
         </CardContent>
         
         <CardFooter className="flex justify-end gap-2 border-t pt-4 px-0">
