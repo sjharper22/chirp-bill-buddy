@@ -3,6 +3,7 @@ import React from 'react';
 import { PatientProfile } from "@/types/patient";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Save } from "lucide-react";
 import { usePatientForm } from './form/hooks/usePatientForm';
 import { PatientNameField } from './form/PatientNameField';
@@ -36,141 +37,157 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
   const isFormSubmitting = isSubmitting || isSubmittingLocal;
   
   return (
-    <form onSubmit={handleSubmit}>
-      <Card className="border-0 shadow-none">
-        <CardHeader className="px-0 pt-0">
-          <CardTitle>New Patient Profile</CardTitle>
-        </CardHeader>
-        
-        <CardContent className="space-y-6 px-0">
-          <FormErrorMessage error={submitError} />
+    <div className="h-full flex flex-col">
+      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+        <Card className="border-0 shadow-none h-full flex flex-col">
+          <CardHeader className="px-4 sm:px-6 pt-4 pb-4 flex-shrink-0">
+            <CardTitle className="text-xl sm:text-2xl">New Patient Profile</CardTitle>
+          </CardHeader>
           
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Basic Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <PatientNameField 
-                  value={patient.name}
-                  onChange={(value) => handleChange('name', value)}
-                  error={validationErrors.name}
-                  disabled={isFormSubmitting}
-                />
+          <CardContent className="flex-1 px-4 sm:px-6 pb-0 overflow-hidden">
+            <ScrollArea className="h-full pr-4">
+              <div className="space-y-6 pb-4">
+                <FormErrorMessage error={submitError} />
                 
-                <DateOfBirthField
-                  value={patient.dob}
-                  onChange={(date) => handleChange('dob', date)}
-                  error={validationErrors.dob}
+                {/* Basic Information */}
+                <Card>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-base sm:text-lg">Basic Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <PatientNameField 
+                        value={patient.name}
+                        onChange={(value) => handleChange('name', value)}
+                        error={validationErrors.name}
+                        disabled={isFormSubmitting}
+                      />
+                      
+                      <DateOfBirthField
+                        value={patient.dob}
+                        onChange={(date) => handleChange('dob', date)}
+                        error={validationErrors.dob}
+                        disabled={isFormSubmitting}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Contact Information */}
+                <ContactInfoSection
+                  patient={patient}
+                  handleChange={handleChange}
                   disabled={isFormSubmitting}
                 />
+
+                {/* Address Information */}
+                <AddressSection
+                  patient={patient}
+                  handleChange={handleChange}
+                  disabled={isFormSubmitting}
+                />
+
+                {/* Demographics */}
+                <DemographicsSection
+                  patient={patient}
+                  handleChange={handleChange}
+                  disabled={isFormSubmitting}
+                />
+
+                {/* Emergency Contact */}
+                <EmergencyContactSection
+                  patient={patient}
+                  handleChange={handleChange}
+                  disabled={isFormSubmitting}
+                />
+
+                {/* Insurance Information */}
+                <InsuranceSection
+                  patient={patient}
+                  handleChange={handleChange}
+                  disabled={isFormSubmitting}
+                />
+
+                {/* Medical Information */}
+                <MedicalInfoSection
+                  patient={patient}
+                  handleChange={handleChange}
+                  disabled={isFormSubmitting}
+                />
+
+                {/* Default Codes */}
+                <Card>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-base sm:text-lg">Default Medical Codes</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <CodesField
+                      label="Common ICD-10 Codes"
+                      codes={patient.commonIcdCodes || []}
+                      onChange={(codes) => handleChange('commonIcdCodes', codes)}
+                      placeholder="Add ICD codes..."
+                      disabled={isFormSubmitting}
+                    />
+                    
+                    <CodesField
+                      label="Common CPT Codes"
+                      codes={patient.commonCptCodes || []}
+                      onChange={(codes) => handleChange('commonCptCodes', codes)}
+                      placeholder="Add CPT codes..."
+                      disabled={isFormSubmitting}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Notes */}
+                <Card>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-base sm:text-lg">Additional Notes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <NotesField
+                      value={patient.notes}
+                      onChange={(value) => handleChange('notes', value)}
+                      disabled={isFormSubmitting}
+                    />
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Contact Information */}
-          <ContactInfoSection
-            patient={patient}
-            handleChange={handleChange}
-            disabled={isFormSubmitting}
-          />
-
-          {/* Address Information */}
-          <AddressSection
-            patient={patient}
-            handleChange={handleChange}
-            disabled={isFormSubmitting}
-          />
-
-          {/* Demographics */}
-          <DemographicsSection
-            patient={patient}
-            handleChange={handleChange}
-            disabled={isFormSubmitting}
-          />
-
-          {/* Emergency Contact */}
-          <EmergencyContactSection
-            patient={patient}
-            handleChange={handleChange}
-            disabled={isFormSubmitting}
-          />
-
-          {/* Insurance Information */}
-          <InsuranceSection
-            patient={patient}
-            handleChange={handleChange}
-            disabled={isFormSubmitting}
-          />
-
-          {/* Medical Information */}
-          <MedicalInfoSection
-            patient={patient}
-            handleChange={handleChange}
-            disabled={isFormSubmitting}
-          />
-
-          {/* Default Codes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Default Medical Codes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <CodesField
-                label="Common ICD-10 Codes"
-                codes={patient.commonIcdCodes || []}
-                onChange={(codes) => handleChange('commonIcdCodes', codes)}
-                placeholder="Add ICD codes..."
+            </ScrollArea>
+          </CardContent>
+          
+          <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 border-t pt-4 px-4 sm:px-6 flex-shrink-0">
+            {onCancel && (
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={onCancel} 
                 disabled={isFormSubmitting}
-              />
-              
-              <CodesField
-                label="Common CPT Codes"
-                codes={patient.commonCptCodes || []}
-                onChange={(codes) => handleChange('commonCptCodes', codes)}
-                placeholder="Add CPT codes..."
-                disabled={isFormSubmitting}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Additional Notes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <NotesField
-                value={patient.notes}
-                onChange={(value) => handleChange('notes', value)}
-                disabled={isFormSubmitting}
-              />
-            </CardContent>
-          </Card>
-        </CardContent>
-        
-        <CardFooter className="flex justify-end gap-2 border-t pt-4 px-0">
-          {onCancel && (
-            <Button type="button" variant="ghost" onClick={onCancel} disabled={isFormSubmitting}>
-              Cancel
-            </Button>
-          )}
-          <Button type="submit" disabled={isFormSubmitting}>
-            {isFormSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Save Patient
-              </>
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
             )}
-          </Button>
-        </CardFooter>
-      </Card>
-    </form>
+            <Button 
+              type="submit" 
+              disabled={isFormSubmitting}
+              className="w-full sm:w-auto"
+            >
+              {isFormSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Patient
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </div>
   );
 }
