@@ -69,6 +69,60 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_relationships: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          patient_id: string
+          related_patient_id: string | null
+          related_person_email: string | null
+          related_person_name: string | null
+          related_person_phone: string | null
+          relationship_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id: string
+          related_patient_id?: string | null
+          related_person_email?: string | null
+          related_person_name?: string | null
+          related_person_phone?: string | null
+          relationship_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          related_patient_id?: string | null
+          related_person_email?: string | null
+          related_person_name?: string | null
+          related_person_phone?: string | null
+          relationship_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_relationships_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_relationships_related_patient_id_fkey"
+            columns: ["related_patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_superbills: {
         Row: {
           created_at: string
@@ -100,52 +154,136 @@ export type Database = {
       }
       patients: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
+          allergies: string | null
+          avatar_url: string | null
+          city: string | null
           common_complaints: Json | null
+          country: string | null
           created_at: string
           created_by: string | null
           default_cpt_codes: Json | null
           default_icd_codes: Json | null
           dob: string
           email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relationship: string | null
+          employer: string | null
+          gender: string | null
           id: string
+          insurance_group_number: string | null
+          insurance_policy_number: string | null
+          insurance_provider: string | null
+          insurance_subscriber_dob: string | null
+          insurance_subscriber_name: string | null
           last_visit_date: string | null
+          marital_status: string | null
+          medical_history: string | null
+          medications: string | null
           name: string
+          occupation: string | null
+          patient_status: string | null
           phone: string | null
+          preferred_communication: string | null
+          primary_care_physician: string | null
+          referring_physician: string | null
+          secondary_phone: string | null
+          state: string | null
           total_billed: number | null
           updated_at: string
           visit_count: number | null
+          work_phone: string | null
+          zip_code: string | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          allergies?: string | null
+          avatar_url?: string | null
+          city?: string | null
           common_complaints?: Json | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           default_cpt_codes?: Json | null
           default_icd_codes?: Json | null
           dob: string
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          employer?: string | null
+          gender?: string | null
           id?: string
+          insurance_group_number?: string | null
+          insurance_policy_number?: string | null
+          insurance_provider?: string | null
+          insurance_subscriber_dob?: string | null
+          insurance_subscriber_name?: string | null
           last_visit_date?: string | null
+          marital_status?: string | null
+          medical_history?: string | null
+          medications?: string | null
           name: string
+          occupation?: string | null
+          patient_status?: string | null
           phone?: string | null
+          preferred_communication?: string | null
+          primary_care_physician?: string | null
+          referring_physician?: string | null
+          secondary_phone?: string | null
+          state?: string | null
           total_billed?: number | null
           updated_at?: string
           visit_count?: number | null
+          work_phone?: string | null
+          zip_code?: string | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          allergies?: string | null
+          avatar_url?: string | null
+          city?: string | null
           common_complaints?: Json | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           default_cpt_codes?: Json | null
           default_icd_codes?: Json | null
           dob?: string
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          employer?: string | null
+          gender?: string | null
           id?: string
+          insurance_group_number?: string | null
+          insurance_policy_number?: string | null
+          insurance_provider?: string | null
+          insurance_subscriber_dob?: string | null
+          insurance_subscriber_name?: string | null
           last_visit_date?: string | null
+          marital_status?: string | null
+          medical_history?: string | null
+          medications?: string | null
           name?: string
+          occupation?: string | null
+          patient_status?: string | null
           phone?: string | null
+          preferred_communication?: string | null
+          primary_care_physician?: string | null
+          referring_physician?: string | null
+          secondary_phone?: string | null
+          state?: string | null
           total_billed?: number | null
           updated_at?: string
           visit_count?: number | null
+          work_phone?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }

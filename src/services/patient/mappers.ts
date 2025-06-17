@@ -1,6 +1,4 @@
-
 import { PatientProfile } from "@/types/patient";
-import { Patient } from "./types";
 
 // Convert database patient to frontend patient model
 export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
@@ -12,10 +10,20 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
   console.log("Mapping DB patient to frontend model:", dbPatient);
   
   // Handle dates properly
+  const parseDateSafely = (dateValue: any): Date | undefined => {
+    if (!dateValue) return undefined;
+    try {
+      const date = new Date(dateValue);
+      return isNaN(date.getTime()) ? undefined : date;
+    } catch (e) {
+      console.error("Error parsing date:", e);
+      return undefined;
+    }
+  };
+
   let dobDate: Date;
   try {
     dobDate = dbPatient.dob ? new Date(dbPatient.dob) : new Date();
-    // Ensure it's a valid date
     if (isNaN(dobDate.getTime())) {
       console.warn("Invalid DOB date, using current date instead");
       dobDate = new Date();
@@ -23,19 +31,6 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
   } catch (e) {
     console.error("Error parsing DOB:", e);
     dobDate = new Date();
-  }
-  
-  // Handle last visit date
-  let lastVisitDate: Date | undefined;
-  try {
-    lastVisitDate = dbPatient.last_visit_date ? new Date(dbPatient.last_visit_date) : undefined;
-    if (lastVisitDate && isNaN(lastVisitDate.getTime())) {
-      console.warn("Invalid last visit date, setting to undefined");
-      lastVisitDate = undefined;
-    }
-  } catch (e) {
-    console.error("Error parsing last visit date:", e);
-    lastVisitDate = undefined;
   }
   
   // Parse JSON fields safely
@@ -53,19 +48,57 @@ export const mapDbPatientToPatient = (dbPatient: any): PatientProfile => {
     return [];
   };
   
-  // Ensure ICD and CPT codes are arrays
-  const icdCodes = parseJsonField(dbPatient.default_icd_codes);
-  const cptCodes = parseJsonField(dbPatient.default_cpt_codes);
-  
   const result: PatientProfile = {
     id: dbPatient.id || '',
     name: dbPatient.name || '',
     dob: dobDate,
-    lastSuperbillDate: lastVisitDate,
+    phone: dbPatient.phone || undefined,
+    email: dbPatient.email || undefined,
+    secondary_phone: dbPatient.secondary_phone || undefined,
+    work_phone: dbPatient.work_phone || undefined,
+    
+    // Address Information
+    address_line1: dbPatient.address_line1 || undefined,
+    address_line2: dbPatient.address_line2 || undefined,
+    city: dbPatient.city || undefined,
+    state: dbPatient.state || undefined,
+    zip_code: dbPatient.zip_code || undefined,
+    country: dbPatient.country || undefined,
+    
+    // Demographics
+    gender: dbPatient.gender || undefined,
+    marital_status: dbPatient.marital_status || undefined,
+    occupation: dbPatient.occupation || undefined,
+    employer: dbPatient.employer || undefined,
+    preferred_communication: dbPatient.preferred_communication || undefined,
+    avatar_url: dbPatient.avatar_url || undefined,
+    patient_status: dbPatient.patient_status || 'active',
+    
+    // Emergency Contact
+    emergency_contact_name: dbPatient.emergency_contact_name || undefined,
+    emergency_contact_phone: dbPatient.emergency_contact_phone || undefined,
+    emergency_contact_relationship: dbPatient.emergency_contact_relationship || undefined,
+    
+    // Insurance Information
+    insurance_provider: dbPatient.insurance_provider || undefined,
+    insurance_policy_number: dbPatient.insurance_policy_number || undefined,
+    insurance_group_number: dbPatient.insurance_group_number || undefined,
+    insurance_subscriber_name: dbPatient.insurance_subscriber_name || undefined,
+    insurance_subscriber_dob: parseDateSafely(dbPatient.insurance_subscriber_dob),
+    
+    // Medical Information
+    referring_physician: dbPatient.referring_physician || undefined,
+    primary_care_physician: dbPatient.primary_care_physician || undefined,
+    allergies: dbPatient.allergies || undefined,
+    medications: dbPatient.medications || undefined,
+    medical_history: dbPatient.medical_history || undefined,
+    
+    // Existing fields
+    lastSuperbillDate: parseDateSafely(dbPatient.last_visit_date),
     lastSuperbillDateRange: undefined,
-    commonIcdCodes: icdCodes,
-    commonCptCodes: cptCodes,
-    notes: '', // Default empty string for notes that don't exist in DB
+    commonIcdCodes: parseJsonField(dbPatient.default_icd_codes),
+    commonCptCodes: parseJsonField(dbPatient.default_cpt_codes),
+    notes: '', // Notes are handled separately as they don't exist in DB
   };
   
   console.log("Mapped patient:", result);
@@ -91,15 +124,55 @@ export const mapPatientToDbPatient = (patient: Omit<PatientProfile, "id">): any 
     return [];
   };
   
-  // Create the DB patient object - omit notes field since it doesn't exist in DB
   const dbPatient = {
     name: patient.name || '',
     dob: formatDate(patient.dob), 
+    phone: patient.phone || null,
+    email: patient.email || null,
+    secondary_phone: patient.secondary_phone || null,
+    work_phone: patient.work_phone || null,
+    
+    // Address Information
+    address_line1: patient.address_line1 || null,
+    address_line2: patient.address_line2 || null,
+    city: patient.city || null,
+    state: patient.state || null,
+    zip_code: patient.zip_code || null,
+    country: patient.country || 'US',
+    
+    // Demographics
+    gender: patient.gender || null,
+    marital_status: patient.marital_status || null,
+    occupation: patient.occupation || null,
+    employer: patient.employer || null,
+    preferred_communication: patient.preferred_communication || 'phone',
+    avatar_url: patient.avatar_url || null,
+    patient_status: patient.patient_status || 'active',
+    
+    // Emergency Contact
+    emergency_contact_name: patient.emergency_contact_name || null,
+    emergency_contact_phone: patient.emergency_contact_phone || null,
+    emergency_contact_relationship: patient.emergency_contact_relationship || null,
+    
+    // Insurance Information
+    insurance_provider: patient.insurance_provider || null,
+    insurance_policy_number: patient.insurance_policy_number || null,
+    insurance_group_number: patient.insurance_group_number || null,
+    insurance_subscriber_name: patient.insurance_subscriber_name || null,
+    insurance_subscriber_dob: formatDate(patient.insurance_subscriber_dob),
+    
+    // Medical Information
+    referring_physician: patient.referring_physician || null,
+    primary_care_physician: patient.primary_care_physician || null,
+    allergies: patient.allergies || null,
+    medications: patient.medications || null,
+    medical_history: patient.medical_history || null,
+    
+    // Existing fields
     default_icd_codes: ensureArray(patient.commonIcdCodes),
     default_cpt_codes: ensureArray(patient.commonCptCodes),
     last_visit_date: patient.lastSuperbillDate instanceof Date ? 
       patient.lastSuperbillDate.toISOString() : null,
-    // Note: we don't include notes field as it doesn't exist in the database schema
   };
   
   console.log("DB patient format:", dbPatient);
