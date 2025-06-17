@@ -22,9 +22,10 @@ interface PatientFormProps {
   onSubmit: (patient: Omit<PatientProfile, "id">) => Promise<void>;
   onCancel?: () => void;
   isSubmitting?: boolean;
+  initialPatient?: Partial<PatientProfile>;
 }
 
-export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: PatientFormProps) {
+export function PatientForm({ onSubmit, onCancel, isSubmitting = false, initialPatient }: PatientFormProps) {
   const {
     patient,
     handleChange,
@@ -32,7 +33,7 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
     validationErrors,
     submitError,
     isSubmittingLocal
-  } = usePatientForm(onSubmit);
+  } = usePatientForm(onSubmit, initialPatient);
   
   const isFormSubmitting = isSubmitting || isSubmittingLocal;
   
@@ -171,12 +172,12 @@ export function PatientForm({ onSubmit, onCancel, isSubmitting = false }: Patien
             {isFormSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {initialPatient ? 'Updating...' : 'Saving...'}
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Save Patient
+                {initialPatient ? 'Update Patient' : 'Save Patient'}
               </>
             )}
           </Button>

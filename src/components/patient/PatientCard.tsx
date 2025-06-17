@@ -1,112 +1,132 @@
 
-import { PatientProfile as PatientProfileType } from "@/types/patient";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PatientProfile } from "@/types/patient";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useState } from "react";
-import { PatientProfile } from "./PatientProfile";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Calendar, Phone, Mail, MapPin, Eye } from "lucide-react";
 import { formatDate } from "@/lib/utils/format-utils";
-import { Trash, Plus, Eye } from "lucide-react";
-import { usePatient } from "@/context/patient/patient-context";
-import { Link } from "react-router-dom";
 
 interface PatientCardProps {
-  patient: PatientProfileType;
+  patient: PatientProfile;
   isSelected: boolean;
-  onToggleSelection: () => void;
+  onToggleSelection: (id: string) => void;
+  canEdit: boolean;
 }
 
-export function PatientCard({ patient, isSelected, onToggleSelection }: PatientCardProps) {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const { deletePatient } = usePatient();
-  
-  const handleDelete = async () => {
-    try {
-      await deletePatient(patient.id);
-      setDeleteDialogOpen(false);
-    } catch (error) {
-      console.error("Error deleting patient:", error);
+export function PatientCard({ patient, isSelected, onToggleSelection, canEdit }: PatientCardProps) {
+  const navigate = useNavigate();
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'inactive': return 'bg-gray-100 text-gray-800';
+      case 'discharged': return 'bg-blue-100 text-blue-800';
+      case 'deceased': return 'bg-red-100 text-red-800';
+      default: return 'bg-green-100 text-green-800';
     }
   };
-  
+
+  const handleViewProfile = () => {
+    navigate(`/patients/${patient.id}`);
+  };
+
   return (
-    <Card className={`relative ${isSelected ? "ring-2 ring-primary" : ""} hover:shadow-md transition-shadow`}>
-      <CardContent className="p-4">
-        <div className="absolute top-4 left-4">
-          <Checkbox checked={isSelected} onCheckedChange={onToggleSelection} />
-        </div>
-        
-        <div className="ml-8">
-          <div className="flex justify-between items-start mb-3">
-            <Button variant="link" className="p-0 h-auto text-left" onClick={() => setDialogOpen(true)}>
-              <span className="font-semibold text-lg hover:underline">{patient.name}</span>
-            </Button>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            {canEdit && (
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => onToggleSelection(patient.id)}
+              />
+            )}
             
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-destructive" 
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              <Trash className="h-4 w-4" />
-              <span className="sr-only">Delete</span>
-            </Button>
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={patient.avatar_url} alt={patient.name} />
+              <AvatarFallback>{getInitials(patient.name)}</AvatarFallback>
+            </Avatar>
+            
+            <div>
+              <h3 className="font-semibold text-lg">{patient.name}</h3>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-3 w-3" />
+                {formatDate(patient.dob)}
+              </div>
+            </div>
           </div>
           
-          <div className="text-sm text-muted-foreground space-y-1 mb-4">
-            <p>DOB: {formatDate(patient.dob)}</p>
-            {patient.lastSuperbillDate && (
-              <p>Last Superbill: {formatDate(patient.lastSuperbillDate)}</p>
-            )}
-            {patient.commonIcdCodes?.length > 0 && (
-              <p>Common ICDs: {patient.commonIcdCodes.length}</p>
-            )}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => setDialogOpen(true)}>
-              <Eye className="mr-2 h-4 w-4" />
-              View Profile
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/new" state={{ prefilledPatient: patient }}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Superbill
-              </Link>
+          <div className="flex items-center gap-2">
+            <Badge className={getStatusColor(patient.patient_status)}>
+              {patient.patient_status || 'active'}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleViewProfile}
+              className="h-8 w-8 p-0"
+            >
+              <Eye className="h-4 w-4" />
             </Button>
           </div>
         </div>
+      </CardHeader>
+      
+      <CardContent className="pt-0">
+        <div className="space-y-2 text-sm">
+          {patient.phone && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Phone className="h-3 w-3" />
+              {patient.phone}
+            </div>
+          )}
+          
+          {patient.email && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Mail className="h-3 w-3" />
+              {patient.email}
+            </div>
+          )}
+          
+          {(patient.city || patient.state) && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="h-3 w-3" />
+              {[patient.city, patient.state].filter(Boolean).join(', ')}
+            </div>
+          )}
+        </div>
+        
+        {(patient.commonIcdCodes?.length > 0 || patient.commonCptCodes?.length > 0) && (
+          <div className="mt-3 pt-3 border-t">
+            <div className="text-xs text-muted-foreground mb-1">Common Codes</div>
+            <div className="flex flex-wrap gap-1">
+              {patient.commonIcdCodes?.slice(0, 3).map(code => (
+                <Badge key={code} variant="outline" className="text-xs">
+                  {code}
+                </Badge>
+              ))}
+              {patient.commonCptCodes?.slice(0, 2).map(code => (
+                <Badge key={code} variant="outline" className="text-xs">
+                  {code}
+                </Badge>
+              ))}
+              {(patient.commonIcdCodes?.length > 3 || patient.commonCptCodes?.length > 2) && (
+                <Badge variant="outline" className="text-xs">
+                  +more
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
-      
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <PatientProfile 
-            patient={patient} 
-            onUpdate={() => setDialogOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
-      
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Patient</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {patient.name}? This action cannot be undone and will remove the patient from both your local list and the database.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 }

@@ -10,9 +10,9 @@ import { usePatientFormReset } from './usePatientFormReset';
  */
 export const usePatientForm = (
   onSubmit: (patient: Omit<PatientProfile, "id">) => Promise<void>,
-  initialPatient?: Partial<Omit<PatientProfile, "id">>
+  initialPatient?: Partial<PatientProfile>
 ) => {
-  // Initialize state management
+  // Initialize state management with initial patient data
   const {
     patient,
     setPatient,
