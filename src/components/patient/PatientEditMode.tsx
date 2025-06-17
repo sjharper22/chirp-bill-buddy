@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,31 @@ export function PatientEditMode({
   editedPatient,
   handleChange
 }: PatientEditModeProps) {
+  const [displayedMonth, setDisplayedMonth] = useState<Date | undefined>(editedPatient.dob);
+
+  useEffect(() => {
+    setDisplayedMonth(editedPatient.dob);
+  }, [editedPatient.dob]);
+
+  const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      // Create date at noon to avoid timezone issues
+      const [year, month, day] = e.target.value.split('-').map(Number);
+      const date = new Date(year, month - 1, day, 12, 0, 0);
+      if (!isNaN(date.getTime())) {
+        handleChange('dob', date);
+      }
+    }
+  };
+
+  const handleCalendarSelect = (date: Date | undefined) => {
+    if (date) {
+      // Create a new date at noon to avoid timezone issues
+      const adjustedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+      handleChange('dob', adjustedDate);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4">
@@ -46,12 +71,7 @@ export function PatientEditMode({
               type="date"
               id="dob"
               value={editedPatient.dob ? format(editedPatient.dob, "yyyy-MM-dd") : ""}
-              onChange={(e) => {
-                const date = new Date(e.target.value);
-                if (!isNaN(date.getTime())) {
-                  handleChange('dob', date);
-                }
-              }}
+              onChange={handleDateInput}
               className="flex-1"
             />
             <Popover>
@@ -68,8 +88,10 @@ export function PatientEditMode({
                 <Calendar
                   mode="single"
                   selected={editedPatient.dob}
-                  onSelect={date => date && handleChange('dob', date)}
+                  onSelect={handleCalendarSelect}
                   initialFocus
+                  month={displayedMonth}
+                  onMonthChange={setDisplayedMonth}
                   className={cn("p-3 pointer-events-auto")}
                   fromYear={1900}
                   toYear={new Date().getFullYear()}

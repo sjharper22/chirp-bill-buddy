@@ -24,6 +24,25 @@ export function DateOfBirthField({ value, onChange, error, disabled = false }: D
   useEffect(() => {
     setDisplayedMonth(value);
   }, [value]);
+
+  const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      // Create date at noon to avoid timezone issues
+      const [year, month, day] = e.target.value.split('-').map(Number);
+      const date = new Date(year, month - 1, day, 12, 0, 0);
+      if (!isNaN(date.getTime())) {
+        onChange(date);
+      }
+    }
+  };
+
+  const handleCalendarSelect = (date: Date | undefined) => {
+    if (date) {
+      // Create a new date at noon to avoid timezone issues
+      const adjustedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+      onChange(adjustedDate);
+    }
+  };
   
   return (
     <div className="space-y-2">
@@ -35,12 +54,7 @@ export function DateOfBirthField({ value, onChange, error, disabled = false }: D
           type="date"
           id="dob"
           value={value ? format(value, "yyyy-MM-dd") : ""}
-          onChange={(e) => {
-            const date = new Date(e.target.value);
-            if (!isNaN(date.getTime())) {
-              onChange(date);
-            }
-          }}
+          onChange={handleDateInput}
           className={cn(
             "flex-1",
             error ? "border-destructive" : ""
@@ -62,9 +76,10 @@ export function DateOfBirthField({ value, onChange, error, disabled = false }: D
             <Calendar
               mode="single"
               selected={value}
-              onSelect={date => date && onChange(date)}
+              onSelect={handleCalendarSelect}
               initialFocus
               month={displayedMonth}
+              onMonthChange={setDisplayedMonth}
               defaultMonth={value}
               className={cn("p-3 pointer-events-auto")}
               fromYear={1900}

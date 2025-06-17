@@ -24,7 +24,9 @@ export function VisitDatePicker({ visit, onVisitChange }: VisitDatePickerProps) 
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      onVisitChange({ ...visit, date });
+      // Create a new date at noon to avoid timezone issues
+      const adjustedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+      onVisitChange({ ...visit, date: adjustedDate });
     }
   };
 

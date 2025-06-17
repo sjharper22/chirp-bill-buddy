@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useState, useEffect } from "react";
 
 interface PatientInfoSectionProps {
   superbill: Omit<Superbill, "id" | "createdAt" | "updatedAt">;
@@ -19,10 +20,48 @@ interface PatientInfoSectionProps {
 }
 
 export function PatientInfoSection({ superbill, updateField }: PatientInfoSectionProps) {
+  const [patientDobMonth, setPatientDobMonth] = useState<Date | undefined>(superbill.patientDob);
+  const [issueDateMonth, setIssueDateMonth] = useState<Date | undefined>(superbill.issueDate);
+
+  useEffect(() => {
+    setPatientDobMonth(superbill.patientDob);
+  }, [superbill.patientDob]);
+
+  useEffect(() => {
+    setIssueDateMonth(superbill.issueDate);
+  }, [superbill.issueDate]);
+
   const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
-    if (!isNaN(date.getTime())) {
+    if (e.target.value) {
+      // Create date at noon to avoid timezone issues
+      const [year, month, day] = e.target.value.split('-').map(Number);
+      const date = new Date(year, month - 1, day, 12, 0, 0);
       updateField("patientDob", date);
+    }
+  };
+
+  const handleIssueDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      // Create date at noon to avoid timezone issues
+      const [year, month, day] = e.target.value.split('-').map(Number);
+      const date = new Date(year, month - 1, day, 12, 0, 0);
+      updateField("issueDate", date);
+    }
+  };
+
+  const handlePatientDobSelect = (date: Date | undefined) => {
+    if (date) {
+      // Create a new date at noon to avoid timezone issues
+      const adjustedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+      updateField("patientDob", adjustedDate);
+    }
+  };
+
+  const handleIssueDateSelect = (date: Date | undefined) => {
+    if (date) {
+      // Create a new date at noon to avoid timezone issues
+      const adjustedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+      updateField("issueDate", adjustedDate);
     }
   };
 
@@ -68,8 +107,10 @@ export function PatientInfoSection({ superbill, updateField }: PatientInfoSectio
                   <Calendar
                     mode="single"
                     selected={superbill.patientDob}
-                    onSelect={date => date && updateField("patientDob", date)}
+                    onSelect={handlePatientDobSelect}
                     initialFocus
+                    month={patientDobMonth}
+                    onMonthChange={setPatientDobMonth}
                     className={cn("p-3 pointer-events-auto")}
                     fromYear={1900}
                     toYear={new Date().getFullYear()}
@@ -87,12 +128,7 @@ export function PatientInfoSection({ superbill, updateField }: PatientInfoSectio
               type="date"
               id="issueDate"
               value={superbill.issueDate ? format(superbill.issueDate, "yyyy-MM-dd") : ""}
-              onChange={(e) => {
-                const date = new Date(e.target.value);
-                if (!isNaN(date.getTime())) {
-                  updateField("issueDate", date);
-                }
-              }}
+              onChange={handleIssueDateInput}
               className="flex-1"
             />
             <Popover>
@@ -109,8 +145,10 @@ export function PatientInfoSection({ superbill, updateField }: PatientInfoSectio
                 <Calendar
                   mode="single"
                   selected={superbill.issueDate}
-                  onSelect={date => date && updateField("issueDate", date)}
+                  onSelect={handleIssueDateSelect}
                   initialFocus
+                  month={issueDateMonth}
+                  onMonthChange={setIssueDateMonth}
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
