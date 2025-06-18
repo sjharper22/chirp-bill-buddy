@@ -169,11 +169,7 @@ export default function Patients() {
         <PatientList
           patients={filteredPatients}
           selectedPatientIds={selectedPatientIds}
-          togglePatientSelection={togglePatientSelection}
-          onSelectAll={selectAllPatients}
-          onClearSelection={clearPatientSelection}
-          canEdit={canEdit}
-          onRefresh={handleManualRefresh}
+          onToggleSelection={togglePatientSelection}
         />
       )}
     </div>
