@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -44,7 +43,7 @@ export function AppointmentForm({ appointment, onSubmit, onCancel }: Appointment
 
   const { data: patients = [] } = useQuery({
     queryKey: ['patients'],
-    queryFn: () => patientService.getPatients(),
+    queryFn: () => patientService.getAll(),
   });
 
   useEffect(() => {

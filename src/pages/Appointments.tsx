@@ -10,7 +10,7 @@ import { AppointmentStats } from "@/components/appointments/AppointmentStats";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { appointmentService } from "@/services/appointmentService";
-import { Appointment, AppointmentFormData } from "@/types/appointment";
+import { Appointment, AppointmentFormData, AppointmentStatus } from "@/types/appointment";
 import { useAuth } from "@/context/auth-context";
 
 export default function Appointments() {
@@ -111,7 +111,7 @@ export default function Appointments() {
 
   const handleStatusChange = async (id: string, status: string) => {
     try {
-      const updatedAppointment = await appointmentService.updateAppointmentStatus(id, status);
+      const updatedAppointment = await appointmentService.updateAppointmentStatus(id, status as AppointmentStatus);
       setAppointments(prev =>
         prev.map(app => app.id === id ? updatedAppointment : app)
       );
