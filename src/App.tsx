@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/auth-context";
 import { PatientProvider } from "@/context/patient/patient-provider";
 import { SuperbillProvider } from "@/context/superbill-context";
@@ -36,6 +36,10 @@ function App() {
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
+                  
+                  {/* Redirect /new to /new-superbill */}
+                  <Route path="/new" element={<Navigate to="/new-superbill" replace />} />
+                  
                   <Route path="/" element={
                     <ProtectedRoute>
                       <AppLayout>
