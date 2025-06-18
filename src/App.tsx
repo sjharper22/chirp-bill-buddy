@@ -14,6 +14,7 @@ import EditSuperbill from "@/pages/EditSuperbill";
 import ViewSuperbill from "@/pages/ViewSuperbill";
 import Patients from "@/pages/Patients";
 import PatientProfile from "@/pages/PatientProfile";
+import Appointments from "@/pages/Appointments";
 import Settings from "@/pages/Settings";
 import Reports from "@/pages/Reports";
 import Team from "@/pages/Team";
@@ -79,6 +80,13 @@ function App() {
                     <ProtectedRoute>
                       <AppLayout>
                         <PatientProfile />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/appointments" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <Appointments />
                       </AppLayout>
                     </ProtectedRoute>
                   } />

@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Appointment, AppointmentFormData } from "@/types/appointment";
+import { Appointment, AppointmentFormData, AppointmentStatus } from "@/types/appointment";
 
 export const appointmentService = {
   // Get all appointments with patient names
@@ -146,7 +146,7 @@ export const appointmentService = {
   },
 
   // Update appointment status
-  async updateAppointmentStatus(id: string, status: string): Promise<Appointment> {
+  async updateAppointmentStatus(id: string, status: AppointmentStatus): Promise<Appointment> {
     const { data, error } = await supabase
       .from('appointments')
       .update({ status })
