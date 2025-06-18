@@ -9,6 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          appointment_type: Database["public"]["Enums"]["appointment_type"]
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number
+          end_time: string
+          id: string
+          is_recurring: boolean
+          location: string | null
+          notes: string | null
+          parent_appointment_id: string | null
+          patient_id: string
+          provider_name: string | null
+          recurrence_end_date: string | null
+          recurrence_interval: number | null
+          recurrence_pattern: Database["public"]["Enums"]["recurrence_pattern"]
+          reminder_minutes_before: number | null
+          send_reminder: boolean
+          start_time: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_type?: Database["public"]["Enums"]["appointment_type"]
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number
+          end_time: string
+          id?: string
+          is_recurring?: boolean
+          location?: string | null
+          notes?: string | null
+          parent_appointment_id?: string | null
+          patient_id: string
+          provider_name?: string | null
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_pattern?: Database["public"]["Enums"]["recurrence_pattern"]
+          reminder_minutes_before?: number | null
+          send_reminder?: boolean
+          start_time: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_type?: Database["public"]["Enums"]["appointment_type"]
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number
+          end_time?: string
+          id?: string
+          is_recurring?: boolean
+          location?: string | null
+          notes?: string | null
+          parent_appointment_id?: string | null
+          patient_id?: string
+          provider_name?: string | null
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_pattern?: Database["public"]["Enums"]["recurrence_pattern"]
+          reminder_minutes_before?: number | null
+          send_reminder?: boolean
+          start_time?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_parent_appointment_id_fkey"
+            columns: ["parent_appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           created_at: string
@@ -356,6 +446,22 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "editor" | "viewer"
+      appointment_status:
+        | "scheduled"
+        | "confirmed"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "no_show"
+      appointment_type:
+        | "consultation"
+        | "follow_up"
+        | "procedure"
+        | "lab_work"
+        | "imaging"
+        | "therapy"
+        | "emergency"
+      recurrence_pattern: "none" | "daily" | "weekly" | "monthly" | "yearly"
       template_category: "cover_letter" | "appeal_letter" | "general"
     }
     CompositeTypes: {
@@ -473,6 +579,24 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "viewer"],
+      appointment_status: [
+        "scheduled",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "no_show",
+      ],
+      appointment_type: [
+        "consultation",
+        "follow_up",
+        "procedure",
+        "lab_work",
+        "imaging",
+        "therapy",
+        "emergency",
+      ],
+      recurrence_pattern: ["none", "daily", "weekly", "monthly", "yearly"],
       template_category: ["cover_letter", "appeal_letter", "general"],
     },
   },
