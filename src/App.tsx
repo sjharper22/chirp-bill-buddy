@@ -55,14 +55,14 @@ function App() {
                       </AppLayout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/edit-superbill/:id" element={
+                  <Route path="/edit/:id" element={
                     <ProtectedRoute>
                       <AppLayout>
                         <EditSuperbill />
                       </AppLayout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/view-superbill/:id" element={
+                  <Route path="/view/:id" element={
                     <ProtectedRoute>
                       <AppLayout>
                         <ViewSuperbill />
