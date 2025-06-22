@@ -401,6 +401,35 @@ export type Database = {
         }
         Relationships: []
       }
+      superbill_visits: {
+        Row: {
+          created_at: string
+          id: string
+          superbill_id: string
+          visit_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          superbill_id: string
+          visit_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          superbill_id?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "superbill_visits_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -424,6 +453,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      visits: {
+        Row: {
+          cpt_codes: Json | null
+          created_at: string
+          fee: number | null
+          icd_codes: Json | null
+          id: string
+          main_complaints: Json | null
+          notes: string | null
+          patient_id: string
+          status: string | null
+          superbill_id: string | null
+          updated_at: string
+          visit_date: string
+        }
+        Insert: {
+          cpt_codes?: Json | null
+          created_at?: string
+          fee?: number | null
+          icd_codes?: Json | null
+          id?: string
+          main_complaints?: Json | null
+          notes?: string | null
+          patient_id: string
+          status?: string | null
+          superbill_id?: string | null
+          updated_at?: string
+          visit_date: string
+        }
+        Update: {
+          cpt_codes?: Json | null
+          created_at?: string
+          fee?: number | null
+          icd_codes?: Json | null
+          id?: string
+          main_complaints?: Json | null
+          notes?: string | null
+          patient_id?: string
+          status?: string | null
+          superbill_id?: string | null
+          updated_at?: string
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -1,10 +1,10 @@
 
 import { useNavigate } from "react-router-dom";
-import { Superbill } from "@/types/superbill";
 import { useSuperbill } from "@/context/superbill-context";
-import { usePatient } from "@/context/patient/patient-context";
+import { useToast } from "@/components/ui/use-toast";
+import { Superbill } from "@/types/superbill";
 import { generateId } from "@/lib/utils/superbill-utils";
-import { toast } from "@/components/ui/use-toast";
+import { visitService } from "@/services/visitService";
 
 /**
  * Hook for handling superbill form submission
@@ -15,115 +15,75 @@ export function useSuperbillSubmit(
 ) {
   const navigate = useNavigate();
   const { addSuperbill, updateSuperbill } = useSuperbill();
-  const { addPatient, getPatient } = usePatient();
+  const { toast } = useToast();
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!superbill.patientName) {
-      toast({
-        title: "Error",
-        description: "Please enter a patient name",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const now = new Date();
-    
-    // Check if patient already exists
-    const existingPatient = getPatient(superbill.patientName);
-    
-    // If patient doesn't exist in the patient list, add them automatically
-    if (!existingPatient) {
-      // Extract common complaints from visits
-      const commonComplaints: string[] = [];
-      superbill.visits.forEach(visit => {
-        if (visit.mainComplaints) {
-          visit.mainComplaints.forEach(complaint => {
-            if (!commonComplaints.includes(complaint)) {
-              commonComplaints.push(complaint);
-            }
-          });
+    try {
+      const now = new Date();
+      
+      if (existingSuperbill) {
+        // Update existing superbill
+        const updatedSuperbill: Superbill = {
+          ...superbill,
+          id: existingSuperbill.id,
+          createdAt: existingSuperbill.createdAt,
+          updatedAt: now,
+          status: existingSuperbill.status
+        };
+        
+        updateSuperbill(existingSuperbill.id, updatedSuperbill);
+        
+        toast({
+          title: "Superbill updated successfully",
+          description: `Updated superbill for ${superbill.patientName}`,
+        });
+        
+        navigate(`/view/${existingSuperbill.id}`);
+      } else {
+        // Create new superbill
+        const newSuperbillId = generateId();
+        const newSuperbill: Superbill = {
+          ...superbill,
+          id: newSuperbillId,
+          createdAt: now,
+          updatedAt: now,
+          status: 'draft'
+        };
+        
+        addSuperbill(newSuperbill);
+
+        // If visits have database IDs, link them to the superbill
+        const visitIds = superbill.visits
+          .map(visit => visit.id)
+          .filter(id => id && id.length > 10); // Filter for UUID-like IDs
+
+        if (visitIds.length > 0) {
+          try {
+            await visitService.linkVisitsToSuperbill(newSuperbillId, visitIds);
+          } catch (error) {
+            console.error("Failed to link visits to superbill:", error);
+            // Don't fail the entire submission for this
+          }
         }
-      });
-      
-      // Extract ICD and CPT codes
-      const commonIcdCodes: string[] = [];
-      const commonCptCodes: string[] = [];
-      
-      superbill.visits.forEach(visit => {
-        visit.icdCodes.forEach(code => {
-          if (!commonIcdCodes.includes(code)) {
-            commonIcdCodes.push(code);
-          }
-        });
-        
-        visit.cptCodes.forEach(code => {
-          if (!commonCptCodes.includes(code)) {
-            commonCptCodes.push(code);
-          }
-        });
-      });
-      
-      try {
-        // Add new patient - this will handle both local and database storage
-        await addPatient({
-          name: superbill.patientName,
-          dob: superbill.patientDob,
-          lastSuperbillDate: now,
-          commonIcdCodes,
-          commonCptCodes,
-          notes: `Automatically added from superbill creation`
-        });
         
         toast({
-          title: "Patient Added",
-          description: `${superbill.patientName} was automatically added to your patient list.`,
+          title: "Superbill created successfully",
+          description: `Created superbill for ${superbill.patientName} with ${superbill.visits.length} visit${superbill.visits.length !== 1 ? 's' : ''}`,
         });
-      } catch (error) {
-        console.error("Error adding patient:", error);
-        toast({
-          title: "Warning",
-          description: `There was an error adding the patient to your list.`,
-          variant: "destructive",
-        });
+        
+        navigate(`/view/${newSuperbillId}`);
       }
-    } else {
-      // Update last superbill date for existing patient
-      // Note: For now we're not updating the patient record, but this could be added if needed
-    }
-    
-    // Continue with superbill creation/update
-    if (existingSuperbill) {
-      updateSuperbill(existingSuperbill.id, {
-        ...superbill,
-        id: existingSuperbill.id,
-        createdAt: existingSuperbill.createdAt,
-        updatedAt: now
-      });
-      
+    } catch (error) {
+      console.error("Error saving superbill:", error);
       toast({
-        title: "Superbill Updated",
-        description: "The superbill has been updated successfully."
-      });
-    } else {
-      addSuperbill({
-        ...superbill,
-        id: generateId(),
-        createdAt: now,
-        updatedAt: now
-      });
-      
-      toast({
-        title: "Superbill Created",
-        description: "The superbill has been created successfully."
+        title: "Error saving superbill",
+        description: "Please try again or contact support if the problem persists.",
+        variant: "destructive",
       });
     }
-    
-    navigate("/");
   };
-  
+
   return { handleSubmit };
 }
