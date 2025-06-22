@@ -44,6 +44,7 @@ export function AppSidebar() {
   const dashboardItems = [
     { title: "Home", icon: Home, url: "/" },
     { title: "Patients", icon: Users, url: "/patients" },
+    { title: "Appointments", icon: CalendarDays, url: "/appointments" },
   ];
   
   const superbillItems = [
