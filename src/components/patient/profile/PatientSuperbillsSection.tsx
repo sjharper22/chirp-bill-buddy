@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PatientProfile as PatientProfileType } from "@/types/patient";
 import { Superbill } from "@/types/superbill";
@@ -8,16 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils/superbill-utils";
 import { ActionButtons } from "@/components/superbill/ActionButtons";
-import { Link } from "react-router-dom";
-import { Plus, FileText, Calendar, DollarSign } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Plus, FileText, Calendar, DollarSign, Copy } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PatientSuperbillsSectionProps {
   patient: PatientProfileType;
 }
 
 export function PatientSuperbillsSection({ patient }: PatientSuperbillsSectionProps) {
-  const { superbills } = useSuperbill();
+  const { superbills, duplicateSuperbill } = useSuperbill();
   const [patientSuperbills, setPatientSuperbills] = useState<Superbill[]>([]);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Filter superbills for this patient
@@ -26,6 +28,27 @@ export function PatientSuperbillsSection({ patient }: PatientSuperbillsSectionPr
     );
     setPatientSuperbills(filtered);
   }, [superbills, patient.name]);
+
+  const handleDuplicate = (superbillId: string, patientName: string) => {
+    try {
+      const newId = duplicateSuperbill(superbillId);
+      
+      toast({
+        title: "Superbill duplicated",
+        description: `Created a copy of ${patientName}'s superbill`,
+      });
+      
+      // Navigate to edit the new duplicated superbill
+      navigate(`/edit/${newId}`);
+    } catch (error) {
+      console.error("Error duplicating superbill:", error);
+      toast({
+        title: "Error duplicating superbill",
+        description: "Please try again or contact support if the problem persists.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const totalBilled = patientSuperbills.reduce((sum, superbill) => {
     return sum + superbill.visits.reduce((visitSum, visit) => visitSum + (visit.fee || 0), 0);
@@ -40,7 +63,7 @@ export function PatientSuperbillsSection({ patient }: PatientSuperbillsSectionPr
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Superbills</h3>
         <Button asChild size="sm">
-          <Link to="/new" state={{ prefilledPatient: patient }}>
+          <Link to="/new-superbill" state={{ prefilledPatient: patient }}>
             <Plus className="mr-2 h-4 w-4" />
             Create New Superbill
           </Link>
@@ -96,7 +119,7 @@ export function PatientSuperbillsSection({ patient }: PatientSuperbillsSectionPr
               Create a new superbill for {patient.name} to get started.
             </p>
             <Button asChild>
-              <Link to="/new" state={{ prefilledPatient: patient }}>
+              <Link to="/new-superbill" state={{ prefilledPatient: patient }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create First Superbill
               </Link>
@@ -126,6 +149,14 @@ export function PatientSuperbillsSection({ patient }: PatientSuperbillsSectionPr
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleDuplicate(superbill.id, patient.name)}
+                    >
+                      <Copy className="mr-1 h-4 w-4" />
+                      Duplicate
+                    </Button>
                     <Button variant="outline" size="sm" asChild>
                       <Link to={`/view/${superbill.id}`}>
                         View

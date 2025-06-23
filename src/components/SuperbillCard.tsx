@@ -1,11 +1,12 @@
-
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency, calculateTotalFee } from "@/lib/utils/superbill-utils";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Edit, Eye, Trash2, GripHorizontal } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Edit, Eye, Trash2, GripHorizontal, Copy } from "lucide-react";
 import { StatusBadge } from "@/components/group-submission/table/StatusBadge";
+import { useSuperbill } from "@/context/superbill-context";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SuperbillCardProps {
   superbill: Superbill;
@@ -14,6 +15,10 @@ interface SuperbillCardProps {
 }
 
 export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardProps) {
+  const navigate = useNavigate();
+  const { duplicateSuperbill } = useSuperbill();
+  const { toast } = useToast();
+  
   const totalFee = calculateTotalFee(superbill.visits);
   const visitCount = superbill.visits.length;
   
@@ -55,6 +60,29 @@ export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardPro
   // Format status for display
   const formatStatus = (status: string) => {
     return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+  
+  const handleDuplicate = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering card onClick
+    
+    try {
+      const newId = duplicateSuperbill(superbill.id);
+      
+      toast({
+        title: "Superbill duplicated",
+        description: `Created a copy of ${superbill.patientName}'s superbill`,
+      });
+      
+      // Navigate to edit the new duplicated superbill
+      navigate(`/edit/${newId}`);
+    } catch (error) {
+      console.error("Error duplicating superbill:", error);
+      toast({
+        title: "Error duplicating superbill",
+        description: "Please try again or contact support if the problem persists.",
+        variant: "destructive",
+      });
+    }
   };
   
   return (
@@ -122,6 +150,15 @@ export function SuperbillCard({ superbill, onDelete, onClick }: SuperbillCardPro
         </Button>
         
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDuplicate}
+          >
+            <Copy className="h-4 w-4 mr-1" />
+            Duplicate
+          </Button>
+          
           <Button 
             variant="outline" 
             size="sm" 

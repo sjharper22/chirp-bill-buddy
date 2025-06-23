@@ -1,6 +1,6 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Superbill, ClinicDefaults, SuperbillStatus } from "@/types/superbill";
+import { generateId } from "@/lib/utils/superbill-utils";
 
 // Default clinic information from the provided image
 const DEFAULT_CLINIC_INFO: ClinicDefaults = {
@@ -23,6 +23,7 @@ interface SuperbillContextType {
   addSuperbill: (superbill: Superbill) => void;
   updateSuperbill: (id: string, superbill: Superbill) => void;
   deleteSuperbill: (id: string) => void;
+  duplicateSuperbill: (id: string) => string;
   getSuperbill: (id: string) => Superbill | undefined;
   updateClinicDefaults: (defaults: Partial<ClinicDefaults>) => void;
   updateSuperbillStatus: (id: string, status: SuperbillStatus) => void;
@@ -98,6 +99,32 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
     setSuperbills(prev => prev.filter(bill => bill.id !== id));
   };
 
+  const duplicateSuperbill = (id: string): string => {
+    const originalSuperbill = superbills.find(bill => bill.id === id);
+    if (!originalSuperbill) {
+      throw new Error("Superbill not found");
+    }
+
+    const now = new Date();
+    const newId = generateId();
+    const duplicatedSuperbill: Superbill = {
+      ...originalSuperbill,
+      id: newId,
+      status: 'draft', // Reset status to draft
+      createdAt: now,
+      updatedAt: now,
+      // Generate new IDs for visits to avoid conflicts
+      visits: originalSuperbill.visits.map(visit => ({
+        ...visit,
+        id: generateId(),
+        status: 'draft' // Reset visit status as well
+      }))
+    };
+
+    setSuperbills(prev => [...prev, duplicatedSuperbill]);
+    return newId; // Return the new ID so we can navigate to it
+  };
+
   const getSuperbill = (id: string) => {
     return superbills.find(bill => bill.id === id);
   };
@@ -122,6 +149,7 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
         addSuperbill, 
         updateSuperbill, 
         deleteSuperbill, 
+        duplicateSuperbill,
         getSuperbill,
         updateClinicDefaults,
         updateSuperbillStatus 
