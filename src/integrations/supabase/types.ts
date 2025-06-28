@@ -456,6 +456,7 @@ export type Database = {
       }
       visits: {
         Row: {
+          cpt_code_entries: Json | null
           cpt_codes: Json | null
           created_at: string
           fee: number | null
@@ -470,6 +471,7 @@ export type Database = {
           visit_date: string
         }
         Insert: {
+          cpt_code_entries?: Json | null
           cpt_codes?: Json | null
           created_at?: string
           fee?: number | null
@@ -484,6 +486,7 @@ export type Database = {
           visit_date: string
         }
         Update: {
+          cpt_code_entries?: Json | null
           cpt_codes?: Json | null
           created_at?: string
           fee?: number | null

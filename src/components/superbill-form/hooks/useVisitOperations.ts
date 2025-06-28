@@ -1,74 +1,70 @@
 
-import { Visit, Superbill } from "@/types/superbill";
-import { createEmptyVisit, generateId } from "@/lib/utils/superbill-utils";
-import { ReactStateUpdater } from "./types";
+import { Visit } from "@/types/superbill";
+import { generateId } from "@/lib/utils/superbill-utils";
+import { CptCodeEntry } from "@/types/cpt-entry";
 
-/**
- * Hook for managing visit operations within a superbill
- */
 export function useVisitOperations(
-  superbill: Omit<Superbill, "id" | "createdAt" | "updatedAt">, 
-  setSuperbill: ReactStateUpdater<Omit<Superbill, "id" | "createdAt" | "updatedAt">>
+  superbill: any,
+  setSuperbill: (updater: (prev: any) => any) => void
 ) {
-  // Visit Operations
   const updateVisit = (updatedVisit: Visit) => {
     setSuperbill(prev => ({
       ...prev,
-      visits: prev.visits.map(visit => 
+      visits: prev.visits.map((visit: Visit) => 
         visit.id === updatedVisit.id ? updatedVisit : visit
       )
     }));
   };
-  
+
   const addVisit = () => {
-    // Use createEmptyVisit with correct arguments
-    const newVisit = createEmptyVisit();
-    
-    // If there are default main complaints, use the first one
-    if (superbill.defaultMainComplaints && superbill.defaultMainComplaints.length > 0) {
-      newVisit.mainComplaints = [superbill.defaultMainComplaints[0]];
-    }
-    
-    // Add default ICD codes, CPT codes and fee from superbill
-    newVisit.icdCodes = [...superbill.defaultIcdCodes];
-    newVisit.cptCodes = [...superbill.defaultCptCodes];
-    newVisit.fee = superbill.defaultFee;
-    
+    const now = new Date();
+    const newVisit: Visit = {
+      id: generateId(),
+      date: now,
+      icdCodes: [...superbill.defaultIcdCodes],
+      cptCodes: [...superbill.defaultCptCodes], // Keep for backward compatibility
+      cptCodeEntries: [], // Start with empty itemized codes
+      fee: superbill.defaultFee,
+      mainComplaints: [...superbill.defaultMainComplaints],
+      status: 'draft',
+      notes: ""
+    };
+
     setSuperbill(prev => ({
       ...prev,
       visits: [...prev.visits, newVisit]
     }));
   };
-  
+
   const duplicateVisit = (visit: Visit) => {
+    const duplicatedVisit: Visit = {
+      ...visit,
+      id: generateId(),
+      cptCodeEntries: visit.cptCodeEntries ? [...visit.cptCodeEntries] : []
+    };
+
     setSuperbill(prev => ({
       ...prev,
-      visits: [...prev.visits, { ...visit, id: generateId() }]
+      visits: [...prev.visits, duplicatedVisit]
     }));
   };
-  
+
   const deleteVisit = (id: string) => {
     setSuperbill(prev => ({
       ...prev,
-      visits: prev.visits.filter(visit => visit.id !== id)
+      visits: prev.visits.filter((visit: Visit) => visit.id !== id)
     }));
   };
-  
+
   const updateVisitsWithDefaults = () => {
-    if (superbill.visits.length === 0) return;
-    
-    if (!confirm("Update all existing visits with these default values?")) {
-      return;
-    }
-    
     setSuperbill(prev => ({
       ...prev,
-      visits: prev.visits.map(visit => ({
+      visits: prev.visits.map((visit: Visit) => ({
         ...visit,
-        icdCodes: [...prev.defaultIcdCodes],
-        cptCodes: [...prev.defaultCptCodes],
-        // Don't update mainComplaint automatically
-        fee: prev.defaultFee
+        icdCodes: [...superbill.defaultIcdCodes],
+        cptCodes: [...superbill.defaultCptCodes], // Keep for backward compatibility
+        mainComplaints: [...superbill.defaultMainComplaints],
+        fee: superbill.defaultFee
       }))
     }));
   };

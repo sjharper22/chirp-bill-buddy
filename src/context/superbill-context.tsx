@@ -117,7 +117,8 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
       visits: originalSuperbill.visits.map(visit => ({
         ...visit,
         id: generateId(),
-        status: 'draft' // Reset visit status as well
+        status: 'draft', // Reset visit status as well
+        cptCodeEntries: visit.cptCodeEntries ? [...visit.cptCodeEntries] : [] // Deep copy CPT entries
       }))
     };
 

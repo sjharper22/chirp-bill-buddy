@@ -3,9 +3,8 @@ import { Visit } from "@/types/superbill";
 import { VisitDatePicker } from "@/components/visit/VisitDatePicker";
 import { VisitComplaints } from "@/components/visit/VisitComplaints";
 import { IcdCodeSelector } from "@/components/visit/IcdCodeSelector";
-import { CptCodeSelector } from "@/components/visit/CptCodeSelector";
+import { CptCodeTableSelector } from "@/components/visit/CptCodeTableSelector";
 import { VisitNotes } from "@/components/visit/VisitNotes";
-import { VisitFeeInput } from "./VisitFeeInput";
 import { VisitSection as VisitSectionType } from "@/hooks/useVisitSections";
 
 interface VisitSectionContentProps {
@@ -40,13 +39,23 @@ export function VisitSectionContent({
       );
     case 'codes':
       return (
-        <div className="w-full">
+        <div className="w-full space-y-4">
           <IcdCodeSelector visit={visit} onVisitChange={onVisitChange} />
-          <CptCodeSelector visit={visit} onVisitChange={onVisitChange} />
+          <CptCodeTableSelector visit={visit} onVisitChange={onVisitChange} />
         </div>
       );
     case 'fee':
-      return <VisitFeeInput visit={visit} onChange={onVisitChange} />;
+      return (
+        <div className="w-full p-4 bg-muted/50 rounded-lg">
+          <div className="text-sm text-muted-foreground mb-1">Visit Total (Calculated)</div>
+          <div className="text-lg font-semibold">
+            ${(visit.cptCodeEntries?.reduce((sum, entry) => sum + entry.fee, 0) || visit.fee || 0).toFixed(2)}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
+            Based on individual CPT code fees
+          </div>
+        </div>
+      );
     case 'notes':
       return (
         <div className="w-full">

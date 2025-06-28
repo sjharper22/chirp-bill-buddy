@@ -1,10 +1,24 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import { CptCodeEntry } from "@/types/cpt-entry";
 
-export type Visit = Tables<"visits">;
-export type VisitInsert = TablesInsert<"visits">;
-export type VisitUpdate = TablesUpdate<"visits">;
+export interface Visit {
+  id: string;
+  patient_id: string;
+  visit_date: string;
+  icd_codes: unknown;
+  cpt_codes: unknown;
+  cpt_code_entries?: CptCodeEntry[]; // New field
+  main_complaints: unknown;
+  fee: number;
+  notes?: string;
+  status: string;
+  superbill_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type VisitInsert = Visit;
+export type VisitUpdate = Visit;
 
 export const visitService = {
   // Get all visits for a patient
@@ -22,13 +36,17 @@ export const visitService = {
   // Get unbilled visits for a patient
   async getUnbilledVisitsByPatient(patientId: string): Promise<Visit[]> {
     const { data, error } = await supabase
-      .from("visits")
-      .select("*")
-      .eq("patient_id", patientId)
-      .eq("status", "unbilled")
-      .order("visit_date", { ascending: false });
+      .from('visits')
+      .select('*')
+      .eq('patient_id', patientId)
+      .eq('status', 'unbilled')
+      .order('visit_date', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching unbilled visits:', error);
+      throw error;
+    }
+
     return data || [];
   },
 

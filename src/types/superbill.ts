@@ -1,13 +1,15 @@
+import { CptCodeEntry } from './cpt-entry';
 
 export interface Visit {
   id: string;
   date: Date;
   icdCodes: string[];
-  cptCodes: string[];
-  fee: number;
+  cptCodes: string[]; // Keep for backward compatibility
+  cptCodeEntries: CptCodeEntry[]; // New itemized structure
+  fee: number; // This will be calculated from cptCodeEntries
   notes?: string;
-  mainComplaints: string[]; // Changed from mainComplaint (string) to mainComplaints (string[])
-  status?: 'draft' | 'in_progress' | 'completed'; // New status property
+  mainComplaints: string[];
+  status?: 'draft' | 'in_progress' | 'completed';
 }
 
 export type SuperbillStatus = 'draft' | 'in_progress' | 'in_review' | 'completed';
