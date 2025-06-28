@@ -48,6 +48,7 @@ export function useSuperbillForm(existingSuperbill?: Superbill, prefilledPatient
       date: new Date(visit.visit_date),
       icdCodes: (visit.icd_codes as string[]) || [],
       cptCodes: (visit.cpt_codes as string[]) || [],
+      cptCodeEntries: visit.cpt_code_entries || [], // Include the CPT code entries
       mainComplaints: (visit.main_complaints as string[]) || [],
       fee: visit.fee || 0,
       notes: visit.notes || "",

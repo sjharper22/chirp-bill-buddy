@@ -2,7 +2,7 @@
 import { Visit } from "@/types/superbill";
 import { Badge } from "@/components/ui/badge";
 import { AIAssistantButton } from "@/components/ai/AIAssistantButton";
-import { commonICD10Codes } from "@/lib/utils/superbill-utils";
+import { commonIcdCodes } from "@/lib/utils/superbill-utils";
 import { Command } from "cmdk";
 import {
   Popover,
@@ -35,7 +35,7 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
     onVisitChange({ ...visit, icdCodes: visit.icdCodes.filter(c => c !== code) });
   };
 
-  const filteredCodes = commonICD10Codes.filter(code => {
+  const filteredCodes = commonIcdCodes.filter(code => {
     const search = inputValue.toLowerCase();
     return (
       code.value.toLowerCase().includes(search) ||
@@ -47,12 +47,12 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
     if (inputValue && !visit.icdCodes.includes(inputValue.toUpperCase())) {
       const customCode = inputValue.toUpperCase();
       
-      // Check if code already exists in commonICD10Codes
-      const existingCodeIndex = commonICD10Codes.findIndex(code => code.value === customCode);
+      // Check if code already exists in commonIcdCodes
+      const existingCodeIndex = commonIcdCodes.findIndex(code => code.value === customCode);
       
-      // If code doesn't exist in commonICD10Codes, add it
+      // If code doesn't exist in commonIcdCodes, add it
       if (existingCodeIndex === -1) {
-        commonICD10Codes.push({
+        commonIcdCodes.push({
           value: customCode,
           label: `${customCode} - Custom Code`
         });

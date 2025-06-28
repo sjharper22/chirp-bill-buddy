@@ -24,6 +24,7 @@ export function VisitForm({ visit, onSubmit, onCancel }: VisitFormProps) {
     visit_date: visit?.visit_date ? new Date(visit.visit_date) : new Date(),
     icd_codes: (visit?.icd_codes as string[]) || [],
     cpt_codes: (visit?.cpt_codes as string[]) || [],
+    cpt_code_entries: visit?.cpt_code_entries || [], // Add support for itemized CPT codes
     main_complaints: (visit?.main_complaints as string[]) || [],
     fee: visit?.fee || 0,
     notes: visit?.notes || "",

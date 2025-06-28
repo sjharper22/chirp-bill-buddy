@@ -1,7 +1,7 @@
 
 import { Label } from "@/components/ui/label";
 import { MultiTagInput } from "@/components/MultiTagInput";
-import { commonICD10Codes } from "@/lib/utils/superbill-utils";
+import { commonIcdCodes } from "@/lib/utils/superbill-utils";
 
 interface IcdCodesSectionProps {
   defaultIcdCodes: string[];
@@ -16,7 +16,7 @@ export function IcdCodesSection({ defaultIcdCodes, onChange }: IcdCodesSectionPr
         placeholder="Add ICD-10 Codes"
         tags={defaultIcdCodes}
         onChange={onChange}
-        suggestions={commonICD10Codes}
+        suggestions={commonIcdCodes}
         preventFormSubmission={true}
       />
       <p className="text-xs text-muted-foreground mt-1">

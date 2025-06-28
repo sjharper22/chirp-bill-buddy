@@ -1,4 +1,3 @@
-
 import { Visit } from "@/types/superbill";
 import { SuperbillStatus } from "@/types/superbill";
 
@@ -9,6 +8,7 @@ export function createEmptyVisit(): Visit {
     date: new Date(),
     icdCodes: [],
     cptCodes: [],
+    cptCodeEntries: [], // Add the missing property
     mainComplaints: [],
     fee: 0,
     notes: '',
@@ -21,6 +21,7 @@ export function duplicateVisit(visit: Visit): Visit {
   return {
     ...visit,
     id: crypto.randomUUID(),
+    cptCodeEntries: visit.cptCodeEntries ? [...visit.cptCodeEntries] : [] // Deep copy CPT entries
   };
 }
 
