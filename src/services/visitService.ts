@@ -1,6 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { CptCodeEntry } from "@/types/cpt-entry";
+import { Tables } from "@/integrations/supabase/types";
+
+// Database row type from Supabase
+type VisitRow = Tables<'visits'>;
 
 export interface Visit {
   id: string;
@@ -8,7 +12,7 @@ export interface Visit {
   visit_date: string;
   icd_codes: unknown;
   cpt_codes: unknown;
-  cpt_code_entries?: CptCodeEntry[]; // New field
+  cpt_code_entries: CptCodeEntry[]; // Required field
   main_complaints: unknown;
   fee: number;
   notes?: string;
@@ -16,6 +20,22 @@ export interface Visit {
   superbill_id?: string;
   created_at: string;
   updated_at: string;
+}
+
+// Transform database row to Visit
+function mapRowToVisit(row: VisitRow): Visit {
+  return {
+    ...row,
+    cpt_code_entries: Array.isArray(row.cpt_code_entries) ? (row.cpt_code_entries as unknown as CptCodeEntry[]) : []
+  };
+}
+
+// Transform Visit to database insert/update format
+function mapVisitToRow(visit: Partial<Visit>): any {
+  return {
+    ...visit,
+    cpt_code_entries: visit.cpt_code_entries || []
+  };
 }
 
 export type VisitInsert = Visit;
@@ -31,7 +51,7 @@ export const visitService = {
       .order("visit_date", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(mapRowToVisit);
   },
 
   // Get unbilled visits for a patient
@@ -48,32 +68,34 @@ export const visitService = {
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(mapRowToVisit);
   },
 
   // Create a new visit
   async createVisit(visit: VisitInsert): Promise<Visit> {
+    const visitData = mapVisitToRow(visit);
     const { data, error } = await supabase
       .from("visits")
-      .insert(visit)
+      .insert(visitData)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return mapRowToVisit(data);
   },
 
   // Update a visit
   async updateVisit(id: string, updates: VisitUpdate): Promise<Visit> {
+    const updateData = mapVisitToRow(updates);
     const { data, error } = await supabase
       .from("visits")
-      .update(updates)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return mapRowToVisit(data);
   },
 
   // Delete a visit
@@ -123,6 +145,6 @@ export const visitService = {
       .eq("superbill_id", superbillId);
 
     if (error) throw error;
-    return data?.map(item => item.visits).filter(Boolean) as Visit[] || [];
+    return (data?.map(item => item.visits).filter(Boolean) || []).map(mapRowToVisit);
   }
 };
