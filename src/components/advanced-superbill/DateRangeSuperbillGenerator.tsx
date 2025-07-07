@@ -50,18 +50,25 @@ export function DateRangeSuperbillGenerator({ prefilledPatient, selectedPatientI
 
     try {
       setLoading(true);
+      console.log("Loading visits for patient:", selectedPatientId);
+      console.log("Date range:", dateRange.from, "to", dateRange.to);
+      
       const allVisits = await visitService.getVisitsByPatient(selectedPatientId);
+      console.log("All visits returned:", allVisits.length, allVisits);
       
       // Filter visits within the date range
       const filteredVisits = allVisits.filter(visit => {
         const visitDate = new Date(visit.visit_date);
+        console.log("Visit date:", visit.visit_date, "parsed:", visitDate, "in range:", visitDate >= dateRange.from! && visitDate <= dateRange.to!);
         return visitDate >= dateRange.from! && visitDate <= dateRange.to!;
       });
 
+      console.log("Filtered visits:", filteredVisits.length, filteredVisits);
       setAvailableVisits(filteredVisits);
       // Auto-select all visits by default
       setSelectedVisitIds(filteredVisits.map(visit => visit.id));
     } catch (error: any) {
+      console.error("Error loading visits:", error);
       toast({
         title: "Error",
         description: `Failed to load visits: ${error.message}`,
