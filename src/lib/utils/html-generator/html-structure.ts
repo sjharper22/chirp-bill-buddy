@@ -34,29 +34,92 @@ export function generateProviderInfoSection(superbill: Superbill): string {
 
 export function generateServicesTable(superbill: Superbill): string {
   const totalFee = superbill.visits.reduce((total, visit) => total + (visit.fee || 0), 0);
+
+  // Create rows for each CPT code entry
+  const serviceRows: Array<{
+    visitId: string;
+    date: Date;
+    cptCode: string;
+    description: string;
+    fee: number;
+    isFirstRowForVisit: boolean;
+    visitRowSpan: number;
+  }> = [];
+
+  superbill.visits.forEach(visit => {
+    const cptEntries = visit.cptCodeEntries || [];
+    
+    // If no itemized entries, fall back to legacy cptCodes
+    if (cptEntries.length === 0 && visit.cptCodes && visit.cptCodes.length > 0) {
+      const feePerCode = visit.fee / visit.cptCodes.length;
+      visit.cptCodes.forEach((code, index) => {
+        serviceRows.push({
+          visitId: visit.id,
+          date: visit.date,
+          cptCode: code,
+          description: 'Service rendered',
+          fee: feePerCode,
+          isFirstRowForVisit: index === 0,
+          visitRowSpan: visit.cptCodes.length
+        });
+      });
+    } else {
+      // Use itemized entries
+      cptEntries.forEach((entry, index) => {
+        serviceRows.push({
+          visitId: visit.id,
+          date: visit.date,
+          cptCode: entry.code,
+          description: entry.description,
+          fee: entry.fee,
+          isFirstRowForVisit: index === 0,
+          visitRowSpan: cptEntries.length
+        });
+      });
+    }
+  });
+
+  // Group by visit for subtotals
+  const visitSubtotals = superbill.visits.map(visit => {
+    const visitTotal = visit.cptCodeEntries?.reduce((sum, entry) => sum + entry.fee, 0) || visit.fee || 0;
+    return { visitId: visit.id, total: visitTotal };
+  });
   
   return `
     <table>
       <thead>
         <tr>
           <th style="width: 15%;">Date</th>
-          <th style="width: 30%;">ICD-10 Codes</th>
-          <th style="width: 30%;">CPT Codes</th>
+          <th style="width: 20%;">CPT Code</th>
+          <th style="width: 50%;">Description</th>
           <th style="width: 15%; text-align: right;">Fee</th>
         </tr>
       </thead>
       <tbody>
-        ${superbill.visits.map((visit, index) => `
-          <tr>
-            <td>${formatDate(visit.date)}</td>
-            <td>${visit.icdCodes.join(", ")}</td>
-            <td>${visit.cptCodes.join(", ")}</td>
-            <td style="text-align: right;">${formatCurrency(visit.fee)}</td>
-          </tr>
-        `).join("")}
-        <tr class="total-row">
-          <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
-          <td style="text-align: right;"><strong>${formatCurrency(totalFee)}</strong></td>
+        ${serviceRows.map((row, index) => {
+          const isLastRowForVisit = index === serviceRows.length - 1 || 
+            serviceRows[index + 1]?.visitId !== row.visitId;
+          
+          return `
+            <tr style="${index % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #f8f9fa;'}">
+              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 8px;">${formatDate(row.date)}</td>` : ''}
+              <td style="padding: 8px; font-family: monospace; font-size: 14px;">${row.cptCode}</td>
+              <td style="padding: 8px;">${row.description}</td>
+              <td style="padding: 8px; text-align: right;">${formatCurrency(row.fee)}</td>
+            </tr>
+            ${isLastRowForVisit ? `
+              <tr style="background-color: #f1f3f4; border-bottom: 2px solid #dee2e6;">
+                <td colspan="2"></td>
+                <td style="padding: 4px 8px; text-align: right; font-weight: bold; font-size: 14px;">Visit Subtotal:</td>
+                <td style="padding: 4px 8px; text-align: right; font-weight: bold; font-size: 14px;">${formatCurrency(visitSubtotals.find(v => v.visitId === row.visitId)?.total || 0)}</td>
+              </tr>
+            ` : ''}
+          `;
+        }).join("")}
+        
+        <tr style="border-top: 2px solid #333; background-color: rgba(59, 130, 246, 0.05);">
+          <td colspan="3" style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px;">Grand Total:</td>
+          <td style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px;">${formatCurrency(totalFee)}</td>
         </tr>
       </tbody>
     </table>
