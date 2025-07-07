@@ -20,6 +20,7 @@ import Reports from "@/pages/Reports";
 import Team from "@/pages/Team";
 import Templates from "@/pages/Templates";
 import GroupedSubmission from "@/pages/GroupedSubmission";
+import AdvancedSuperbill from "@/pages/AdvancedSuperbill";
 import NotFound from "@/pages/NotFound";
 import Unauthorized from "@/pages/Unauthorized";
 import "./App.css";
@@ -122,6 +123,13 @@ function App() {
                     <ProtectedRoute>
                       <AppLayout>
                         <GroupedSubmission />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/advanced-superbill" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <AdvancedSuperbill />
                       </AppLayout>
                     </ProtectedRoute>
                   } />

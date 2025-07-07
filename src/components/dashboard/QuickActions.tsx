@@ -1,14 +1,14 @@
 
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, LayoutTemplate, ClipboardList } from "lucide-react";
+import { Users, LayoutTemplate, ClipboardList, Merge } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function QuickActions() {
   const navigate = useNavigate();
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Patients</CardTitle>
@@ -44,6 +44,19 @@ export function QuickActions() {
           <Button variant="outline" className="w-full" onClick={() => navigate("/grouped-submission")}>
             <ClipboardList className="mr-2 h-4 w-4" />
             Group Submissions
+          </Button>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Advanced Superbills</CardTitle>
+          <CardDescription>Merge superbills or create from date ranges</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" className="w-full" onClick={() => navigate("/advanced-superbill")}>
+            <Merge className="mr-2 h-4 w-4" />
+            Advanced Tools
           </Button>
         </CardContent>
       </Card>

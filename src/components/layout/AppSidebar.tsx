@@ -26,7 +26,8 @@ import {
   LayoutTemplate,
   UserCog,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Merge
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -49,6 +50,7 @@ export function AppSidebar() {
   
   const superbillItems = [
     ...(isAdmin || isEditor ? [{ title: "Create New", icon: PlusSquare, url: "/new" }] : []),
+    ...(isAdmin || isEditor ? [{ title: "Advanced Tools", icon: Merge, url: "/advanced-superbill" }] : []),
     { title: "Group Submissions", icon: ClipboardList, url: "/grouped-submission" },
   ];
   
