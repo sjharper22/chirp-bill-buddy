@@ -1,6 +1,7 @@
 
 import { Superbill } from "@/types/superbill";
 import { formatDate, formatCurrency } from "../superbill-utils";
+import { commonCPTCodes } from "../medical-codes";
 
 export function generatePatientInfoSection(superbill: Superbill, visitDates: number[]): string {
   const earliestDate = visitDates.length > 0 ? new Date(Math.min(...visitDates)) : null;
@@ -35,10 +36,17 @@ export function generateProviderInfoSection(superbill: Superbill): string {
 export function generateServicesTable(superbill: Superbill): string {
   const totalFee = superbill.visits.reduce((total, visit) => total + (visit.fee || 0), 0);
 
+  // Helper function to get CPT description
+  const getCPTDescription = (code: string): string => {
+    const cptCode = commonCPTCodes.find(cpt => cpt.value === code);
+    return cptCode ? cptCode.label.split(' - ')[1] || cptCode.label : 'Service rendered';
+  };
+
   // Create rows for each CPT code entry
   const serviceRows: Array<{
     visitId: string;
     date: Date;
+    icdCodes: string[];
     cptCode: string;
     description: string;
     fee: number;
@@ -56,8 +64,9 @@ export function generateServicesTable(superbill: Superbill): string {
         serviceRows.push({
           visitId: visit.id,
           date: visit.date,
+          icdCodes: visit.icdCodes || [],
           cptCode: code,
-          description: 'Service rendered',
+          description: getCPTDescription(code),
           fee: feePerCode,
           isFirstRowForVisit: index === 0,
           visitRowSpan: visit.cptCodes.length
@@ -69,6 +78,7 @@ export function generateServicesTable(superbill: Superbill): string {
         serviceRows.push({
           visitId: visit.id,
           date: visit.date,
+          icdCodes: visit.icdCodes || [],
           cptCode: entry.code,
           description: entry.description,
           fee: entry.fee,
@@ -89,9 +99,10 @@ export function generateServicesTable(superbill: Superbill): string {
     <table>
       <thead>
         <tr>
-          <th style="width: 15%;">Date</th>
-          <th style="width: 20%;">CPT Code</th>
-          <th style="width: 50%;">Description</th>
+          <th style="width: 12%;">Date</th>
+          <th style="width: 20%;">ICD-10 Codes</th>
+          <th style="width: 15%;">CPT Code</th>
+          <th style="width: 38%;">Description</th>
           <th style="width: 15%; text-align: right;">Fee</th>
         </tr>
       </thead>
@@ -103,13 +114,14 @@ export function generateServicesTable(superbill: Superbill): string {
           return `
             <tr style="${index % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #f8f9fa;'}">
               ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 8px;">${formatDate(row.date)}</td>` : ''}
+              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 8px; font-size: 12px;">${row.icdCodes.join(', ')}</td>` : ''}
               <td style="padding: 8px; font-family: monospace; font-size: 14px;">${row.cptCode}</td>
               <td style="padding: 8px;">${row.description}</td>
               <td style="padding: 8px; text-align: right;">${formatCurrency(row.fee)}</td>
             </tr>
             ${isLastRowForVisit ? `
               <tr style="background-color: #f1f3f4; border-bottom: 2px solid #dee2e6;">
-                <td colspan="2"></td>
+                <td colspan="3"></td>
                 <td style="padding: 4px 8px; text-align: right; font-weight: bold; font-size: 14px;">Visit Subtotal:</td>
                 <td style="padding: 4px 8px; text-align: right; font-weight: bold; font-size: 14px;">${formatCurrency(visitSubtotals.find(v => v.visitId === row.visitId)?.total || 0)}</td>
               </tr>
@@ -118,7 +130,7 @@ export function generateServicesTable(superbill: Superbill): string {
         }).join("")}
         
         <tr style="border-top: 2px solid #333; background-color: rgba(59, 130, 246, 0.05);">
-          <td colspan="3" style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px;">Grand Total:</td>
+          <td colspan="4" style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px;">Grand Total:</td>
           <td style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px;">${formatCurrency(totalFee)}</td>
         </tr>
       </tbody>
