@@ -17,13 +17,19 @@ import { Superbill } from "@/types/superbill";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DateRange } from "react-day-picker";
+import { PatientProfile } from "@/types/patient";
 
-export function DateRangeSuperbillGenerator() {
+interface DateRangeSuperbillGeneratorProps {
+  prefilledPatient?: PatientProfile;
+  selectedPatientIds?: string[];
+}
+
+export function DateRangeSuperbillGenerator({ prefilledPatient, selectedPatientIds }: DateRangeSuperbillGeneratorProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { patients } = usePatient();
   const { addSuperbill, clinicDefaults } = useSuperbill();
-  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(prefilledPatient?.id || "");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [availableVisits, setAvailableVisits] = useState<Visit[]>([]);
   const [selectedVisitIds, setSelectedVisitIds] = useState<string[]>([]);

@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Group } from "lucide-react";
+import { Group, CalendarRange } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface PatientListActionsProps {
@@ -51,6 +51,16 @@ export function PatientListActions({
             size="sm"
           >
             Clear Selection ({selectedPatientIds.length})
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => navigate("/advanced-superbill?tab=daterange", { 
+              state: { selectedPatientIds } 
+            })}
+            size="sm"
+          >
+            <CalendarRange className="h-4 w-4 mr-2" />
+            Bulk Date Range
           </Button>
           <Button 
             onClick={() => navigate("/grouped-submission", { 

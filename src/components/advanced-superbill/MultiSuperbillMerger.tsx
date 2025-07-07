@@ -13,13 +13,18 @@ import { Superbill, Visit } from "@/types/superbill";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Plus, Users } from "lucide-react";
+import { PatientProfile } from "@/types/patient";
 
-export function MultiSuperbillMerger() {
+interface MultiSuperbillMergerProps {
+  prefilledPatient?: PatientProfile;
+}
+
+export function MultiSuperbillMerger({ prefilledPatient }: MultiSuperbillMergerProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { superbills, addSuperbill, clinicDefaults } = useSuperbill();
   const { patients } = usePatient();
-  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(prefilledPatient?.id || "");
   const [selectedSuperbillIds, setSelectedSuperbillIds] = useState<string[]>([]);
   const [selectedVisitIds, setSelectedVisitIds] = useState<string[]>([]);
   const [patientSuperbills, setPatientSuperbills] = useState<Superbill[]>([]);

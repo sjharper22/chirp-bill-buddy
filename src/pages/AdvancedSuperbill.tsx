@@ -1,15 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Merge, Calendar } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { MultiSuperbillMerger } from "@/components/advanced-superbill/MultiSuperbillMerger";
 import { DateRangeSuperbillGenerator } from "@/components/advanced-superbill/DateRangeSuperbillGenerator";
 
 export default function AdvancedSuperbill() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("merge");
+
+  useEffect(() => {
+    // Check for tab parameter in URL
+    const tabParam = searchParams.get("tab");
+    if (tabParam && (tabParam === "merge" || tabParam === "daterange")) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   return (
     <div className="container max-w-screen-xl mx-auto py-8 px-4">
@@ -49,7 +59,7 @@ export default function AdvancedSuperbill() {
               </p>
             </CardHeader>
             <CardContent>
-              <MultiSuperbillMerger />
+              <MultiSuperbillMerger prefilledPatient={location.state?.prefilledPatient} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -64,7 +74,10 @@ export default function AdvancedSuperbill() {
               </p>
             </CardHeader>
             <CardContent>
-              <DateRangeSuperbillGenerator />
+              <DateRangeSuperbillGenerator 
+                prefilledPatient={location.state?.prefilledPatient}
+                selectedPatientIds={location.state?.selectedPatientIds}
+              />
             </CardContent>
           </Card>
         </TabsContent>

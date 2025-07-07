@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils/superbill-utils";
 import { ActionButtons } from "@/components/superbill/ActionButtons";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, FileText, Calendar, DollarSign, Copy } from "lucide-react";
+import { Plus, FileText, Calendar, DollarSign, Copy, Merge, CalendarRange } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PatientSuperbillsSectionProps {
@@ -62,12 +62,28 @@ export function PatientSuperbillsSection({ patient }: PatientSuperbillsSectionPr
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Superbills</h3>
-        <Button asChild size="sm">
-          <Link to="/new-superbill" state={{ prefilledPatient: patient }}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create New Superbill
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link to="/advanced-superbill?tab=daterange" state={{ prefilledPatient: patient }}>
+              <CalendarRange className="mr-2 h-4 w-4" />
+              From Date Range
+            </Link>
+          </Button>
+          {patientSuperbills.length >= 2 && (
+            <Button asChild size="sm" variant="outline">
+              <Link to="/advanced-superbill?tab=merge" state={{ prefilledPatient: patient }}>
+                <Merge className="mr-2 h-4 w-4" />
+                Merge Superbills
+              </Link>
+            </Button>
+          )}
+          <Button asChild size="sm">
+            <Link to="/new-superbill" state={{ prefilledPatient: patient }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create New
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Quick Stats */}
