@@ -80,9 +80,8 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
           <div class="info-section">
             ${generatePatientInfoSection(superbill, visitDates)}
             ${generateProviderInfoSection(superbill)}
+            ${generateVisitSummary(superbill)}
           </div>
-          
-          ${generateVisitSummary(superbill)}
           
           <div class="services-section">
             <div class="services-title">Services</div>
