@@ -37,9 +37,12 @@ export function DateRangeSuperbillGenerator({ prefilledPatient, selectedPatientI
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
+    console.log("useEffect triggered", { selectedPatientId, dateRange });
     if (selectedPatientId && dateRange?.from && dateRange?.to) {
+      console.log("Calling loadVisitsInDateRange");
       loadVisitsInDateRange();
     } else {
+      console.log("Clearing visits - missing requirements");
       setAvailableVisits([]);
       setSelectedVisitIds([]);
     }
