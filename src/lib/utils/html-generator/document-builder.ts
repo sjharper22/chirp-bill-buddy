@@ -5,7 +5,8 @@ import {
   generateProviderInfoSection, 
   generateServicesTable, 
   generateNotesSection, 
-  generateFooter 
+  generateFooter,
+  generateVisitSummary
 } from "./html-structure";
 import { generatePageHeader } from "./header-generator";
 
@@ -80,6 +81,8 @@ export function buildSeparateDocuments(superbill: Superbill, coverLetterContent?
             ${generatePatientInfoSection(superbill, visitDates)}
             ${generateProviderInfoSection(superbill)}
           </div>
+          
+          ${generateVisitSummary(superbill)}
           
           <div class="services-section">
             <div class="services-title">Services</div>
