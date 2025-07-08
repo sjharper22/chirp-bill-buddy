@@ -113,11 +113,11 @@ export function generateServicesTable(superbill: Superbill): string {
           
           return `
             <tr style="${index % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #f8f9fa;'}">
-              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 6px; font-size: 12px; word-wrap: break-word; vertical-align: middle;">${formatDate(row.date)}</td>` : ''}
-              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 6px; font-size: 11px; word-wrap: break-word; vertical-align: middle;">${row.icdCodes.join(', ')}</td>` : ''}
-              <td style="padding: 6px; font-family: monospace; font-size: 12px; word-wrap: break-word; vertical-align: middle;">${row.cptCode}</td>
-              <td style="padding: 6px; font-size: 11px; line-height: 1.3; word-wrap: break-word; vertical-align: middle;">${row.description}</td>
-              <td style="padding: 6px; text-align: right; font-size: 12px; word-wrap: break-word; vertical-align: middle;">${formatCurrency(row.fee)}</td>
+              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 6px; font-size: 12px; word-wrap: break-word; vertical-align: top;">${formatDate(row.date)}</td>` : ''}
+              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 6px; font-size: 11px; word-wrap: break-word; vertical-align: top;">${row.icdCodes.join(', ')}</td>` : ''}
+              <td style="padding: 6px; font-family: monospace; font-size: 12px; word-wrap: break-word; vertical-align: top;">${row.cptCode}</td>
+              <td style="padding: 6px; font-size: 11px; line-height: 1.3; word-wrap: break-word; vertical-align: top;">${row.description}</td>
+              <td style="padding: 6px; text-align: right; font-size: 12px; word-wrap: break-word; vertical-align: top;">${formatCurrency(row.fee)}</td>
             </tr>
             ${isLastRowForVisit ? `
               <tr style="background-color: #f1f3f4; border-bottom: 2px solid #dee2e6;">
