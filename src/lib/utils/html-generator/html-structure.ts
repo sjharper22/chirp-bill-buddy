@@ -96,14 +96,14 @@ export function generateServicesTable(superbill: Superbill): string {
   });
   
   return `
-    <table>
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
       <thead>
         <tr>
-          <th style="width: 12%;">Date</th>
-          <th style="width: 20%;">ICD-10 Codes</th>
-          <th style="width: 15%;">CPT Code</th>
-          <th style="width: 38%;">Description</th>
-          <th style="width: 15%; text-align: right;">Fee</th>
+          <th style="width: 15%; padding: 8px; font-size: 13px; word-wrap: break-word;">Date</th>
+          <th style="width: 20%; padding: 8px; font-size: 13px; word-wrap: break-word;">ICD-10 Codes</th>
+          <th style="width: 12%; padding: 8px; font-size: 13px; word-wrap: break-word;">CPT Code</th>
+          <th style="width: 40%; padding: 8px; font-size: 13px; word-wrap: break-word;">Description</th>
+          <th style="width: 13%; padding: 8px; font-size: 13px; text-align: right; word-wrap: break-word;">Fee</th>
         </tr>
       </thead>
       <tbody>
@@ -113,25 +113,25 @@ export function generateServicesTable(superbill: Superbill): string {
           
           return `
             <tr style="${index % 2 === 0 ? 'background-color: #ffffff;' : 'background-color: #f8f9fa;'}">
-              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 8px;">${formatDate(row.date)}</td>` : ''}
-              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 8px; font-size: 12px;">${row.icdCodes.join(', ')}</td>` : ''}
-              <td style="padding: 8px; font-family: monospace; font-size: 14px;">${row.cptCode}</td>
-              <td style="padding: 8px;">${row.description}</td>
-              <td style="padding: 8px; text-align: right;">${formatCurrency(row.fee)}</td>
+              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 6px; font-size: 12px; word-wrap: break-word; vertical-align: top;">${formatDate(row.date)}</td>` : ''}
+              ${row.isFirstRowForVisit ? `<td rowspan="${row.visitRowSpan}" style="border-right: 1px solid #dee2e6; padding: 6px; font-size: 11px; word-wrap: break-word; vertical-align: top;">${row.icdCodes.join(', ')}</td>` : ''}
+              <td style="padding: 6px; font-family: monospace; font-size: 12px; word-wrap: break-word; vertical-align: top;">${row.cptCode}</td>
+              <td style="padding: 6px; font-size: 11px; line-height: 1.3; word-wrap: break-word; vertical-align: top;">${row.description}</td>
+              <td style="padding: 6px; text-align: right; font-size: 12px; word-wrap: break-word; vertical-align: top;">${formatCurrency(row.fee)}</td>
             </tr>
             ${isLastRowForVisit ? `
               <tr style="background-color: #f1f3f4; border-bottom: 2px solid #dee2e6;">
                 <td colspan="3"></td>
-                <td style="padding: 4px 8px; text-align: right; font-weight: bold; font-size: 14px;">Visit Subtotal:</td>
-                <td style="padding: 4px 8px; text-align: right; font-weight: bold; font-size: 14px;">${formatCurrency(visitSubtotals.find(v => v.visitId === row.visitId)?.total || 0)}</td>
+                <td style="padding: 4px 6px; text-align: right; font-weight: bold; font-size: 12px;">Visit Subtotal:</td>
+                <td style="padding: 4px 6px; text-align: right; font-weight: bold; font-size: 12px;">${formatCurrency(visitSubtotals.find(v => v.visitId === row.visitId)?.total || 0)}</td>
               </tr>
             ` : ''}
           `;
         }).join("")}
         
         <tr style="border-top: 2px solid #333; background-color: rgba(59, 130, 246, 0.05);">
-          <td colspan="4" style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px;">Grand Total:</td>
-          <td style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px;">${formatCurrency(totalFee)}</td>
+          <td colspan="4" style="padding: 8px 6px; text-align: right; font-weight: bold; font-size: 14px;">Grand Total:</td>
+          <td style="padding: 8px 6px; text-align: right; font-weight: bold; font-size: 14px;">${formatCurrency(totalFee)}</td>
         </tr>
       </tbody>
     </table>
