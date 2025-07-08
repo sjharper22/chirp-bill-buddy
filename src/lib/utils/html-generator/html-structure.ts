@@ -162,32 +162,6 @@ export function generateNotesSection(superbill: Superbill): string {
   `;
 }
 
-export function generateVisitSummary(superbill: Superbill): string {
-  const totalVisits = superbill.visits.length;
-  const totalCharges = superbill.visits.reduce((total, visit) => total + (visit.fee || 0), 0);
-  const averageVisitCost = totalVisits > 0 ? totalCharges / totalVisits : 0;
-  
-  return `
-    <div style="margin: 20px 0; padding: 15px; border: 1px solid #dee2e6; border-radius: 4px; background-color: #f8f9fa; page-break-inside: avoid;">
-      <h3 style="margin: 0 0 15px 0; font-size: 16px; font-weight: bold; text-align: center;">Summary of Visits</h3>
-      <div style="display: flex; justify-content: space-around; text-align: center;">
-        <div style="flex: 1; padding: 0 10px;">
-          <p style="margin: 0; font-size: 12px; color: #6c757d;">Total Visits</p>
-          <p style="margin: 4px 0 0 0; font-size: 18px; font-weight: bold;">${totalVisits}</p>
-        </div>
-        <div style="flex: 1; padding: 0 10px; border-left: 1px solid #dee2e6; border-right: 1px solid #dee2e6;">
-          <p style="margin: 0; font-size: 12px; color: #6c757d;">Total Charges</p>
-          <p style="margin: 4px 0 0 0; font-size: 18px; font-weight: bold;">${formatCurrency(totalCharges)}</p>
-        </div>
-        <div style="flex: 1; padding: 0 10px;">
-          <p style="margin: 0; font-size: 12px; color: #6c757d;">Average Visit Cost</p>
-          <p style="margin: 4px 0 0 0; font-size: 18px; font-weight: bold;">${formatCurrency(averageVisitCost)}</p>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 export function generateFooter(): string {
   return `
     <div class="footer" style="margin-top: 40px; padding-top: 10px; border-top: 1px solid #ccc; font-size: 12px; text-align: center; page-break-inside: avoid;">
