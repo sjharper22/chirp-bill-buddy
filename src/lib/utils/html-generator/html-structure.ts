@@ -29,15 +29,6 @@ export function generateProviderInfoSection(superbill: Superbill): string {
       <p><strong>Email:</strong> ${superbill.clinicEmail}</p>
       <p><strong>EIN:</strong> ${superbill.ein}</p>
       <p><strong>NPI #:</strong> ${superbill.npi}</p>
-      
-      <div style="margin-top: 20px; padding: 15px; border: 1px solid #007bff; border-radius: 4px; background-color: #f0f8ff;">
-        <p style="margin: 0 0 5px 0; font-weight: bold; color: #007bff;">Our clinic information for your insurance submission:</p>
-        <p style="margin: 0; font-size: 12px; line-height: 1.4;">
-          <strong>Clinic:</strong> ${superbill.clinicName}<br>
-          <strong>Provider:</strong> ${superbill.providerName}<br>
-          <strong>Address:</strong> ${superbill.clinicAddress}
-        </p>
-      </div>
     </div>
   `;
 }
