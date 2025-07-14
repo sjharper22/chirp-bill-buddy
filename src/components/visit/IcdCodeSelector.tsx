@@ -16,6 +16,7 @@ import { Search, Settings } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { Plus } from "lucide-react";
 
 interface IcdCodeSelectorProps {
   visit: Visit;
@@ -25,6 +26,7 @@ interface IcdCodeSelectorProps {
 export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [customIcdCodes, setCustomIcdCodes] = useState<Array<{value: string, label: string}>>([]);
   const { toast } = useToast();
 
   const toggleIcdCode = (code: string) => {
@@ -40,6 +42,33 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
         icdCodes: [...visit.icdCodes, code] 
       });
     }
+  };
+
+  const addCustomCode = () => {
+    if (!searchValue.trim()) return;
+    
+    const codeValue = searchValue.toUpperCase().trim();
+    const newCode = {
+      value: codeValue,
+      label: `${codeValue} - Custom Code`
+    };
+    
+    // Add to custom codes list
+    setCustomIcdCodes(prev => [...prev, newCode]);
+    
+    // Automatically select the new code
+    onVisitChange({
+      ...visit,
+      icdCodes: [...visit.icdCodes, codeValue]
+    });
+    
+    // Clear search
+    setSearchValue("");
+    
+    toast({
+      title: "Custom code added",
+      description: `${codeValue} has been added and selected.`
+    });
   };
 
   const handleAICodeSuggestions = (aiContent: string) => {
@@ -59,25 +88,6 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
     return [complaints, existingCpts, notes].filter(Boolean).join('. ');
   };
 
-  // Organize codes by category
-  const spinalCodes = commonICD10Codes.filter(code => 
-    code.value.startsWith('M99') || code.value.startsWith('M54')
-  );
-  
-  const extremityCodes = commonICD10Codes.filter(code => 
-    code.value.startsWith('M25') || code.value.startsWith('M79.67')
-  );
-  
-  const sprainStrainCodes = commonICD10Codes.filter(code => 
-    code.value.startsWith('S13') || code.value.startsWith('S16') || 
-    code.value.startsWith('S23') || code.value.startsWith('S33') || 
-    code.value.startsWith('S39')
-  );
-  
-  const customCodes = commonICD10Codes.filter(code => 
-    !spinalCodes.includes(code) && !extremityCodes.includes(code) && !sprainStrainCodes.includes(code)
-  );
-
   const filterCodes = (codes: typeof commonICD10Codes) => {
     if (!searchValue) return codes;
     return codes.filter(code => 
@@ -85,6 +95,36 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
       code.label.toLowerCase().includes(searchValue.toLowerCase())
     );
   };
+
+  // Combine default codes with custom codes
+  const allCodes = [...commonICD10Codes, ...customIcdCodes];
+  
+  // Organize codes by category
+  const spinalCodes = allCodes.filter(code => 
+    code.value.startsWith('M99') || code.value.startsWith('M54')
+  );
+  
+  const extremityCodes = allCodes.filter(code => 
+    code.value.startsWith('M25') || code.value.startsWith('M79.67')
+  );
+  
+  const sprainStrainCodes = allCodes.filter(code => 
+    code.value.startsWith('S13') || code.value.startsWith('S16') || 
+    code.value.startsWith('S23') || code.value.startsWith('S33') || 
+    code.value.startsWith('S39')
+  );
+  
+  const customCodes = allCodes.filter(code => 
+    !spinalCodes.includes(code) && !extremityCodes.includes(code) && !sprainStrainCodes.includes(code)
+  );
+
+  // Check if search has results
+  const hasSearchResults = searchValue && (
+    filterCodes(spinalCodes).length > 0 ||
+    filterCodes(extremityCodes).length > 0 ||
+    filterCodes(sprainStrainCodes).length > 0 ||
+    filterCodes(customCodes).length > 0
+  );
 
   const treatmentDescription = generateTreatmentDescription();
 
@@ -105,14 +145,27 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
             </DialogHeader>
             
             <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search codes..."
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="pl-10"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search codes..."
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                {searchValue && !hasSearchResults && (
+                  <Button 
+                    onClick={addCustomCode}
+                    variant="outline" 
+                    size="sm"
+                    className="gap-2 whitespace-nowrap"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add "{searchValue.toUpperCase()}"
+                  </Button>
+                )}
               </div>
 
               <div className="grid grid-cols-3 gap-6 overflow-y-auto max-h-[50vh]">
@@ -233,7 +286,7 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
 
       <div className="flex flex-wrap gap-2">
         {visit.icdCodes.map(code => {
-          const codeInfo = commonICD10Codes.find(c => c.value === code);
+          const codeInfo = [...commonICD10Codes, ...customIcdCodes].find(c => c.value === code);
           const displayLabel = codeInfo ? `${code} - ${codeInfo.label.split(' - ')[1]}` : code;
           return (
             <Badge 
