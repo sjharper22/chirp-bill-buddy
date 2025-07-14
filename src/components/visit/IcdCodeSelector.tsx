@@ -2,17 +2,20 @@
 import { Visit } from "@/types/superbill";
 import { Badge } from "@/components/ui/badge";
 import { AIAssistantButton } from "@/components/ai/AIAssistantButton";
-import { commonIcdCodes } from "@/lib/utils/superbill-utils";
-import { Command } from "cmdk";
+import { commonICD10Codes } from "@/lib/utils/medical-codes";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Settings } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 interface IcdCodeSelectorProps {
   visit: Visit;
@@ -21,55 +24,25 @@ interface IcdCodeSelectorProps {
 
 export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) {
   const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [searchValue, setSearchValue] = useState("");
   const { toast } = useToast();
 
-  const addIcdCode = (code: string) => {
-    if (!visit.icdCodes.includes(code)) {
-      onVisitChange({ ...visit, icdCodes: [...visit.icdCodes, code] });
-      setInputValue("");
-    }
-  };
-
-  const removeIcdCode = (code: string) => {
-    onVisitChange({ ...visit, icdCodes: visit.icdCodes.filter(c => c !== code) });
-  };
-
-  const filteredCodes = commonIcdCodes.filter(code => {
-    const search = inputValue.toLowerCase();
-    return (
-      code.value.toLowerCase().includes(search) ||
-      code.label.toLowerCase().includes(search)
-    );
-  });
-
-  const handleCustomCodeAdd = () => {
-    if (inputValue && !visit.icdCodes.includes(inputValue.toUpperCase())) {
-      const customCode = inputValue.toUpperCase();
-      
-      // Check if code already exists in commonIcdCodes
-      const existingCodeIndex = commonIcdCodes.findIndex(code => code.value === customCode);
-      
-      // If code doesn't exist in commonIcdCodes, add it
-      if (existingCodeIndex === -1) {
-        commonIcdCodes.push({
-          value: customCode,
-          label: `${customCode} - Custom Code`
-        });
-        
-        toast({
-          title: "Custom ICD Code Added",
-          description: `${customCode} has been added to your available codes.`
-        });
-      }
-      
-      addIcdCode(customCode);
-      setOpen(false);
+  const toggleIcdCode = (code: string) => {
+    const isSelected = visit.icdCodes.includes(code);
+    if (isSelected) {
+      onVisitChange({ 
+        ...visit, 
+        icdCodes: visit.icdCodes.filter(c => c !== code) 
+      });
+    } else {
+      onVisitChange({ 
+        ...visit, 
+        icdCodes: [...visit.icdCodes, code] 
+      });
     }
   };
 
   const handleAICodeSuggestions = (aiContent: string) => {
-    // Parse AI response for ICD-10 codes (assuming format includes codes)
     const codeMatches = aiContent.match(/\b[A-Z]\d{2}(?:\.\d{1,3})?\b/g) || [];
     const newCodes = codeMatches.filter(code => !visit.icdCodes.includes(code));
     
@@ -86,66 +59,164 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
     return [complaints, existingCpts, notes].filter(Boolean).join('. ');
   };
 
+  // Organize codes by category
+  const spinalCodes = commonICD10Codes.filter(code => 
+    code.value.startsWith('M99') || code.value.startsWith('M54')
+  );
+  
+  const extremityCodes = commonICD10Codes.filter(code => 
+    code.value.startsWith('M25') || code.value.startsWith('M79.67')
+  );
+  
+  const sprainStrainCodes = commonICD10Codes.filter(code => 
+    code.value.startsWith('S13') || code.value.startsWith('S16') || 
+    code.value.startsWith('S23') || code.value.startsWith('S33') || 
+    code.value.startsWith('S39')
+  );
+  
+  const customCodes = commonICD10Codes.filter(code => 
+    !spinalCodes.includes(code) && !extremityCodes.includes(code) && !sprainStrainCodes.includes(code)
+  );
+
+  const filterCodes = (codes: typeof commonICD10Codes) => {
+    if (!searchValue) return codes;
+    return codes.filter(code => 
+      code.value.toLowerCase().includes(searchValue.toLowerCase()) ||
+      code.label.toLowerCase().includes(searchValue.toLowerCase())
+    );
+  };
+
   const treatmentDescription = generateTreatmentDescription();
 
   return (
     <div className="mt-3">
       <div className="flex items-center mb-2 gap-2">
         <span className="text-sm font-medium mr-2">ICD-10 Codes:</span>
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="w-[200px] justify-start">
-              <Search className="mr-2 h-4 w-4" />
-              Search or add ICD-10 code
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Select ICD-10 Codes
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[300px] p-0" align="start">
-            <Command>
-              <div className="flex items-center border-b px-3">
-                <Search className="h-4 w-4 shrink-0 opacity-50" />
-                <input
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Type to search..."
-                  className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle>Select ICD-10 Codes</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search codes..."
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className="pl-10"
                 />
               </div>
-              <div className="max-h-[300px] overflow-y-auto">
-                {filteredCodes.length > 0 ? (
-                  filteredCodes.map(code => (
-                    <div
-                      key={code.value}
-                      className="px-3 py-2 text-sm cursor-pointer hover:bg-accent"
-                      onClick={() => {
-                        addIcdCode(code.value);
-                        setOpen(false);
-                      }}
-                    >
-                      {code.label}
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-4 text-sm text-muted-foreground">
-                    {inputValue ? (
-                      <div className="space-y-2">
-                        <p>No existing codes found.</p>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={handleCustomCodeAdd}
+
+              <div className="grid grid-cols-3 gap-6 overflow-y-auto max-h-[50vh]">
+                {/* Spinal Codes */}
+                <div>
+                  <h3 className="font-semibold text-sm mb-3 text-primary">Spinal Codes</h3>
+                  <div className="space-y-2">
+                    {filterCodes(spinalCodes).map(code => (
+                      <div key={code.value} className="flex items-start space-x-2">
+                        <Checkbox
+                          id={code.value}
+                          checked={visit.icdCodes.includes(code.value)}
+                          onCheckedChange={() => toggleIcdCode(code.value)}
+                        />
+                        <label 
+                          htmlFor={code.value}
+                          className="text-xs leading-relaxed cursor-pointer flex-1"
                         >
-                          Add "{inputValue.toUpperCase()}" as custom code
-                        </Button>
+                          <span className="font-mono font-medium text-primary">{code.value}</span>
+                          <br />
+                          <span className="text-muted-foreground">{code.label.split(' - ')[1]}</span>
+                        </label>
                       </div>
-                    ) : (
-                      "Type to search for ICD-10 codes..."
-                    )}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Extremity Codes */}
+                <div>
+                  <h3 className="font-semibold text-sm mb-3 text-primary">Extremity Codes</h3>
+                  <div className="space-y-2">
+                    {filterCodes(extremityCodes).map(code => (
+                      <div key={code.value} className="flex items-start space-x-2">
+                        <Checkbox
+                          id={code.value}
+                          checked={visit.icdCodes.includes(code.value)}
+                          onCheckedChange={() => toggleIcdCode(code.value)}
+                        />
+                        <label 
+                          htmlFor={code.value}
+                          className="text-xs leading-relaxed cursor-pointer flex-1"
+                        >
+                          <span className="font-mono font-medium text-primary">{code.value}</span>
+                          <br />
+                          <span className="text-muted-foreground">{code.label.split(' - ')[1]}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sprain/Strain Codes */}
+                <div>
+                  <h3 className="font-semibold text-sm mb-3 text-primary">Sprain/Strain Codes</h3>
+                  <div className="space-y-2">
+                    {filterCodes(sprainStrainCodes).map(code => (
+                      <div key={code.value} className="flex items-start space-x-2">
+                        <Checkbox
+                          id={code.value}
+                          checked={visit.icdCodes.includes(code.value)}
+                          onCheckedChange={() => toggleIcdCode(code.value)}
+                        />
+                        <label 
+                          htmlFor={code.value}
+                          className="text-xs leading-relaxed cursor-pointer flex-1"
+                        >
+                          <span className="font-mono font-medium text-primary">{code.value}</span>
+                          <br />
+                          <span className="text-muted-foreground">{code.label.split(' - ')[1]}</span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Codes */}
+                {filterCodes(customCodes).length > 0 && (
+                  <div className="col-span-3">
+                    <h3 className="font-semibold text-sm mb-3 text-primary">Other Codes</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      {filterCodes(customCodes).map(code => (
+                        <div key={code.value} className="flex items-start space-x-2">
+                          <Checkbox
+                            id={code.value}
+                            checked={visit.icdCodes.includes(code.value)}
+                            onCheckedChange={() => toggleIcdCode(code.value)}
+                          />
+                          <label 
+                            htmlFor={code.value}
+                            className="text-xs leading-relaxed cursor-pointer flex-1"
+                          >
+                            <span className="font-mono font-medium text-primary">{code.value}</span>
+                            <br />
+                            <span className="text-muted-foreground">{code.label.split(' - ')[1]}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
-            </Command>
-          </PopoverContent>
-        </Popover>
+            </div>
+          </DialogContent>
+        </Dialog>
         
         {treatmentDescription && (
           <AIAssistantButton
@@ -161,11 +232,20 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {visit.icdCodes.map(code => (
-          <Badge key={code} variant="secondary" className="cursor-pointer hover:bg-muted" onClick={() => removeIcdCode(code)}>
-            {code} <span className="ml-1 text-muted-foreground">×</span>
-          </Badge>
-        ))}
+        {visit.icdCodes.map(code => {
+          const codeInfo = commonICD10Codes.find(c => c.value === code);
+          const displayLabel = codeInfo ? `${code} - ${codeInfo.label.split(' - ')[1]}` : code;
+          return (
+            <Badge 
+              key={code} 
+              variant="secondary" 
+              className="cursor-pointer hover:bg-muted" 
+              onClick={() => toggleIcdCode(code)}
+            >
+              {displayLabel} <span className="ml-1 text-muted-foreground">×</span>
+            </Badge>
+          );
+        })}
         {visit.icdCodes.length === 0 && (
           <span className="text-sm text-muted-foreground">No ICD-10 codes selected</span>
         )}
