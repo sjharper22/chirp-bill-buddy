@@ -2,7 +2,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MultiTagInput } from "@/components/MultiTagInput";
+import { ComplaintsSelector } from "@/components/complaints/ComplaintsSelector";
 
 interface GeneralSettingsSectionProps {
   defaultMainComplaints: string[];
@@ -32,17 +32,16 @@ export function GeneralSettingsSection({
   return (
     <div className="space-y-6" onClick={preventFormSubmission}>
       <div className="space-y-2">
-        <Label htmlFor="defaultMainComplaints">Default Main Complaints</Label>
-        <MultiTagInput
-          placeholder="Add Main Complaints"
-          tags={defaultMainComplaints || []}
-          onChange={onMainComplaintsChange}
-          suggestions={commonMainComplaints}
-          preventFormSubmission={true}
-        />
-        <p className="text-xs text-muted-foreground">
-          Common complaints/reasons that will be available for selection in visits
-        </p>
+      <ComplaintsSelector
+        selectedComplaints={defaultMainComplaints || []}
+        availableComplaints={commonMainComplaints}
+        onComplaintsChange={onMainComplaintsChange}
+        label="Default Main Complaints"
+        placeholder="No complaints selected"
+      />
+      <p className="text-xs text-muted-foreground">
+        Common complaints/reasons that will be available for selection in visits
+      </p>
       </div>
       
       <div className="space-y-2">
