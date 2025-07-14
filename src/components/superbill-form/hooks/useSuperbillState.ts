@@ -31,7 +31,7 @@ export function useSuperbillState(existingSuperbill?: Superbill, prefilledPatien
       providerName: clinicDefaults.providerName,
       defaultIcdCodes: prefilledPatient?.commonIcdCodes?.length ? [...prefilledPatient.commonIcdCodes] : [...clinicDefaults.defaultIcdCodes],
       defaultCptCodes: prefilledPatient?.commonCptCodes?.length ? [...prefilledPatient.commonCptCodes] : [...clinicDefaults.defaultCptCodes],
-      defaultMainComplaints: [...(clinicDefaults.defaultMainComplaints || [])],
+      defaultMainComplaints: [],
       defaultFee: clinicDefaults.defaultFee,
       visits: [],
       status: 'draft'
