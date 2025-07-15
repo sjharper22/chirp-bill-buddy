@@ -26,7 +26,7 @@ interface IcdCodeSelectorProps {
 export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [customIcdCodes, setCustomIcdCodes] = useState<Array<{value: string, label: string}>>([]);
+  const [customDescription, setCustomDescription] = useState("");
   const { toast } = useToast();
 
   const toggleIcdCode = (code: string) => {
@@ -45,16 +45,19 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
   };
 
   const addCustomCode = () => {
-    if (!searchValue.trim()) return;
+    if (!searchValue.trim() || !customDescription.trim()) return;
     
     const codeValue = searchValue.toUpperCase().trim();
     const newCode = {
       value: codeValue,
-      label: `${codeValue} - Custom Code`
+      label: `${codeValue} - ${customDescription.trim()}`
     };
     
-    // Add to custom codes list
-    setCustomIcdCodes(prev => [...prev, newCode]);
+    // Add to global codes list so it appears in future searches
+    const existingCodeIndex = commonICD10Codes.findIndex(item => item.value === codeValue);
+    if (existingCodeIndex === -1) {
+      commonICD10Codes.push(newCode);
+    }
     
     // Automatically select the new code
     onVisitChange({
@@ -62,8 +65,9 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
       icdCodes: [...visit.icdCodes, codeValue]
     });
     
-    // Clear search
+    // Clear inputs
     setSearchValue("");
+    setCustomDescription("");
     
     toast({
       title: "Custom code added",
@@ -96,8 +100,8 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
     );
   };
 
-  // Combine default codes with custom codes
-  const allCodes = [...commonICD10Codes, ...customIcdCodes];
+  // Use the global codes list
+  const allCodes = commonICD10Codes;
   
   // Organize codes by category
   const spinalCodes = allCodes.filter(code => 
@@ -145,8 +149,8 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
             </DialogHeader>
             
             <div className="space-y-4">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
+              <div className="space-y-2">
+                <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search codes..."
@@ -156,15 +160,24 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
                   />
                 </div>
                 {searchValue && !hasSearchResults && (
-                  <Button 
-                    onClick={addCustomCode}
-                    variant="outline" 
-                    size="sm"
-                    className="gap-2 whitespace-nowrap"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add "{searchValue.toUpperCase()}"
-                  </Button>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter description for custom code"
+                      value={customDescription}
+                      onChange={(e) => setCustomDescription(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={addCustomCode}
+                      variant="outline" 
+                      size="sm"
+                      className="gap-2 whitespace-nowrap"
+                      disabled={!customDescription.trim()}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add "{searchValue.toUpperCase()}"
+                    </Button>
+                  </div>
                 )}
               </div>
 
@@ -286,7 +299,7 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
 
       <div className="flex flex-wrap gap-2">
         {visit.icdCodes.map(code => {
-          const codeInfo = [...commonICD10Codes, ...customIcdCodes].find(c => c.value === code);
+          const codeInfo = commonICD10Codes.find(c => c.value === code);
           const displayLabel = codeInfo ? `${code} - ${codeInfo.label.split(' - ')[1]}` : code;
           return (
             <Badge 

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { commonIcdCodes } from "@/lib/utils/superbill-utils";
+import { commonICD10Codes } from "@/lib/utils/medical-codes";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -30,12 +30,12 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
     if (customIcdCode && customIcdDescription) {
       const code = customIcdCode.toUpperCase();
       
-      // Check if code already exists in the commonIcdCodes
-      const existingCodeIndex = commonIcdCodes.findIndex(item => item.value === code);
+      // Check if code already exists in the commonICD10Codes
+      const existingCodeIndex = commonICD10Codes.findIndex(item => item.value === code);
       
-      // If code doesn't exist in commonIcdCodes, add it
+      // If code doesn't exist in commonICD10Codes, add it
       if (existingCodeIndex === -1) {
-        commonIcdCodes.push({
+        commonICD10Codes.push({
           value: code,
           label: `${code} - ${customIcdDescription}`
         });
@@ -90,7 +90,7 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
         <div>
           <h4 className="text-sm font-medium mb-2">Spinal Codes</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {commonIcdCodes
+            {commonICD10Codes
               .filter(code => code.value.startsWith('M99') || code.value.startsWith('M54'))
               .map((code) => (
                 <div key={code.value} className="flex items-center space-x-2">
@@ -103,7 +103,8 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
                     htmlFor={`icd-${code.value}`}
                     className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    {code.label}
+                    <span className="font-mono text-primary mr-2">{code.value}</span>
+                    <span className="text-muted-foreground">{code.label.split(' - ')[1]}</span>
                   </label>
                 </div>
               ))}
@@ -113,7 +114,7 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
         <div>
           <h4 className="text-sm font-medium mb-2">Extremity Codes</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {commonIcdCodes
+            {commonICD10Codes
               .filter(code => code.value.startsWith('M25') || code.value.startsWith('M79'))
               .map((code) => (
                 <div key={code.value} className="flex items-center space-x-2">
@@ -126,7 +127,8 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
                     htmlFor={`icd-${code.value}`}
                     className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    {code.label}
+                    <span className="font-mono text-primary mr-2">{code.value}</span>
+                    <span className="text-muted-foreground">{code.label.split(' - ')[1]}</span>
                   </label>
                 </div>
               ))}
@@ -136,7 +138,7 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
         <div>
           <h4 className="text-sm font-medium mb-2">Sprain/Strain Codes</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {commonIcdCodes
+            {commonICD10Codes
               .filter(code => code.value.startsWith('S'))
               .map((code) => (
                 <div key={code.value} className="flex items-center space-x-2">
@@ -149,7 +151,8 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
                     htmlFor={`icd-${code.value}`}
                     className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    {code.label}
+                    <span className="font-mono text-primary mr-2">{code.value}</span>
+                    <span className="text-muted-foreground">{code.label.split(' - ')[1]}</span>
                   </label>
                 </div>
               ))}
@@ -157,7 +160,7 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
         </div>
 
         {/* Custom Codes Section - Show if there are any custom codes */}
-        {commonIcdCodes.some(code => 
+        {commonICD10Codes.some(code => 
           !code.value.startsWith('M99') && 
           !code.value.startsWith('M54') && 
           !code.value.startsWith('M25') && 
@@ -167,7 +170,7 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
           <div>
             <h4 className="text-sm font-medium mb-2">Custom Codes</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {commonIcdCodes
+              {commonICD10Codes
                 .filter(code => 
                   !code.value.startsWith('M99') && 
                   !code.value.startsWith('M54') && 
@@ -186,7 +189,8 @@ export function IcdCodesSection({ defaultIcdCodes, onCodesChange }: IcdCodesSect
                       htmlFor={`icd-${code.value}`}
                       className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
-                      {code.label}
+                      <span className="font-mono text-primary mr-2">{code.value}</span>
+                      <span className="text-muted-foreground">{code.label.split(' - ')[1]}</span>
                     </label>
                   </div>
                 ))}
