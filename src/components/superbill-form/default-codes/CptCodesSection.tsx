@@ -31,7 +31,7 @@ export function CptCodesSection({ defaultCptCodes, onCodesChange }: CptCodesSect
               htmlFor={`cpt-${code.value}`}
               className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              {code.label}
+              {code.value} - {code.label}
             </label>
           </div>
         ))}
