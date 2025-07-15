@@ -300,7 +300,15 @@ export function IcdCodeSelector({ visit, onVisitChange }: IcdCodeSelectorProps) 
       <div className="flex flex-wrap gap-2">
         {visit.icdCodes.map(code => {
           const codeInfo = commonICD10Codes.find(c => c.value === code);
-          const displayLabel = codeInfo ? `${code} - ${codeInfo.label.split(' - ')[1]}` : code;
+          // Handle both formatted codes "CODE - Description" and plain codes
+          let displayLabel;
+          if (code.includes(' - ')) {
+            displayLabel = code; // Already formatted
+          } else if (codeInfo) {
+            displayLabel = `${code} - ${codeInfo.label.split(' - ')[1]}`;
+          } else {
+            displayLabel = code; // Plain code without description
+          }
           return (
             <Badge 
               key={code} 

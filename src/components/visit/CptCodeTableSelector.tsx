@@ -109,6 +109,50 @@ export function CptCodeTableSelector({ visit, onVisitChange }: CptCodeTableSelec
             onAISuggestions={handleAICodeSuggestions}
           />
         </div>
+        <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <label className="text-sm text-muted-foreground">Visit Total</label>
+              <input
+                type="number"
+                placeholder="Enter total visit amount"
+                value={visit.fee || ""}
+                onChange={(e) => {
+                  const totalAmount = parseFloat(e.target.value) || 0;
+                  const cptEntries = visit.cptCodeEntries || [];
+                  const entryCount = cptEntries.length;
+                  
+                  if (entryCount > 0) {
+                    const feePerCode = totalAmount / entryCount;
+                    const updatedEntries = cptEntries.map(entry => ({
+                      ...entry,
+                      fee: feePerCode
+                    }));
+                    onVisitChange({
+                      ...visit,
+                      fee: totalAmount,
+                      cptCodeEntries: updatedEntries
+                    });
+                  } else {
+                    onVisitChange({
+                      ...visit,
+                      fee: totalAmount
+                    });
+                  }
+                }}
+                className="w-full mt-1 px-3 py-2 border border-input bg-background rounded-md"
+                min={0}
+                step={0.01}
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {visit.cptCodeEntries?.length > 0 
+                ? `Divided equally among ${visit.cptCodeEntries.length} CPT code${visit.cptCodeEntries.length > 1 ? 's' : ''}`
+                : 'Add CPT codes to divide amount automatically'
+              }
+            </div>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <CptCodeTable
