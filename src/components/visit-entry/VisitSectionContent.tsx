@@ -46,13 +46,56 @@ export function VisitSectionContent({
       );
     case 'fee':
       return (
-        <div className="w-full p-4 bg-muted/50 rounded-lg">
-          <div className="text-sm text-muted-foreground mb-1">Visit Total (Calculated)</div>
-          <div className="text-lg font-semibold">
-            ${(visit.cptCodeEntries?.reduce((sum, entry) => sum + entry.fee, 0) || visit.fee || 0).toFixed(2)}
+        <div className="w-full space-y-4">
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <div className="text-sm text-muted-foreground mb-1">Visit Total</div>
+            <input
+              type="number"
+              placeholder="Enter total visit amount"
+              value={visit.fee || ""}
+              onChange={(e) => {
+                const totalAmount = parseFloat(e.target.value) || 0;
+                const cptEntries = visit.cptCodeEntries || [];
+                const entryCount = cptEntries.length;
+                
+                if (entryCount > 0) {
+                  const feePerCode = totalAmount / entryCount;
+                  const updatedEntries = cptEntries.map(entry => ({
+                    ...entry,
+                    fee: feePerCode
+                  }));
+                  onVisitChange({
+                    ...visit,
+                    fee: totalAmount,
+                    cptCodeEntries: updatedEntries
+                  });
+                } else {
+                  onVisitChange({
+                    ...visit,
+                    fee: totalAmount
+                  });
+                }
+              }}
+              className="w-full mt-2 px-3 py-2 border border-input bg-background rounded-md text-lg font-semibold"
+              min={0}
+              step={0.01}
+            />
+            <div className="text-xs text-muted-foreground mt-1">
+              {visit.cptCodeEntries?.length > 0 
+                ? `Divided equally among ${visit.cptCodeEntries.length} CPT code${visit.cptCodeEntries.length > 1 ? 's' : ''}`
+                : 'Add CPT codes to divide amount automatically'
+              }
+            </div>
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Based on individual CPT code fees
+          
+          <div className="p-4 bg-muted/30 rounded-lg">
+            <div className="text-sm text-muted-foreground mb-1">Calculated Total</div>
+            <div className="text-lg font-semibold">
+              ${(visit.cptCodeEntries?.reduce((sum, entry) => sum + entry.fee, 0) || 0).toFixed(2)}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Based on individual CPT code fees
+            </div>
           </div>
         </div>
       );

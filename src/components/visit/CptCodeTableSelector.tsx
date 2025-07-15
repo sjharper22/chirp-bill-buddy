@@ -16,12 +16,27 @@ export function CptCodeTableSelector({ visit, onVisitChange }: CptCodeTableSelec
   const addCptEntry = (code: string, description: string, fee: number = 0) => {
     const newEntry: CptCodeEntry = { code, description, fee };
     const updatedEntries = [...cptEntries, newEntry];
-    const updatedVisit = {
-      ...visit,
-      cptCodeEntries: updatedEntries,
-      fee: updatedEntries.reduce((sum, entry) => sum + entry.fee, 0)
-    };
-    onVisitChange(updatedVisit);
+    
+    // If there's a total visit fee, redistribute it among all entries
+    if (visit.fee && visit.fee > 0) {
+      const feePerCode = visit.fee / updatedEntries.length;
+      const redistributedEntries = updatedEntries.map(entry => ({
+        ...entry,
+        fee: feePerCode
+      }));
+      const updatedVisit = {
+        ...visit,
+        cptCodeEntries: redistributedEntries
+      };
+      onVisitChange(updatedVisit);
+    } else {
+      const updatedVisit = {
+        ...visit,
+        cptCodeEntries: updatedEntries,
+        fee: updatedEntries.reduce((sum, entry) => sum + entry.fee, 0)
+      };
+      onVisitChange(updatedVisit);
+    }
   };
 
   const updateCptEntry = (index: number, updates: Partial<CptCodeEntry>) => {
@@ -38,12 +53,27 @@ export function CptCodeTableSelector({ visit, onVisitChange }: CptCodeTableSelec
 
   const removeCptEntry = (index: number) => {
     const updatedEntries = cptEntries.filter((_, i) => i !== index);
-    const updatedVisit = {
-      ...visit,
-      cptCodeEntries: updatedEntries,
-      fee: updatedEntries.reduce((sum, entry) => sum + entry.fee, 0)
-    };
-    onVisitChange(updatedVisit);
+    
+    // If there's a total visit fee, redistribute it among remaining entries
+    if (visit.fee && visit.fee > 0 && updatedEntries.length > 0) {
+      const feePerCode = visit.fee / updatedEntries.length;
+      const redistributedEntries = updatedEntries.map(entry => ({
+        ...entry,
+        fee: feePerCode
+      }));
+      const updatedVisit = {
+        ...visit,
+        cptCodeEntries: redistributedEntries
+      };
+      onVisitChange(updatedVisit);
+    } else {
+      const updatedVisit = {
+        ...visit,
+        cptCodeEntries: updatedEntries,
+        fee: updatedEntries.reduce((sum, entry) => sum + entry.fee, 0)
+      };
+      onVisitChange(updatedVisit);
+    }
   };
 
   const handleAICodeSuggestions = (aiContent: string) => {
