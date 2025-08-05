@@ -435,6 +435,86 @@ export type Database = {
           },
         ]
       }
+      superbills: {
+        Row: {
+          clinic_address: string
+          clinic_email: string
+          clinic_name: string
+          clinic_phone: string
+          created_at: string
+          created_by: string
+          default_cpt_codes: Json | null
+          default_fee: number | null
+          default_icd_codes: Json | null
+          default_main_complaints: Json | null
+          ein: string
+          id: string
+          issue_date: string
+          npi: string
+          patient_dob: string
+          patient_id: string | null
+          patient_name: string
+          provider_name: string
+          status: string
+          updated_at: string
+          visits: Json
+        }
+        Insert: {
+          clinic_address: string
+          clinic_email: string
+          clinic_name: string
+          clinic_phone: string
+          created_at?: string
+          created_by?: string
+          default_cpt_codes?: Json | null
+          default_fee?: number | null
+          default_icd_codes?: Json | null
+          default_main_complaints?: Json | null
+          ein: string
+          id: string
+          issue_date: string
+          npi: string
+          patient_dob: string
+          patient_id?: string | null
+          patient_name: string
+          provider_name: string
+          status?: string
+          updated_at?: string
+          visits?: Json
+        }
+        Update: {
+          clinic_address?: string
+          clinic_email?: string
+          clinic_name?: string
+          clinic_phone?: string
+          created_at?: string
+          created_by?: string
+          default_cpt_codes?: Json | null
+          default_fee?: number | null
+          default_icd_codes?: Json | null
+          default_main_complaints?: Json | null
+          ein?: string
+          id?: string
+          issue_date?: string
+          npi?: string
+          patient_dob?: string
+          patient_id?: string | null
+          patient_name?: string
+          provider_name?: string
+          status?: string
+          updated_at?: string
+          visits?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "superbills_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

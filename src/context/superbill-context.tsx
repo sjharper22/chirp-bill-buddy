@@ -3,6 +3,7 @@ import { Superbill, ClinicDefaults, SuperbillStatus } from "@/types/superbill";
 import { generateId } from "@/lib/utils/superbill-utils";
 import { superbillService } from "@/services/superbillService";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/context/auth-context";
 
 // Default clinic information from the provided image
 const DEFAULT_CLINIC_INFO: ClinicDefaults = {
@@ -37,38 +38,41 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
   const [superbills, setSuperbills] = useState<Superbill[]>([]);
   const [clinicDefaults, setClinicDefaults] = useState<ClinicDefaults>(DEFAULT_CLINIC_INFO);
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  // Load data from localStorage on initial render
+  // Load data from Supabase on initial render
   useEffect(() => {
-    console.log("Loading superbills from localStorage...");
-    const savedSuperbills = localStorage.getItem("superbills");
-    const savedDefaults = localStorage.getItem("clinicDefaults");
-
-    console.log("Saved superbills in localStorage:", savedSuperbills);
-    
-    if (savedSuperbills) {
+    const loadSuperbills = async () => {
+      if (!user) return;
+      
       try {
-        // Convert string dates back to Date objects
-        const parsed = JSON.parse(savedSuperbills, (key, value) => {
-          if (key === "patientDob" || key === "issueDate" || key === "date" || 
-              key === "createdAt" || key === "updatedAt") {
-            return new Date(value);
-          }
-          return value;
-        });
-        
-        // Ensure all superbills have a status
-        const parsedWithStatus = parsed.map((bill: any) => ({
-          ...bill,
-          status: bill.status || 'draft',
-        }));
-        
-        setSuperbills(parsedWithStatus);
+        console.log("Loading superbills from Supabase...");
+        const loadedSuperbills = await superbillService.getAllSuperbills();
+        console.log("Loaded superbills from Supabase:", loadedSuperbills);
+        setSuperbills(loadedSuperbills);
       } catch (error) {
-        console.error("Failed to parse saved superbills:", error);
+        console.error("Failed to load superbills from Supabase:", error);
+        // Fallback to localStorage
+        const savedSuperbills = localStorage.getItem("superbills");
+        if (savedSuperbills) {
+          try {
+            const parsed = JSON.parse(savedSuperbills, (key, value) => {
+              if (key === "patientDob" || key === "issueDate" || key === "date" || 
+                  key === "createdAt" || key === "updatedAt") {
+                return new Date(value);
+              }
+              return value;
+            });
+            setSuperbills(parsed);
+          } catch (parseError) {
+            console.error("Failed to parse localStorage superbills:", parseError);
+          }
+        }
       }
-    }
+    };
 
+    // Load clinic defaults from localStorage (keep this local for now)
+    const savedDefaults = localStorage.getItem("clinicDefaults");
     if (savedDefaults) {
       try {
         const parsed = JSON.parse(savedDefaults);
@@ -77,46 +81,94 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
         console.error("Failed to parse saved clinic defaults:", error);
       }
     }
-  }, []);
 
-  // Save data to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem("superbills", JSON.stringify(superbills));
-  }, [superbills]);
+    loadSuperbills();
+  }, [user]);
 
+  // Save clinic defaults to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("clinicDefaults", JSON.stringify(clinicDefaults));
   }, [clinicDefaults]);
 
   const addSuperbill = async (superbill: Superbill) => {
-    // Ensure new superbills have a status
-    const newSuperbill = {
-      ...superbill,
-      status: superbill.status || 'draft'
-    };
-    
-    setSuperbills(prev => [...prev, newSuperbill]);
-    
-    // Try to link to database if we have patient information
     try {
-      // Extract patient ID from superbill data or patient name
-      // Note: This is a temporary solution - ideally superbills should store patient IDs
-      console.log("Adding superbill to database link for patient:", superbill.patientName);
+      const newSuperbill = {
+        ...superbill,
+        status: superbill.status || 'draft'
+      };
       
-      // For now, we'll store the superbill ID in the database without patient linking
-      // This can be improved later with proper patient ID mapping
+      if (user) {
+        // Save to Supabase
+        const savedSuperbill = await superbillService.createSuperbill(newSuperbill);
+        setSuperbills(prev => [...prev, savedSuperbill]);
+        toast({
+          title: "Success",
+          description: "Superbill saved to database",
+        });
+      } else {
+        // Fallback to local state
+        setSuperbills(prev => [...prev, newSuperbill]);
+      }
     } catch (error) {
-      console.error("Error linking superbill to database:", error);
-      // Don't show error to user as localStorage still works
+      console.error("Error saving superbill:", error);
+      // Fallback to local state
+      const newSuperbill = {
+        ...superbill,
+        status: superbill.status || 'draft'
+      };
+      setSuperbills(prev => [...prev, newSuperbill]);
+      toast({
+        title: "Warning",
+        description: "Superbill saved locally. Please check your connection.",
+        variant: "destructive"
+      });
     }
   };
 
-  const updateSuperbill = (id: string, updatedSuperbill: Superbill) => {
-    setSuperbills(prev => prev.map(bill => bill.id === id ? updatedSuperbill : bill));
+  const updateSuperbill = async (id: string, updatedSuperbill: Superbill) => {
+    try {
+      if (user) {
+        // Update in Supabase
+        const savedSuperbill = await superbillService.updateSuperbill(id, updatedSuperbill);
+        setSuperbills(prev => prev.map(bill => bill.id === id ? savedSuperbill : bill));
+      } else {
+        // Fallback to local state
+        setSuperbills(prev => prev.map(bill => bill.id === id ? updatedSuperbill : bill));
+      }
+    } catch (error) {
+      console.error("Error updating superbill:", error);
+      // Fallback to local state
+      setSuperbills(prev => prev.map(bill => bill.id === id ? updatedSuperbill : bill));
+      toast({
+        title: "Warning", 
+        description: "Changes saved locally. Please check your connection.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const deleteSuperbill = (id: string) => {
-    setSuperbills(prev => prev.filter(bill => bill.id !== id));
+  const deleteSuperbill = async (id: string) => {
+    try {
+      if (user) {
+        // Delete from Supabase
+        await superbillService.deleteSuperbill(id);
+        setSuperbills(prev => prev.filter(bill => bill.id !== id));
+        toast({
+          title: "Success",
+          description: "Superbill deleted from database",
+        });
+      } else {
+        // Fallback to local state
+        setSuperbills(prev => prev.filter(bill => bill.id !== id));
+      }
+    } catch (error) {
+      console.error("Error deleting superbill:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete superbill from database",
+        variant: "destructive"
+      });
+    }
   };
 
   const duplicateSuperbill = (id: string): string => {
