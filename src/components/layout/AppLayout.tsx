@@ -15,19 +15,30 @@ export function AppLayout({ children }: AppLayoutProps) {
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full bg-gray-50">
-        <AppSidebar />
-        <SidebarInset className="bg-white">
-          <header className="h-16 border-b flex items-center justify-between px-6 z-10">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-800">Superbill Generator</h1>
+      <div className="min-h-screen flex w-full bg-background">
+        {!isMobile && <AppSidebar />}
+        <SidebarInset className="flex-1 bg-background">
+          <header className="sticky top-0 z-20 h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex h-full items-center justify-between px-4 md:px-6">
+              <div className="flex items-center gap-4">
+                {!isMobile && (
+                  <div className="flex items-center">
+                    <h1 className="text-xl font-semibold text-foreground">Superbill Generator</h1>
+                  </div>
+                )}
+                {isMobile && (
+                  <h1 className="text-lg font-semibold text-foreground">Superbill Generator</h1>
+                )}
+              </div>
+              <UserMenu />
             </div>
-            <UserMenu />
           </header>
-          <main className="flex-1 p-4 md:p-8 overflow-auto pb-20 md:pb-8">
-            {children}
+          <main className="flex-1 overflow-auto">
+            <div className="container mx-auto max-w-7xl p-4 md:p-6 lg:p-8 pb-20 md:pb-8">
+              {children}
+            </div>
           </main>
-          <MobileNavigation />
+          {isMobile && <MobileNavigation />}
         </SidebarInset>
       </div>
     </SidebarProvider>

@@ -47,78 +47,86 @@ export function MobileNavigation() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-      <div className="flex items-center justify-between bg-white border-t p-2">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate('/')}
-          className={location.pathname === '/' ? 'bg-accent' : ''}
-        >
-          <Home className="h-5 w-5" />
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate('/patients')}
-          className={location.pathname === '/patients' ? 'bg-accent' : ''}
-        >
-          <Users className="h-5 w-5" />
-        </Button>
-        
-        <Button 
-          variant="default" 
-          size="icon" 
-          onClick={() => navigate('/new')}
-          className="rounded-full"
-        >
-          <PlusSquare className="h-5 w-5" />
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate('/grouped-submission')}
-          className={location.pathname === '/grouped-submission' ? 'bg-accent' : ''}
-        >
-          <ClipboardList className="h-5 w-5" />
-        </Button>
-        
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[80%] sm:w-[385px]">
-            <div className="py-6">
-              <h2 className="text-xl font-semibold mb-6">Menu</h2>
-              {menuItems.map((group) => (
-                <SidebarGroup key={group.label}>
-                  <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {group.items.map((item) => (
-                        <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton
-                            className={location.pathname === item.url ? "bg-accent" : ""}
-                            onClick={() => navigate(item.url)}
-                          >
-                            <item.icon className="w-4 h-4" />
-                            <span>{item.title}</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              ))}
-            </div>
-          </SheetContent>
-        </Sheet>
+      <div className="flex items-center justify-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border h-16 px-2">
+        <div className="grid grid-cols-5 gap-1 w-full max-w-md">
+          <Button 
+            variant={location.pathname === '/' ? 'secondary' : 'ghost'} 
+            size="sm"
+            onClick={() => navigate('/')}
+            className="flex flex-col items-center justify-center h-12 p-1 text-xs"
+          >
+            <Home className="h-4 w-4 mb-1" />
+            <span className="text-[10px] leading-none">Home</span>
+          </Button>
+          
+          <Button 
+            variant={location.pathname === '/patients' ? 'secondary' : 'ghost'} 
+            size="sm"
+            onClick={() => navigate('/patients')}
+            className="flex flex-col items-center justify-center h-12 p-1 text-xs"
+          >
+            <Users className="h-4 w-4 mb-1" />
+            <span className="text-[10px] leading-none">Patients</span>
+          </Button>
+          
+          <Button 
+            variant={location.pathname === '/new' ? 'secondary' : 'default'} 
+            size="sm" 
+            onClick={() => navigate('/new')}
+            className="flex flex-col items-center justify-center h-12 p-1 text-xs rounded-full"
+          >
+            <PlusSquare className="h-4 w-4 mb-1" />
+            <span className="text-[10px] leading-none">New</span>
+          </Button>
+          
+          <Button 
+            variant={location.pathname === '/grouped-submission' ? 'secondary' : 'ghost'} 
+            size="sm"
+            onClick={() => navigate('/grouped-submission')}
+            className="flex flex-col items-center justify-center h-12 p-1 text-xs"
+          >
+            <ClipboardList className="h-4 w-4 mb-1" />
+            <span className="text-[10px] leading-none">Group</span>
+          </Button>
+          
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="flex flex-col items-center justify-center h-12 p-1 text-xs"
+              >
+                <Menu className="h-4 w-4 mb-1" />
+                <span className="text-[10px] leading-none">Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+              <div className="py-6">
+                <h2 className="text-xl font-semibold mb-6">Menu</h2>
+                {menuItems.map((group) => (
+                  <SidebarGroup key={group.label}>
+                    <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {group.items.map((item) => (
+                          <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton
+                              className={location.pathname === item.url ? "bg-accent" : ""}
+                              onClick={() => navigate(item.url)}
+                            >
+                              <item.icon className="w-4 h-4" />
+                              <span>{item.title}</span>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </div>
   );
