@@ -22,10 +22,15 @@ export function PatientSuperbillsSection({ patient }: PatientSuperbillsSectionPr
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("Filtering superbills for patient:", patient.name);
+    console.log("All superbills:", superbills);
+    
     // Filter superbills for this patient
     const filtered = superbills.filter(
       superbill => superbill.patientName.toLowerCase() === patient.name.toLowerCase()
     );
+    
+    console.log("Filtered superbills for", patient.name, ":", filtered);
     setPatientSuperbills(filtered);
   }, [superbills, patient.name]);
 

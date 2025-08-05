@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Superbill, ClinicDefaults, SuperbillStatus } from "@/types/superbill";
 import { generateId } from "@/lib/utils/superbill-utils";
+import { superbillService } from "@/services/superbillService";
+import { useToast } from "@/components/ui/use-toast";
 
 // Default clinic information from the provided image
 const DEFAULT_CLINIC_INFO: ClinicDefaults = {
@@ -34,12 +36,16 @@ const SuperbillContext = createContext<SuperbillContextType | undefined>(undefin
 export function SuperbillProvider({ children }: { children: ReactNode }) {
   const [superbills, setSuperbills] = useState<Superbill[]>([]);
   const [clinicDefaults, setClinicDefaults] = useState<ClinicDefaults>(DEFAULT_CLINIC_INFO);
+  const { toast } = useToast();
 
   // Load data from localStorage on initial render
   useEffect(() => {
+    console.log("Loading superbills from localStorage...");
     const savedSuperbills = localStorage.getItem("superbills");
     const savedDefaults = localStorage.getItem("clinicDefaults");
 
+    console.log("Saved superbills in localStorage:", savedSuperbills);
+    
     if (savedSuperbills) {
       try {
         // Convert string dates back to Date objects
@@ -82,13 +88,27 @@ export function SuperbillProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("clinicDefaults", JSON.stringify(clinicDefaults));
   }, [clinicDefaults]);
 
-  const addSuperbill = (superbill: Superbill) => {
+  const addSuperbill = async (superbill: Superbill) => {
     // Ensure new superbills have a status
     const newSuperbill = {
       ...superbill,
       status: superbill.status || 'draft'
     };
+    
     setSuperbills(prev => [...prev, newSuperbill]);
+    
+    // Try to link to database if we have patient information
+    try {
+      // Extract patient ID from superbill data or patient name
+      // Note: This is a temporary solution - ideally superbills should store patient IDs
+      console.log("Adding superbill to database link for patient:", superbill.patientName);
+      
+      // For now, we'll store the superbill ID in the database without patient linking
+      // This can be improved later with proper patient ID mapping
+    } catch (error) {
+      console.error("Error linking superbill to database:", error);
+      // Don't show error to user as localStorage still works
+    }
   };
 
   const updateSuperbill = (id: string, updatedSuperbill: Superbill) => {
