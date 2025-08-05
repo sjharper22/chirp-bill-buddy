@@ -30,15 +30,23 @@ export function DateRangeSelector({ dateRange, onDateRangeChange }: DateRangeSel
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Date Range</label>
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full justify-start text-left font-normal">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateRange.from ? formatDate(dateRange.from) : <span>From date</span>}
+            <Button variant="outline" className="w-full justify-start text-left font-normal min-w-0">
+              <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+              <span className="truncate">
+                {dateRange.from ? formatDate(dateRange.from) : "From date"}
+              </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent 
+            className="w-auto p-0" 
+            align="start"
+            side="bottom"
+            avoidCollisions={true}
+            collisionPadding={10}
+          >
             <Calendar
               mode="single"
               selected={dateRange.from}
@@ -46,19 +54,27 @@ export function DateRangeSelector({ dateRange, onDateRangeChange }: DateRangeSel
               initialFocus
               month={fromMonth}
               defaultMonth={dateRange.from || new Date()}
-              className={cn("p-3 pointer-events-auto")}
+              className="p-3"
             />
           </PopoverContent>
         </Popover>
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full justify-start text-left font-normal">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateRange.to ? formatDate(dateRange.to) : <span>To date</span>}
+            <Button variant="outline" className="w-full justify-start text-left font-normal min-w-0">
+              <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+              <span className="truncate">
+                {dateRange.to ? formatDate(dateRange.to) : "To date"}
+              </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent 
+            className="w-auto p-0" 
+            align="start"
+            side="bottom"
+            avoidCollisions={true}
+            collisionPadding={10}
+          >
             <Calendar
               mode="single"
               selected={dateRange.to}
@@ -66,7 +82,7 @@ export function DateRangeSelector({ dateRange, onDateRangeChange }: DateRangeSel
               initialFocus
               month={toMonth}
               defaultMonth={dateRange.to || new Date()}
-              className={cn("p-3 pointer-events-auto")}
+              className="p-3"
             />
           </PopoverContent>
         </Popover>
