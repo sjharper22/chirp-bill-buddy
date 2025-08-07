@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { createSuperbillRequest } from "@/services/superbillRequestService";
+import { getMySuperbillRequestPrefs, upsertMySuperbillRequestPrefs } from "@/services/superbillRequestPrefsService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 
@@ -21,6 +23,7 @@ export default function RequestSuperbill() {
   const [toDate, setToDate] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [delivery, setDelivery] = useState("email");
+  const [rememberDefaults, setRememberDefaults] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // SEO meta
@@ -45,9 +48,21 @@ export default function RequestSuperbill() {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      setEmail(user.email ?? "");
-    }
+    const load = async () => {
+      if (user) {
+        setEmail(user.email ?? "");
+        try {
+          const prefs = await getMySuperbillRequestPrefs();
+          if (prefs) {
+            setDelivery((prefs as any).default_delivery || "email");
+            if (prefs.default_notes) setNotes(prefs.default_notes);
+          }
+        } catch (e) {
+          console.warn('Failed to load request prefs', e);
+        }
+      }
+    };
+    load();
   }, [user]);
 
   const canSubmit = useMemo(() => {
@@ -76,6 +91,19 @@ export default function RequestSuperbill() {
         notes,
         preferred_delivery: delivery as any,
       });
+
+      if (rememberDefaults) {
+        try {
+          await upsertMySuperbillRequestPrefs({
+            default_delivery: delivery as any,
+            default_notes: notes,
+          });
+          toast({ title: "Preferences saved", description: "We'll prefill your next request." });
+        } catch (prefErr: any) {
+          console.warn('Failed to save prefs', prefErr);
+        }
+      }
+
       toast({ title: "Request submitted", description: "We will notify you when it's ready." });
       setPatientName("");
       setPatientDob("");
@@ -84,6 +112,7 @@ export default function RequestSuperbill() {
       setToDate("");
       setNotes("");
       setDelivery("email");
+      setRememberDefaults(false);
     } catch (err: any) {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
     } finally {
@@ -150,7 +179,11 @@ export default function RequestSuperbill() {
               </select>
             </div>
 
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Checkbox id="rememberDefaults" checked={rememberDefaults} onCheckedChange={(v) => setRememberDefaults(!!v)} />
+                <Label htmlFor="rememberDefaults" className="text-sm text-muted-foreground">Save these as my defaults</Label>
+              </div>
               <Button type="submit" disabled={!canSubmit}>
                 {submitting ? "Submitting..." : "Submit Request"}
               </Button>

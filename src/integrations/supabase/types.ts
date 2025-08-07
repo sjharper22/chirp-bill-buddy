@@ -406,6 +406,45 @@ export type Database = {
         }
         Relationships: []
       }
+      superbill_request_prefs: {
+        Row: {
+          auto_approve: boolean
+          created_at: string
+          day_of_month: number
+          default_delivery: string
+          default_notes: string | null
+          id: string
+          notify_via_email: boolean
+          recurrence: Database["public"]["Enums"]["request_recurrence"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_approve?: boolean
+          created_at?: string
+          day_of_month?: number
+          default_delivery?: string
+          default_notes?: string | null
+          id?: string
+          notify_via_email?: boolean
+          recurrence?: Database["public"]["Enums"]["request_recurrence"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_approve?: boolean
+          created_at?: string
+          day_of_month?: number
+          default_delivery?: string
+          default_notes?: string | null
+          id?: string
+          notify_via_email?: boolean
+          recurrence?: Database["public"]["Enums"]["request_recurrence"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       superbill_requests: {
         Row: {
           contact_email: string | null
@@ -686,6 +725,7 @@ export type Database = {
         | "therapy"
         | "emergency"
       recurrence_pattern: "none" | "daily" | "weekly" | "monthly" | "yearly"
+      request_recurrence: "none" | "monthly" | "quarterly"
       request_status: "pending" | "in_progress" | "completed" | "rejected"
       template_category: "cover_letter" | "appeal_letter" | "general"
     }
@@ -834,6 +874,7 @@ export const Constants = {
         "emergency",
       ],
       recurrence_pattern: ["none", "daily", "weekly", "monthly", "yearly"],
+      request_recurrence: ["none", "monthly", "quarterly"],
       request_status: ["pending", "in_progress", "completed", "rejected"],
       template_category: ["cover_letter", "appeal_letter", "general"],
     },
