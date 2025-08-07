@@ -23,6 +23,8 @@ import GroupedSubmission from "@/pages/GroupedSubmission";
 import AdvancedSuperbill from "@/pages/AdvancedSuperbill";
 import NotFound from "@/pages/NotFound";
 import Unauthorized from "@/pages/Unauthorized";
+import RequestSuperbill from "@/pages/RequestSuperbill";
+import Requests from "@/pages/Requests";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -38,6 +40,7 @@ function App() {
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
+                  <Route path="/request-superbill" element={<RequestSuperbill />} />
                   
                   {/* Redirect /new to /new-superbill */}
                   <Route path="/new" element={<Navigate to="/new-superbill" replace />} />

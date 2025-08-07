@@ -406,6 +406,60 @@ export type Database = {
         }
         Relationships: []
       }
+      superbill_requests: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string
+          from_date: string | null
+          fulfillment_superbill_id: string | null
+          id: string
+          notes: string | null
+          patient_dob: string | null
+          patient_id: string | null
+          patient_name: string | null
+          preferred_delivery: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          to_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by: string
+          from_date?: string | null
+          fulfillment_superbill_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_dob?: string | null
+          patient_id?: string | null
+          patient_name?: string | null
+          preferred_delivery?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          to_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string
+          from_date?: string | null
+          fulfillment_superbill_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_dob?: string | null
+          patient_id?: string | null
+          patient_name?: string | null
+          preferred_delivery?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          to_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       superbill_visits: {
         Row: {
           created_at: string
@@ -615,7 +669,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "editor" | "viewer"
+      app_role: "admin" | "editor" | "viewer" | "patient"
       appointment_status:
         | "scheduled"
         | "confirmed"
@@ -632,6 +686,7 @@ export type Database = {
         | "therapy"
         | "emergency"
       recurrence_pattern: "none" | "daily" | "weekly" | "monthly" | "yearly"
+      request_status: "pending" | "in_progress" | "completed" | "rejected"
       template_category: "cover_letter" | "appeal_letter" | "general"
     }
     CompositeTypes: {
@@ -760,7 +815,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "editor", "viewer"],
+      app_role: ["admin", "editor", "viewer", "patient"],
       appointment_status: [
         "scheduled",
         "confirmed",
@@ -779,6 +834,7 @@ export const Constants = {
         "emergency",
       ],
       recurrence_pattern: ["none", "daily", "weekly", "monthly", "yearly"],
+      request_status: ["pending", "in_progress", "completed", "rejected"],
       template_category: ["cover_letter", "appeal_letter", "general"],
     },
   },
