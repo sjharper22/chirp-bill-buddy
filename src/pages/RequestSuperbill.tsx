@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { createSuperbillRequest } from "@/services/superbillRequestService";
 import { getMySuperbillRequestPrefs, upsertMySuperbillRequestPrefs } from "@/services/superbillRequestPrefsService";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,6 +92,22 @@ export default function RequestSuperbill() {
         notes,
         preferred_delivery: delivery as any,
       });
+      // Send confirmation email (non-blocking)
+      try {
+        await supabase.functions.invoke('notify-superbill-request', {
+          body: {
+            email,
+            name: patientName || (user.email ?? 'Patient'),
+            delivery,
+            from_date: fromDate || null,
+            to_date: toDate || null,
+            notes,
+            submitted_at: new Date().toISOString(),
+          },
+        });
+      } catch (emailErr) {
+        console.warn('Email notification failed', emailErr);
+      }
 
       if (rememberDefaults) {
         try {
@@ -103,7 +120,6 @@ export default function RequestSuperbill() {
           console.warn('Failed to save prefs', prefErr);
         }
       }
-
       toast({ title: "Request submitted", description: "We will notify you when it's ready." });
       setPatientName("");
       setPatientDob("");
