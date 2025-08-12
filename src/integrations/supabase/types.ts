@@ -164,6 +164,42 @@ export type Database = {
         }
         Relationships: []
       }
+      magic_link_tokens: {
+        Row: {
+          action: string
+          created_at: string
+          expires_at: string
+          id: string
+          payload: Json | null
+          token: string
+          updated_at: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          payload?: Json | null
+          token: string
+          updated_at?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          payload?: Json | null
+          token?: string
+          updated_at?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       patient_relationships: {
         Row: {
           created_at: string

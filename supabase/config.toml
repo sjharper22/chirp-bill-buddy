@@ -1,1 +1,4 @@
 project_id = "bjtspvoeiwyiqvtyuyin"
+
+[functions.confirm-superbill]
+verify_jwt = false
